@@ -3,22 +3,12 @@ import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import authRoutes from "./routes/auth.js";
+import { connectDB } from "./config/db.js";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-
-// Database connection
-mongoose
-    .connect(process.env.MONGODB_URI)
-    .then(() => {
-        console.log("Connected to MongoDB");
-    })
-    .catch((error) => {
-        console.error("MongoDB connection error:", error);
-        process.exit(1);
-    });
 
 // Middleware
 app.use(cors());
@@ -27,7 +17,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.get("/", (req, res) => {
-    res.json({ message: "Express backend is running!" });
+    res.json({ message: "Server is running!" });
 });
 
 app.get("/api/health", (req, res) => {
@@ -48,5 +38,6 @@ app.use((error, req, res, next) => {
 
 // Start server
 app.listen(PORT, () => {
+    connectDB();
     console.log(`Server is running on port ${PORT}`);
 });
