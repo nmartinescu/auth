@@ -2,6 +2,7 @@ import { Button, Flex, Input, Box, Text } from "@chakra-ui/react";
 import { useColorModeValue } from "../ui/color-mode";
 import { useState, useEffect } from "react";
 import { LuUserPlus, LuUser, LuLock, LuMail } from "react-icons/lu";
+import { API_ENDPOINTS } from "../../config/constants";
 import {
     FormField,
     AuthHeader,
@@ -51,7 +52,7 @@ export function Register() {
         setIsLoading(true);
 
         try {
-            const response = await fetch('http://localhost:5000/api/auth/register', {
+            const response = await fetch(API_ENDPOINTS.AUTH.REGISTER, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

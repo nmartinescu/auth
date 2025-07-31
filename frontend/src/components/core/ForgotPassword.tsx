@@ -3,6 +3,7 @@ import { useColorModeValue } from "../ui/color-mode";
 import { useState, useEffect } from "react";
 import { LuMail } from "react-icons/lu";
 import { FormField, AuthHeader, AuthFooter } from "../ui";
+import { API_ENDPOINTS } from "../../config/constants";
 import {
     primaryButtonStyle,
     createInputStyle,
@@ -39,16 +40,13 @@ export function ForgotPassword() {
         setError("");
 
         try {
-            const response = await fetch(
-                "http://localhost:5000/api/auth/forgot-password",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ email }),
-                }
-            );
+            const response = await fetch(API_ENDPOINTS.AUTH.FORGOT_PASSWORD, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email }),
+            });
 
             const data = await response.json();
 
@@ -85,9 +83,13 @@ export function ForgotPassword() {
                             borderRadius="lg"
                             mb={4}
                         >
-                            <LuMail size={48} color="#10B981" style={{ margin: "0 auto" }} />
+                            <LuMail
+                                size={48}
+                                color="#10B981"
+                                style={{ margin: "0 auto" }}
+                            />
                         </Box>
-                        
+
                         {resetToken && (
                             <Box
                                 p={3}
@@ -106,7 +108,10 @@ export function ForgotPassword() {
                                     bg={useColorModeValue("white", "gray.800")}
                                     borderRadius="md"
                                     border="1px solid"
-                                    borderColor={useColorModeValue("blue.200", "blue.700")}
+                                    borderColor={useColorModeValue(
+                                        "blue.200",
+                                        "blue.700"
+                                    )}
                                 >
                                     {resetToken}
                                 </Box>

@@ -3,6 +3,7 @@ import { useColorModeValue } from "../ui/color-mode";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { LuLogIn, LuUser } from "react-icons/lu";
+import { API_ENDPOINTS } from "../../config/constants";
 import {
     FormField,
     AuthHeader,
@@ -44,7 +45,7 @@ export function Login() {
 
         try {
             const response = await fetch(
-                "http://localhost:5000/api/auth/login",
+                API_ENDPOINTS.AUTH.LOGIN,
                 {
                     method: "POST",
                     headers: {

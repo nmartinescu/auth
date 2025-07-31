@@ -3,6 +3,7 @@ import { useColorModeValue } from "../ui/color-mode";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { LuLock, LuCheck } from "react-icons/lu";
+import { API_ENDPOINTS } from "../../config/constants";
 import { FormField, AuthHeader, PasswordInput, AuthFooter } from "../ui";
 import {
     successButtonStyle,
@@ -58,7 +59,7 @@ export function ResetPassword() {
 
         try {
             const response = await fetch(
-                "http://localhost:5000/api/auth/reset-password",
+                API_ENDPOINTS.AUTH.RESET_PASSWORD,
                 {
                     method: "POST",
                     headers: {
