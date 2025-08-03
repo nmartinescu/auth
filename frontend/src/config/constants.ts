@@ -2,7 +2,7 @@
 const getApiBaseUrl = () => {
     // Development: when running locally (npm run dev)
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        return 'http://localhost:3000';
+        return 'http://localhost:5000';
     }
 
     return 'https://ostep-web.onrender.com';

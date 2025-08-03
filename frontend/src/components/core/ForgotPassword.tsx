@@ -1,4 +1,4 @@
-import { Button, Flex, Input, Box, Text } from "@chakra-ui/react";
+import { Button, Flex, Input, Box, Text, VStack } from "@chakra-ui/react";
 import { useColorModeValue } from "../ui/color-mode";
 import { useState, useEffect } from "react";
 import { LuMail } from "react-icons/lu";
@@ -16,11 +16,12 @@ export function ForgotPassword() {
     const [email, setEmail] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
-    const [resetToken, setResetToken] = useState("");
     const [error, setError] = useState("");
 
     const boxBg = useColorModeValue("white", "gray.800");
     const containerBg = useColorModeValue("gray.50", "gray.900");
+    const textColor = useColorModeValue("gray.800", "white");
+    const subtextColor = useColorModeValue("gray.600", "gray.300");
     const inputStyleWithFocus = createInputStyle(authTheme.primary.focus);
 
     // Check if user is already logged in
@@ -52,10 +53,6 @@ export function ForgotPassword() {
 
             if (data.success) {
                 setIsSubmitted(true);
-                // For demo purposes, store the reset token
-                if (data.resetToken) {
-                    setResetToken(data.resetToken);
-                }
             } else {
                 setError(data.message || "Failed to send reset email");
             }
@@ -81,7 +78,7 @@ export function ForgotPassword() {
                             p={4}
                             bg={useColorModeValue("green.50", "green.900")}
                             borderRadius="lg"
-                            mb={4}
+                            mb={6}
                         >
                             <LuMail
                                 size={48}
@@ -90,33 +87,38 @@ export function ForgotPassword() {
                             />
                         </Box>
 
-                        {resetToken && (
+                        <VStack gap={4} align="center">
+                            <Text fontSize="lg" fontWeight="semibold" color={textColor}>
+                                Email Sent Successfully!
+                            </Text>
+                            
+                            <Text fontSize="sm" color={subtextColor} textAlign="center" maxW="400px">
+                                If an account with <strong>{email}</strong> exists, you'll receive a password reset link shortly.
+                            </Text>
+
                             <Box
-                                p={3}
+                                p={4}
                                 bg={useColorModeValue("blue.50", "blue.900")}
                                 borderRadius="md"
-                                mb={4}
+                                border="1px solid"
+                                borderColor={useColorModeValue("blue.200", "blue.700")}
                             >
-                                <Box fontSize="sm" color="blue.600" mb={2}>
-                                    Demo Reset Token (copy this):
-                                </Box>
-                                <Box
-                                    fontSize="xs"
-                                    fontFamily="mono"
-                                    wordBreak="break-all"
-                                    p={2}
-                                    bg={useColorModeValue("white", "gray.800")}
-                                    borderRadius="md"
-                                    border="1px solid"
-                                    borderColor={useColorModeValue(
-                                        "blue.200",
-                                        "blue.700"
-                                    )}
-                                >
-                                    {resetToken}
-                                </Box>
+                                <VStack gap={2} align="start">
+                                    <Text fontSize="sm" fontWeight="semibold" color="blue.600">
+                                        Next Steps:
+                                    </Text>
+                                    <Text fontSize="sm" color="blue.600">
+                                        • Check your email inbox
+                                    </Text>
+                                    <Text fontSize="sm" color="blue.600">
+                                        • Look in your spam/junk folder
+                                    </Text>
+                                    <Text fontSize="sm" color="blue.600">
+                                        • Click the reset link within 1 hour
+                                    </Text>
+                                </VStack>
                             </Box>
-                        )}
+                        </VStack>
                     </Box>
 
                     <AuthFooter
@@ -124,7 +126,7 @@ export function ForgotPassword() {
                         linkTo="/login"
                         linkLabel="Back to login"
                         linkColor={authTheme.primary.link}
-                        additionalText="Didn't receive an email? Check your spam folder"
+                        additionalText="Didn't receive an email? Try checking your spam folder or contact support"
                     />
                 </Box>
             </Flex>

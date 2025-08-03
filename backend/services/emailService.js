@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+const { sendPasswordResetEmail } = require("../services/resendService");
 
 // Create transporter
 const createTransporter = () => {
