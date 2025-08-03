@@ -62,10 +62,21 @@ export function Login() {
 
             if (data.success) {
                 console.log("User logged in:", data.data.user);
-                console.log("Token:", data.data.token);
+                console.log("Access Token:", data.data.accessToken);
 
-                // Store token in localStorage for future requests
-                localStorage.setItem("authToken", data.data.token);
+                // Store tokens using the token service
+                const { accessToken, refreshToken, expiresIn } = data.data;
+                
+                // New token storage
+                localStorage.setItem('tokenData', JSON.stringify({
+                    accessToken,
+                    refreshToken,
+                    expiresIn,
+                    expiresAt: Date.now() + expiresIn
+                }));
+                
+                // Legacy token storage for backward compatibility
+                localStorage.setItem("authToken", accessToken);
                 localStorage.setItem("user", JSON.stringify(data.data.user));
 
                 // Clear form

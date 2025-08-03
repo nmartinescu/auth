@@ -27,6 +27,9 @@ export function Dashboard() {
         try {
             const parsedUser = JSON.parse(userData);
             setUser(parsedUser);
+            
+            // Removed automatic test - now manual via button
+            
         } catch (error) {
             console.error("Error parsing user data:", error);
             handleLogout();
@@ -34,6 +37,42 @@ export function Dashboard() {
             setIsLoading(false);
         }
     }, []);
+
+    const testTokenRefresh = async () => {
+        try {
+            console.log('Testing token refresh...');
+            const token = localStorage.getItem("authToken");
+            
+            // Make a simple authenticated request that will trigger token refresh if needed
+            const response = await fetch('http://localhost:5000/api/auth/refresh', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    refreshToken: JSON.parse(localStorage.getItem('tokenData') || '{}').refreshToken
+                }),
+            });
+            
+            const data = await response.json();
+            console.log('Token refresh test result:', data);
+            
+            if (data.success) {
+                // Update tokens
+                const { accessToken, refreshToken, expiresIn } = data.data;
+                localStorage.setItem('tokenData', JSON.stringify({
+                    accessToken,
+                    refreshToken,
+                    expiresIn,
+                    expiresAt: Date.now() + expiresIn
+                }));
+                localStorage.setItem("authToken", accessToken);
+                console.log('✅ Token refresh successful!');
+            }
+        } catch (error) {
+            console.log('❌ Token refresh test error:', error);
+        }
+    };
 
     const handleLogout = () => {
         localStorage.removeItem("authToken");
@@ -200,6 +239,14 @@ export function Dashboard() {
                                     >
                                         <LuSettings />
                                         Memory Viewer
+                                    </Button>
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        colorScheme="blue"
+                                        onClick={testTokenRefresh}
+                                    >
+                                        🔄 Test Token Refresh
                                     </Button>
                                     <Button
                                         size="sm"

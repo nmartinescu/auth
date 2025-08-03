@@ -1,7 +1,7 @@
-import jwt from "jsonwebtoken";
+import { verifyAccessToken } from "../services/authService.js";
 import User from "../models/User.js";
 
-// Middleware to verify JWT token and get user
+// Middleware to verify JWT access token and get user
 export const authenticateToken = async (req, res, next) => {
     try {
         const authHeader = req.headers['authorization'];
@@ -10,17 +10,26 @@ export const authenticateToken = async (req, res, next) => {
         if (!token) {
             return res.status(401).json({
                 success: false,
-                message: 'Access token required'
+                message: 'Access token required',
+                code: 'TOKEN_REQUIRED'
             });
         }
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await User.findById(decoded.userId);
-        
+        const tokenVerification = verifyAccessToken(token);
+        if (!tokenVerification.success) {
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid or expired access token',
+                code: 'TOKEN_EXPIRED'
+            });
+        }
+
+        const user = await User.findById(tokenVerification.decoded.userId);
         if (!user) {
             return res.status(401).json({
                 success: false,
-                message: 'User not found'
+                message: 'User not found',
+                code: 'USER_NOT_FOUND'
             });
         }
 
@@ -29,7 +38,8 @@ export const authenticateToken = async (req, res, next) => {
     } catch (error) {
         return res.status(403).json({
             success: false,
-            message: 'Invalid or expired token'
+            message: 'Invalid or expired token',
+            code: 'TOKEN_INVALID'
         });
     }
 };

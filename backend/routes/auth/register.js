@@ -1,6 +1,6 @@
 import express from "express";
 import { validateRegistration } from "../../validators/authValidators.js";
-import { generateToken, createUser, checkUserExists } from "../../services/authService.js";
+import { generateTokens, createUser, checkUserExists } from "../../services/authService.js";
 
 const router = express.Router();
 
@@ -30,15 +30,17 @@ router.post("/", async (req, res) => {
         // Create new user
         const user = await createUser({ name, email, password });
 
-        // Generate token
-        const token = generateToken(user._id);
+        // Generate tokens
+        const tokens = generateTokens(user._id);
 
         res.status(201).json({
             success: true,
             message: "User registered successfully",
             data: {
                 user: user.toJSON(),
-                token,
+                accessToken: tokens.accessToken,
+                refreshToken: tokens.refreshToken,
+                expiresIn: tokens.expiresIn,
             },
         });
     } catch (error) {

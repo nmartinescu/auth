@@ -1,6 +1,6 @@
 import express from "express";
 import { validateLogin } from "../../validators/authValidators.js";
-import { generateToken, findUserByEmail } from "../../services/authService.js";
+import { generateTokens, findUserByEmail } from "../../services/authService.js";
 
 const router = express.Router();
 
@@ -37,15 +37,17 @@ router.post("/", async (req, res) => {
             });
         }
 
-        // Generate token
-        const token = generateToken(user._id);
+        // Generate tokens
+        const tokens = generateTokens(user._id);
 
         res.status(200).json({
             success: true,
             message: "Login successful",
             data: {
                 user: user.toJSON(),
-                token,
+                accessToken: tokens.accessToken,
+                refreshToken: tokens.refreshToken,
+                expiresIn: tokens.expiresIn,
             },
         });
     } catch (error) {
