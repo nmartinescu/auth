@@ -1,7 +1,7 @@
 import { Box, Flex, Text, Button, VStack, HStack } from "@chakra-ui/react";
 import { useColorModeValue } from "../ui/color-mode";
 import { useState, useEffect } from "react";
-import { LuUser, LuSettings } from "react-icons/lu";
+import { LuUser, LuSettings, LuTrash2 } from "react-icons/lu";
 import type { User } from "../../types/user";
 
 export function Dashboard() {
@@ -171,17 +171,47 @@ export function Dashboard() {
                                     Quick Actions
                                 </Text>
                                 <VStack align="stretch" gap={2}>
-                                    <Button size="sm" variant="outline">
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() =>
+                                            (window.location.href = "/process")
+                                        }
+                                    >
                                         <LuSettings />
                                         System Monitor
                                     </Button>
-                                    <Button size="sm" variant="outline">
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() =>
+                                            (window.location.href = "/memory")
+                                        }
+                                    >
                                         <LuSettings />
                                         Process Manager
                                     </Button>
-                                    <Button size="sm" variant="outline">
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() =>
+                                            (window.location.href = "/disk")
+                                        }
+                                    >
                                         <LuSettings />
                                         Memory Viewer
+                                    </Button>
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        colorScheme="red"
+                                        onClick={() =>
+                                            (window.location.href =
+                                                "/delete-account")
+                                        }
+                                    >
+                                        <LuTrash2 />
+                                        Delete Account
                                     </Button>
                                 </VStack>
                             </VStack>

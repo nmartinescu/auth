@@ -8,6 +8,7 @@ import { Register } from "./components/core/Register";
 import { ForgotPassword } from "./components/core/ForgotPassword";
 import { ResetPassword } from "./components/core/ResetPassword";
 import { Dashboard } from "./components/core/Dashboard";
+import { DeleteAccount } from "./components/core/DeleteAccount";
 import { ProtectedRoute } from "./components/core/ProtectedRoute";
 import { Box } from "@chakra-ui/react";
 
@@ -31,6 +32,14 @@ function App() {
                     element={
                         <ProtectedRoute>
                             <Dashboard />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/delete-account"
+                    element={
+                        <ProtectedRoute>
+                            <DeleteAccount />
                         </ProtectedRoute>
                     }
                 />

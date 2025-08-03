@@ -270,4 +270,89 @@ router.post("/reset-password", async (req, res) => {
     }
 });
 
+// Middleware to verify JWT token and get user
+const authenticateToken = async (req, res, next) => {
+    try {
+        const authHeader = req.headers['authorization'];
+        const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+        if (!token) {
+            return res.status(401).json({
+                success: false,
+                message: 'Access token required'
+            });
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await User.findById(decoded.userId);
+        
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                message: 'User not found'
+            });
+        }
+
+        req.user = user;
+        next();
+    } catch (error) {
+        return res.status(403).json({
+            success: false,
+            message: 'Invalid or expired token'
+        });
+    }
+};
+
+// Delete account endpoint
+router.delete("/delete-account", authenticateToken, async (req, res) => {
+    try {
+        const { password, confirmDeletion } = req.body;
+        const user = req.user;
+
+        // Validation
+        if (!password) {
+            return res.status(400).json({
+                success: false,
+                message: "Password is required to delete account",
+            });
+        }
+
+        if (confirmDeletion !== "DELETE MY ACCOUNT") {
+            return res.status(400).json({
+                success: false,
+                message: "Please type 'DELETE MY ACCOUNT' to confirm deletion",
+            });
+        }
+
+        // Verify password
+        const isPasswordValid = await user.comparePassword(password);
+        if (!isPasswordValid) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid password",
+            });
+        }
+
+        // Log account deletion for audit purposes
+        console.log(`Account deletion requested for user: ${user.email} (ID: ${user._id}) at ${new Date().toISOString()}`);
+
+        // Delete user account
+        await User.findByIdAndDelete(user._id);
+
+        // Log successful deletion
+        console.log(`Account successfully deleted for user: ${user.email} (ID: ${user._id}) at ${new Date().toISOString()}`);
+
+        res.status(200).json({
+            success: true,
+            message: "Account has been permanently deleted",
+        });
+    } catch (error) {
+        console.error("Account deletion error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Internal server error",
+        });
+    }
+});
+
 export default router;

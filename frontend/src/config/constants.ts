@@ -17,6 +17,7 @@ export const API_ENDPOINTS = {
         REGISTER: `${API_BASE_URL}/api/auth/register`,
         FORGOT_PASSWORD: `${API_BASE_URL}/api/auth/forgot-password`,
         RESET_PASSWORD: `${API_BASE_URL}/api/auth/reset-password`,
+        DELETE_ACCOUNT: `${API_BASE_URL}/api/auth/delete-account`,
     }
 } as const;
 
