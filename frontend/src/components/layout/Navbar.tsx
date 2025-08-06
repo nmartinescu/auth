@@ -1,6 +1,6 @@
 import { Flex, Heading, Button } from "@chakra-ui/react";
 import { NavButton } from "../ui/NavButton";
-import { LuCpu, LuMemoryStick, LuHardDrive, LuLogOut, LuLogIn } from "react-icons/lu";
+import { LuCpu, LuMemoryStick, LuHardDrive, LuLogOut, LuLogIn, LuLayoutDashboard } from "react-icons/lu";
 import { useState, useEffect } from "react";
 
 export function Navbar() {
@@ -23,6 +23,11 @@ export function Navbar() {
         { to: "/process", label: "Process", icon: LuCpu },
         { to: "/memory", label: "Memory", icon: LuMemoryStick },
         { to: "/disk", label: "Disk", icon: LuHardDrive },
+    ];
+
+    const loggedInNavItems = [
+        { to: "/dashboard", label: "Dashboard", icon: LuLayoutDashboard },
+        ...navItems,
     ];
 
     return (
@@ -48,7 +53,7 @@ export function Navbar() {
             </Heading>
 
             <Flex direction={{ base: "column", md: "row" }}>
-                {navItems.map((item) => (
+                {(isLoggedIn ? loggedInNavItems : navItems).map((item) => (
                     <NavButton key={item.to} {...item} />
                 ))}
                 {isLoggedIn ? (

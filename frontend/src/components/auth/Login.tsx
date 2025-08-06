@@ -176,9 +176,7 @@ export function Login() {
                             </Text>
                         </Link>
                     </Text>
-                    <Text fontSize="sm" color="gray.400" textAlign="center">
-                        Demo: admin@example.com / password
-                    </Text>
+
                 </Flex>
             </Box>
         </Flex>

@@ -1,7 +1,7 @@
 import { Box, Flex, Text, Button, VStack, HStack } from "@chakra-ui/react";
 import { useColorModeValue } from "../ui/color-mode";
 import { useState, useEffect } from "react";
-import { LuUser, LuSettings, LuTrash2 } from "react-icons/lu";
+import { LuUser, LuTrash2 } from "react-icons/lu";
 import type { User } from "../../types/user";
 
 export function Dashboard() {
@@ -49,17 +49,20 @@ export function Dashboard() {
             const token = localStorage.getItem("authToken");
 
             // Make a simple authenticated request that will trigger token refresh if needed
-            const response = await fetch("http://localhost:3000/api/auth/refresh", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    refreshToken: JSON.parse(
-                        localStorage.getItem("tokenData") || "{}"
-                    ).refreshToken,
-                }),
-            });
+            const response = await fetch(
+                "http://localhost:3000/api/auth/refresh",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        refreshToken: JSON.parse(
+                            localStorage.getItem("tokenData") || "{}"
+                        ).refreshToken,
+                    }),
+                }
+            );
 
             const data = await response.json();
             console.log("Token refresh test result:", data);
@@ -214,36 +217,6 @@ export function Dashboard() {
                                     Quick Actions
                                 </Text>
                                 <VStack align="stretch" gap={2}>
-                                    <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() =>
-                                            (window.location.href = "/process")
-                                        }
-                                    >
-                                        <LuSettings />
-                                        System Monitor
-                                    </Button>
-                                    <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() =>
-                                            (window.location.href = "/memory")
-                                        }
-                                    >
-                                        <LuSettings />
-                                        Process Manager
-                                    </Button>
-                                    <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() =>
-                                            (window.location.href = "/disk")
-                                        }
-                                    >
-                                        <LuSettings />
-                                        Memory Viewer
-                                    </Button>
                                     <Button
                                         size="sm"
                                         variant="outline"

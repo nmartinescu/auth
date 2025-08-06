@@ -34,7 +34,7 @@ export interface ForgotPasswordRequest {
 export interface ForgotPasswordResponse {
     success: boolean;
     message: string;
-    resetToken?: string; // Only for demo purposes
+    resetToken?: string;
 }
 
 export interface ResetPasswordRequest {
