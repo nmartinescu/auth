@@ -3,12 +3,7 @@ import { useColorModeValue } from "../ui/color-mode";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { LuLogIn, LuUser } from "react-icons/lu";
-import { API_ENDPOINTS } from "../../config/constants";
-import {
-    FormField,
-    AuthHeader,
-    PasswordInput,
-} from "../ui";
+import { FormField, AuthHeader, PasswordInput, AuthFooter } from "../ui";
 import {
     primaryButtonStyle,
     createInputStyle,
@@ -16,6 +11,7 @@ import {
     authBoxStyle,
     authTheme,
 } from "../ui/auth-styles";
+import { API_ENDPOINTS } from "../../config/constants";
 
 export function Login() {
     const [email, setEmail] = useState("");
@@ -44,19 +40,16 @@ export function Login() {
         setError("");
 
         try {
-            const response = await fetch(
-                API_ENDPOINTS.AUTH.LOGIN,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        email,
-                        password,
-                    }),
-                }
-            );
+            const response = await fetch(API_ENDPOINTS.AUTH.LOGIN, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    email,
+                    password,
+                }),
+            });
 
             const data = await response.json();
 
@@ -66,15 +59,18 @@ export function Login() {
 
                 // Store tokens using the token service
                 const { accessToken, refreshToken, expiresIn } = data.data;
-                
+
                 // New token storage
-                localStorage.setItem('tokenData', JSON.stringify({
-                    accessToken,
-                    refreshToken,
-                    expiresIn,
-                    expiresAt: Date.now() + expiresIn
-                }));
-                
+                localStorage.setItem(
+                    "tokenData",
+                    JSON.stringify({
+                        accessToken,
+                        refreshToken,
+                        expiresIn,
+                        expiresAt: Date.now() + expiresIn,
+                    })
+                );
+
                 // Legacy token storage for backward compatibility
                 localStorage.setItem("authToken", accessToken);
                 localStorage.setItem("user", JSON.stringify(data.data.user));
@@ -119,6 +115,7 @@ export function Login() {
                                 </Text>
                             </Box>
                         )}
+
                         <FormField label="Email" icon={<LuUser />}>
                             <Input
                                 type="email"

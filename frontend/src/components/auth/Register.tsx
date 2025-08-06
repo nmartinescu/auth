@@ -2,7 +2,6 @@ import { Button, Flex, Input, Box, Text } from "@chakra-ui/react";
 import { useColorModeValue } from "../ui/color-mode";
 import { useState, useEffect } from "react";
 import { LuUserPlus, LuUser, LuLock, LuMail } from "react-icons/lu";
-import { API_ENDPOINTS } from "../../config/constants";
 import {
     FormField,
     AuthHeader,
@@ -16,6 +15,7 @@ import {
     authBoxStyle,
     authTheme,
 } from "../ui/auth-styles";
+import { API_ENDPOINTS } from "../../config/constants";
 
 export function Register() {
     const [name, setName] = useState("");
@@ -31,12 +31,12 @@ export function Register() {
 
     // Check if user is already logged in
     useEffect(() => {
-        const token = localStorage.getItem('authToken');
-        const userData = localStorage.getItem('user');
-        
+        const token = localStorage.getItem("authToken");
+        const userData = localStorage.getItem("user");
+
         if (token && userData) {
             // User is already logged in, redirect to dashboard
-            window.location.href = '/dashboard';
+            window.location.href = "/dashboard";
         }
     }, []);
 
@@ -53,53 +53,56 @@ export function Register() {
 
         try {
             const response = await fetch(API_ENDPOINTS.AUTH.REGISTER, {
-                method: 'POST',
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
                     name,
                     email,
                     password,
-                    confirmPassword
+                    confirmPassword,
                 }),
             });
 
             const data = await response.json();
 
             if (data.success) {
-                console.log('User registered:', data.data.user);
-                console.log('Access Token:', data.data.accessToken);
-                
+                console.log("User registered:", data.data.user);
+                console.log("Access Token:", data.data.accessToken);
+
                 // Store tokens using the token service
                 const { accessToken, refreshToken, expiresIn } = data.data;
-                
+
                 // New token storage
-                localStorage.setItem('tokenData', JSON.stringify({
-                    accessToken,
-                    refreshToken,
-                    expiresIn,
-                    expiresAt: Date.now() + expiresIn
-                }));
-                
+                localStorage.setItem(
+                    "tokenData",
+                    JSON.stringify({
+                        accessToken,
+                        refreshToken,
+                        expiresIn,
+                        expiresAt: Date.now() + expiresIn,
+                    })
+                );
+
                 // Legacy token storage for backward compatibility
-                localStorage.setItem('authToken', accessToken);
-                localStorage.setItem('user', JSON.stringify(data.data.user));
-                
+                localStorage.setItem("authToken", accessToken);
+                localStorage.setItem("user", JSON.stringify(data.data.user));
+
                 // Clear form
-                setName('');
-                setEmail('');
-                setPassword('');
-                setConfirmPassword('');
-                
+                setName("");
+                setEmail("");
+                setPassword("");
+                setConfirmPassword("");
+
                 // Redirect to dashboard
-                window.location.href = '/dashboard';
+                window.location.href = "/dashboard";
             } else {
-                setError(data.message || 'Registration failed');
+                setError(data.message || "Registration failed");
             }
         } catch (error) {
-            console.error('Registration error:', error);
-            setError('Network error. Please try again.');
+            console.error("Registration error:", error);
+            setError("Network error. Please try again.");
         } finally {
             setIsLoading(false);
         }
@@ -128,6 +131,7 @@ export function Register() {
                                 </Text>
                             </Box>
                         )}
+
                         <FormField label="Full Name" icon={<LuUser />}>
                             <Input
                                 type="text"

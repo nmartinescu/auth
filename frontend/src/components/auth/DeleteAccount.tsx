@@ -1,7 +1,7 @@
 import { Button, Flex, Input, Box, Text, VStack } from "@chakra-ui/react";
 import { useColorModeValue } from "../ui/color-mode";
 import { useState, useEffect } from "react";
-import { LuTrash2, LuTriangle } from "react-icons/lu";
+import { LuTrash2, LuTriangleAlert } from "react-icons/lu";
 import { FormField, AuthHeader, PasswordInput } from "../ui";
 import {
     authContainerStyle,
@@ -126,7 +126,7 @@ export function DeleteAccount() {
                 >
                     <VStack gap={3} align="start">
                         <Flex align="center" gap={2}>
-                            <LuTriangle size={20} color="#DC2626" />
+                            <LuTriangleAlert size={20} color="#DC2626" />
                             <Text fontWeight="bold" color="red.600">
                                 Warning: This action cannot be undone
                             </Text>
@@ -194,7 +194,7 @@ export function DeleteAccount() {
 
                         <FormField
                             label="Type 'DELETE MY ACCOUNT' to confirm"
-                            icon={<LuTriangle />}
+                            icon={<LuTriangleAlert />}
                         >
                             <Input
                                 type="text"

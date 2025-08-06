@@ -3,7 +3,6 @@ import { useColorModeValue } from "../ui/color-mode";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { LuLock, LuCheck } from "react-icons/lu";
-import { API_ENDPOINTS } from "../../config/constants";
 import { FormField, AuthHeader, PasswordInput, AuthFooter } from "../ui";
 import {
     successButtonStyle,
@@ -11,6 +10,7 @@ import {
     authBoxStyle,
     authTheme,
 } from "../ui/auth-styles";
+import { API_ENDPOINTS } from "../../config/constants";
 
 export function ResetPassword() {
     const [searchParams] = useSearchParams();
@@ -58,20 +58,17 @@ export function ResetPassword() {
         setIsLoading(true);
 
         try {
-            const response = await fetch(
-                API_ENDPOINTS.AUTH.RESET_PASSWORD,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        token,
-                        newPassword,
-                        confirmPassword,
-                    }),
-                }
-            );
+            const response = await fetch(API_ENDPOINTS.AUTH.RESET_PASSWORD, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    token,
+                    newPassword,
+                    confirmPassword,
+                }),
+            });
 
             const data = await response.json();
 
@@ -107,7 +104,11 @@ export function ResetPassword() {
                             borderRadius="lg"
                             mb={4}
                         >
-                            <LuCheck size={48} color="#10B981" style={{ margin: "0 auto" }} />
+                            <LuCheck
+                                size={48}
+                                color="#10B981"
+                                style={{ margin: "0 auto" }}
+                            />
                         </Box>
                     </Box>
 
@@ -165,6 +166,7 @@ export function ResetPassword() {
                                 </Text>
                             </Box>
                         )}
+
                         <FormField label="New Password" icon={<LuLock />}>
                             <PasswordInput
                                 placeholder="Enter your new password"

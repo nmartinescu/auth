@@ -1,15 +1,15 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { Navbar } from "./components/core/Navbar";
-import { Process } from "./components/core/Process";
-import { Memory } from "./components/core/Memory";
-import { Disk } from "./components/core/Disk";
-import { Login } from "./components/core/Login";
-import { Register } from "./components/core/Register";
-import { ForgotPassword } from "./components/core/ForgotPassword";
-import { ResetPassword } from "./components/core/ResetPassword";
-import { Dashboard } from "./components/core/Dashboard";
-import { DeleteAccount } from "./components/core/DeleteAccount";
-import { ProtectedRoute } from "./components/core/ProtectedRoute";
+import { Navbar } from "./components/layout/Navbar";
+import { Process } from "./components/features/Process";
+import { Memory } from "./components/features/Memory";
+import { Disk } from "./components/features/Disk";
+import { Login } from "./components/auth/Login";
+import { Register } from "./components/auth/Register";
+import { ForgotPassword } from "./components/auth/ForgotPassword";
+import { ResetPassword } from "./components/auth/ResetPassword";
+import { Dashboard } from "./components/dashboard/Dashboard";
+import { DeleteAccount } from "./components/auth/DeleteAccount";
+import { ProtectedRoute } from "./components/routing/ProtectedRoute";
 import { Box } from "@chakra-ui/react";
 
 function App() {

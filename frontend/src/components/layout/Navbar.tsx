@@ -7,16 +7,16 @@ export function Navbar() {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     useEffect(() => {
-        const token = localStorage.getItem('authToken');
-        const userData = localStorage.getItem('user');
+        const token = localStorage.getItem("authToken");
+        const userData = localStorage.getItem("user");
         setIsLoggedIn(!!(token && userData));
     }, []);
 
     const handleLogout = () => {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('user');
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("user");
         setIsLoggedIn(false);
-        window.location.href = '/login';
+        window.location.href = "/login";
     };
 
     const navItems = [

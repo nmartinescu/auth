@@ -3,7 +3,6 @@ import { useColorModeValue } from "../ui/color-mode";
 import { useState, useEffect } from "react";
 import { LuMail } from "react-icons/lu";
 import { FormField, AuthHeader, AuthFooter } from "../ui";
-import { API_ENDPOINTS } from "../../config/constants";
 import {
     primaryButtonStyle,
     createInputStyle,
@@ -11,6 +10,7 @@ import {
     authBoxStyle,
     authTheme,
 } from "../ui/auth-styles";
+import { API_ENDPOINTS } from "../../config/constants";
 
 export function ForgotPassword() {
     const [email, setEmail] = useState("");
@@ -88,12 +88,23 @@ export function ForgotPassword() {
                         </Box>
 
                         <VStack gap={4} align="center">
-                            <Text fontSize="lg" fontWeight="semibold" color={textColor}>
+                            <Text
+                                fontSize="lg"
+                                fontWeight="semibold"
+                                color={textColor}
+                            >
                                 Email Sent Successfully!
                             </Text>
-                            
-                            <Text fontSize="sm" color={subtextColor} textAlign="center" maxW="400px">
-                                If an account with <strong>{email}</strong> exists, you'll receive a password reset link shortly.
+
+                            <Text
+                                fontSize="sm"
+                                color={subtextColor}
+                                textAlign="center"
+                                maxW="400px"
+                            >
+                                If an account with <strong>{email}</strong>{" "}
+                                exists, you'll receive a password reset link
+                                shortly.
                             </Text>
 
                             <Box
@@ -101,10 +112,17 @@ export function ForgotPassword() {
                                 bg={useColorModeValue("blue.50", "blue.900")}
                                 borderRadius="md"
                                 border="1px solid"
-                                borderColor={useColorModeValue("blue.200", "blue.700")}
+                                borderColor={useColorModeValue(
+                                    "blue.200",
+                                    "blue.700"
+                                )}
                             >
                                 <VStack gap={2} align="start">
-                                    <Text fontSize="sm" fontWeight="semibold" color="blue.600">
+                                    <Text
+                                        fontSize="sm"
+                                        fontWeight="semibold"
+                                        color="blue.600"
+                                    >
                                         Next Steps:
                                     </Text>
                                     <Text fontSize="sm" color="blue.600">
@@ -156,6 +174,7 @@ export function ForgotPassword() {
                                 </Text>
                             </Box>
                         )}
+
                         <FormField label="Email Address" icon={<LuMail />}>
                             <Input
                                 type="email"
