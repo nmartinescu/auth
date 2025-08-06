@@ -10,6 +10,7 @@ import { ResetPassword } from "./components/auth/ResetPassword";
 import { Dashboard } from "./components/dashboard/Dashboard";
 import { DeleteAccount } from "./components/auth/DeleteAccount";
 import { ProtectedRoute } from "./components/routing/ProtectedRoute";
+import { ThemeToggle } from "./components/ui/ThemeToggle";
 import { Box } from "@chakra-ui/react";
 
 function App() {
@@ -47,6 +48,9 @@ function App() {
                 {/* Default redirect */}
                 <Route path="/" element={<Navigate to="/process" replace />} />
             </Routes>
+            
+            {/* Theme Toggle - Fixed position in bottom right */}
+            <ThemeToggle />
         </Box>
     );
 }

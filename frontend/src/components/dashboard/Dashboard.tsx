@@ -111,9 +111,9 @@ export function Dashboard() {
                         bg={cardBg}
                         p={6}
                         borderRadius="xl"
-                        shadow="md"
+                        shadow={useColorModeValue("md", "2xl")}
                         border="1px"
-                        borderColor={useColorModeValue("gray.200", "gray.700")}
+                        borderColor={useColorModeValue("gray.200", "gray.600")}
                     >
                         <VStack align="start" gap={4}>
                             <HStack gap={3}>
@@ -161,11 +161,11 @@ export function Dashboard() {
                             bg={cardBg}
                             p={6}
                             borderRadius="xl"
-                            shadow="md"
+                            shadow={useColorModeValue("md", "2xl")}
                             border="1px"
                             borderColor={useColorModeValue(
                                 "gray.200",
-                                "gray.700"
+                                "gray.600"
                             )}
                             flex="1"
                             minW="250px"
@@ -199,11 +199,11 @@ export function Dashboard() {
                             bg={cardBg}
                             p={6}
                             borderRadius="xl"
-                            shadow="md"
+                            shadow={useColorModeValue("md", "2xl")}
                             border="1px"
                             borderColor={useColorModeValue(
                                 "gray.200",
-                                "gray.700"
+                                "gray.600"
                             )}
                             flex="1"
                             minW="250px"

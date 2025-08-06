@@ -1,7 +1,7 @@
 import { Button, Input, Box } from "@chakra-ui/react";
 import { useState } from "react";
 import { LuEye, LuEyeOff } from "react-icons/lu";
-import { toggleButtonStyle, createInputStyle } from "./auth-styles";
+import { getToggleButtonStyle, createInputStyle } from "./auth-styles";
 import type { PasswordInputProps } from "../../types/auth";
 
 export function PasswordInput({ 
@@ -28,7 +28,7 @@ export function PasswordInput({
         {...inputStyleWithFocus}
       />
       <Button
-        {...toggleButtonStyle}
+        {...getToggleButtonStyle()}
         position="absolute"
         right={2}
         top="50%"

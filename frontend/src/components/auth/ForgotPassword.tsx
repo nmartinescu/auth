@@ -7,7 +7,7 @@ import {
     primaryButtonStyle,
     createInputStyle,
     authContainerStyle,
-    authBoxStyle,
+    getAuthBoxStyle,
     authTheme,
 } from "../ui/auth-styles";
 import { API_ENDPOINTS } from "../../config/constants";
@@ -23,6 +23,7 @@ export function ForgotPassword() {
     const textColor = useColorModeValue("gray.800", "white");
     const subtextColor = useColorModeValue("gray.600", "gray.300");
     const inputStyleWithFocus = createInputStyle(authTheme.primary.focus);
+    const authBoxStyleWithDarkMode = getAuthBoxStyle();
 
     // Check if user is already logged in
     useEffect(() => {
@@ -67,7 +68,7 @@ export function ForgotPassword() {
     if (isSubmitted) {
         return (
             <Flex {...authContainerStyle} bg={containerBg}>
-                <Box {...authBoxStyle} bg={boxBg}>
+                <Box {...authBoxStyleWithDarkMode} bg={boxBg}>
                     <AuthHeader
                         title="Check Your Email"
                         subtitle="We've sent password reset instructions to your email"
@@ -153,7 +154,7 @@ export function ForgotPassword() {
 
     return (
         <Flex {...authContainerStyle} bg={containerBg}>
-            <Box {...authBoxStyle} bg={boxBg}>
+            <Box {...authBoxStyleWithDarkMode} bg={boxBg}>
                 <AuthHeader
                     title="Forgot Password"
                     subtitle="Enter your email to receive reset instructions"

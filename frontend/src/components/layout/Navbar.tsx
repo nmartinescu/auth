@@ -1,5 +1,6 @@
 import { Flex, Heading, Button } from "@chakra-ui/react";
 import { NavButton } from "../ui/NavButton";
+import { useColorModeValue } from "../ui/color-mode";
 import { LuCpu, LuMemoryStick, LuHardDrive, LuLogOut, LuLogIn, LuLayoutDashboard } from "react-icons/lu";
 import { useState, useEffect } from "react";
 
@@ -30,24 +31,29 @@ export function Navbar() {
         ...navItems,
     ];
 
+    const navBg = useColorModeValue("#f0f0f0", "#2D3748");
+    const borderColor = useColorModeValue("#e5e7eb", "#4A5568");
+    const titleColor = useColorModeValue("#111827", "#F7FAFC");
+    const buttonHoverBg = useColorModeValue("#e5e7eb", "#4A5568");
+
     return (
         <Flex
             as="nav"
             p={{ base: 1, md: 4 }}
             borderBottom={{
-                base: "2px solid #e5e7eb",
-                md: "5px solid #e5e7eb",
+                base: `2px solid ${borderColor}`,
+                md: `5px solid ${borderColor}`,
             }}
             direction={{ base: "column", md: "row" }}
             align={{ base: "center", md: "space-between" }}
             gap={{ base: 2, md: 0 }}
             justify="space-between"
-            bg="#f0f0f0"
+            bg={navBg}
         >
             <Heading
                 size={{ base: "md", md: "lg" }}
                 fontWeight="semibold"
-                color="#111827"
+                color={titleColor}
             >
                 OS Sim
             </Heading>
@@ -59,8 +65,9 @@ export function Navbar() {
                 {isLoggedIn ? (
                     <Button
                         variant="ghost"
+                        color={titleColor}
                         _hover={{
-                            bg: "#e5e7eb",
+                            bg: buttonHoverBg,
                         }}
                         onClick={handleLogout}
                     >

@@ -3,12 +3,12 @@ import { useColorModeValue } from "../ui/color-mode";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { LuLogIn, LuUser } from "react-icons/lu";
-import { FormField, AuthHeader, PasswordInput, AuthFooter } from "../ui";
+import { FormField, AuthHeader, PasswordInput } from "../ui";
 import {
     primaryButtonStyle,
     createInputStyle,
     authContainerStyle,
-    authBoxStyle,
+    getAuthBoxStyle,
     authTheme,
 } from "../ui/auth-styles";
 import { API_ENDPOINTS } from "../../config/constants";
@@ -22,6 +22,7 @@ export function Login() {
     const boxBg = useColorModeValue("white", "gray.800");
     const containerBg = useColorModeValue("gray.50", "gray.900");
     const inputStyleWithFocus = createInputStyle(authTheme.primary.focus);
+    const authBoxStyleWithDarkMode = getAuthBoxStyle();
 
     // Check if user is already logged in
     useEffect(() => {
@@ -94,7 +95,7 @@ export function Login() {
 
     return (
         <Flex {...authContainerStyle} bg={containerBg}>
-            <Box {...authBoxStyle} bg={boxBg}>
+            <Box {...authBoxStyleWithDarkMode} bg={boxBg}>
                 <AuthHeader
                     title="Welcome Back"
                     subtitle="Sign in to access OS Sim"
@@ -105,12 +106,12 @@ export function Login() {
                         {error && (
                             <Box
                                 p={3}
-                                bg="red.50"
+                                bg={useColorModeValue("red.50", "red.900")}
                                 border="1px solid"
-                                borderColor="red.200"
+                                borderColor={useColorModeValue("red.200", "red.600")}
                                 borderRadius="md"
                             >
-                                <Text color="red.600" fontSize="sm">
+                                <Text color={useColorModeValue("red.600", "red.200")} fontSize="sm">
                                     {error}
                                 </Text>
                             </Box>
@@ -150,12 +151,12 @@ export function Login() {
                 </form>
 
                 <Flex direction="column" align="center" gap={3} mt={6}>
-                    <Text fontSize="sm" color="gray.500" textAlign="center">
+                    <Text fontSize="sm" color={useColorModeValue("gray.500", "gray.400")} textAlign="center">
                         Don't have an account?{" "}
                         <Link to="/register">
                             <Text
                                 as="span"
-                                color={authTheme.success.link}
+                                color={useColorModeValue(authTheme.success.link, "#68D391")}
                                 cursor="pointer"
                                 _hover={{ textDecoration: "underline" }}
                             >
@@ -163,12 +164,12 @@ export function Login() {
                             </Text>
                         </Link>
                     </Text>
-                    <Text fontSize="sm" color="gray.500" textAlign="center">
+                    <Text fontSize="sm" color={useColorModeValue("gray.500", "gray.400")} textAlign="center">
                         Forgot your password?{" "}
                         <Link to="/forgot-password">
                             <Text
                                 as="span"
-                                color={authTheme.primary.link}
+                                color={useColorModeValue(authTheme.primary.link, "#63B3ED")}
                                 cursor="pointer"
                                 _hover={{ textDecoration: "underline" }}
                             >

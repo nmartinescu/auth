@@ -12,7 +12,7 @@ import {
     successButtonStyle,
     createInputStyle,
     authContainerStyle,
-    authBoxStyle,
+    getAuthBoxStyle,
     authTheme,
 } from "../ui/auth-styles";
 import { API_ENDPOINTS } from "../../config/constants";
@@ -28,6 +28,7 @@ export function Register() {
     const boxBg = useColorModeValue("white", "gray.800");
     const containerBg = useColorModeValue("gray.50", "gray.900");
     const inputStyleWithFocus = createInputStyle(authTheme.success.focus);
+    const authBoxStyleWithDarkMode = getAuthBoxStyle();
 
     // Check if user is already logged in
     useEffect(() => {
@@ -110,7 +111,7 @@ export function Register() {
 
     return (
         <Flex {...authContainerStyle} bg={containerBg}>
-            <Box {...authBoxStyle} bg={boxBg}>
+            <Box {...authBoxStyleWithDarkMode} bg={boxBg}>
                 <AuthHeader
                     title="Create Account"
                     subtitle="Join OS Sim to get started"

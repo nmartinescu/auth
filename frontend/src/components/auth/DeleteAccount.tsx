@@ -5,7 +5,7 @@ import { LuTrash2, LuTriangleAlert } from "react-icons/lu";
 import { FormField, AuthHeader, PasswordInput } from "../ui";
 import {
     authContainerStyle,
-    authBoxStyle,
+    getAuthBoxStyle,
     authTheme,
     createInputStyle,
 } from "../ui/auth-styles";
@@ -23,6 +23,7 @@ export function DeleteAccount() {
     const textColor = useColorModeValue("gray.800", "white");
     const subtextColor = useColorModeValue("gray.600", "gray.300");
     const inputStyleWithFocus = createInputStyle(authTheme.primary.focus);
+    const authBoxStyleWithDarkMode = getAuthBoxStyle();
 
     useEffect(() => {
         // Check if user is logged in
@@ -109,7 +110,7 @@ export function DeleteAccount() {
 
     return (
         <Flex {...authContainerStyle} bg={containerBg}>
-            <Box {...authBoxStyle} bg={boxBg} maxW="500px">
+            <Box {...authBoxStyleWithDarkMode} bg={boxBg} maxW="500px">
                 <AuthHeader
                     title="Delete Account"
                     subtitle="Permanently delete your OS Sim account"

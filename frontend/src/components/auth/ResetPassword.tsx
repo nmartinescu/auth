@@ -7,7 +7,7 @@ import { FormField, AuthHeader, PasswordInput, AuthFooter } from "../ui";
 import {
     successButtonStyle,
     authContainerStyle,
-    authBoxStyle,
+    getAuthBoxStyle,
     authTheme,
 } from "../ui/auth-styles";
 import { API_ENDPOINTS } from "../../config/constants";
@@ -23,6 +23,7 @@ export function ResetPassword() {
 
     const boxBg = useColorModeValue("white", "gray.800");
     const containerBg = useColorModeValue("gray.50", "gray.900");
+    const authBoxStyleWithDarkMode = getAuthBoxStyle();
 
     useEffect(() => {
         // Get token from URL params
@@ -91,7 +92,7 @@ export function ResetPassword() {
     if (isSuccess) {
         return (
             <Flex {...authContainerStyle} bg={containerBg}>
-                <Box {...authBoxStyle} bg={boxBg}>
+                <Box {...authBoxStyleWithDarkMode} bg={boxBg}>
                     <AuthHeader
                         title="Password Reset Successful"
                         subtitle="Your password has been updated successfully"
@@ -126,7 +127,7 @@ export function ResetPassword() {
     if (!token) {
         return (
             <Flex {...authContainerStyle} bg={containerBg}>
-                <Box {...authBoxStyle} bg={boxBg}>
+                <Box {...authBoxStyleWithDarkMode} bg={boxBg}>
                     <AuthHeader
                         title="Invalid Reset Link"
                         subtitle="This password reset link is invalid or has expired"
@@ -145,7 +146,7 @@ export function ResetPassword() {
 
     return (
         <Flex {...authContainerStyle} bg={containerBg}>
-            <Box {...authBoxStyle} bg={boxBg}>
+            <Box {...authBoxStyleWithDarkMode} bg={boxBg}>
                 <AuthHeader
                     title="Reset Password"
                     subtitle="Enter your new password below"
