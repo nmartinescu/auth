@@ -1,16 +1,26 @@
 import express from "express";
 import { validateRegistration } from "../../validators/authValidators.js";
-import { generateTokens, createUser, checkUserExists } from "../../services/authService.js";
+import {
+    generateTokens,
+    createUser,
+    checkUserExists,
+} from "../../services/authService.js";
+import { createAccountLimiter } from "../../middleware/rateLimiter.js";
 
 const router = express.Router();
 
-// Register endpoint
-router.post("/", async (req, res) => {
+// Register endpoint with rate limiting
+router.post("/", createAccountLimiter, async (req, res) => {
     try {
         const { name, email, password, confirmPassword } = req.body;
 
         // Validation
-        const validation = validateRegistration({ name, email, password, confirmPassword });
+        const validation = validateRegistration({
+            name,
+            email,
+            password,
+            confirmPassword,
+        });
         if (!validation.isValid) {
             return res.status(400).json({
                 success: false,

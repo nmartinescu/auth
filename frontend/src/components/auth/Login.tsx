@@ -23,6 +23,16 @@ export function Login() {
     const containerBg = useColorModeValue("gray.50", "gray.900");
     const inputStyleWithFocus = createInputStyle(authTheme.primary.focus);
     const authBoxStyleWithDarkMode = getAuthBoxStyle();
+    
+    // Error styling colors
+    const errorBg = useColorModeValue("red.50", "red.900");
+    const errorBorderColor = useColorModeValue("red.200", "red.600");
+    const errorTextColor = useColorModeValue("red.600", "red.200");
+    
+    // Footer text colors
+    const footerTextColor = useColorModeValue("gray.500", "gray.400");
+    const successLinkColor = useColorModeValue(authTheme.success.link, "#68D391");
+    const primaryLinkColor = useColorModeValue(authTheme.primary.link, "#63B3ED");
 
     // Check if user is already logged in
     useEffect(() => {
@@ -106,12 +116,12 @@ export function Login() {
                         {error && (
                             <Box
                                 p={3}
-                                bg={useColorModeValue("red.50", "red.900")}
+                                bg={errorBg}
                                 border="1px solid"
-                                borderColor={useColorModeValue("red.200", "red.600")}
+                                borderColor={errorBorderColor}
                                 borderRadius="md"
                             >
-                                <Text color={useColorModeValue("red.600", "red.200")} fontSize="sm">
+                                <Text color={errorTextColor} fontSize="sm">
                                     {error}
                                 </Text>
                             </Box>
@@ -151,12 +161,12 @@ export function Login() {
                 </form>
 
                 <Flex direction="column" align="center" gap={3} mt={6}>
-                    <Text fontSize="sm" color={useColorModeValue("gray.500", "gray.400")} textAlign="center">
+                    <Text fontSize="sm" color={footerTextColor} textAlign="center">
                         Don't have an account?{" "}
                         <Link to="/register">
                             <Text
                                 as="span"
-                                color={useColorModeValue(authTheme.success.link, "#68D391")}
+                                color={successLinkColor}
                                 cursor="pointer"
                                 _hover={{ textDecoration: "underline" }}
                             >
@@ -164,12 +174,12 @@ export function Login() {
                             </Text>
                         </Link>
                     </Text>
-                    <Text fontSize="sm" color={useColorModeValue("gray.500", "gray.400")} textAlign="center">
+                    <Text fontSize="sm" color={footerTextColor} textAlign="center">
                         Forgot your password?{" "}
                         <Link to="/forgot-password">
                             <Text
                                 as="span"
-                                color={useColorModeValue(authTheme.primary.link, "#63B3ED")}
+                                color={primaryLinkColor}
                                 cursor="pointer"
                                 _hover={{ textDecoration: "underline" }}
                             >

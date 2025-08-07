@@ -1,11 +1,12 @@
 import express from "express";
 import { validateLogin } from "../../validators/authValidators.js";
 import { generateTokens, findUserByEmail } from "../../services/authService.js";
+import { authLimiter } from "../../middleware/rateLimiter.js";
 
 const router = express.Router();
 
-// Login endpoint
-router.post("/", async (req, res) => {
+// Login endpoint with rate limiting
+router.post("/", authLimiter, async (req, res) => {
     try {
         const { email, password } = req.body;
         console.log(email, password);

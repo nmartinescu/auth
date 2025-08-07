@@ -8,6 +8,7 @@
         "start": "cross-env NODE_ENV=production node backend/server.js",
         "dev": "cross-env NODE_ENV=development nodemon backend/server.js",
         "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend",
+        "analyze-logs": "node backend/scripts/analyzeLogs.js",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "dependencies": {
@@ -16,8 +17,11 @@
         "cross-env": "^10.0.0",
         "dotenv": "^16.3.1",
         "express": "^4.18.2",
+        "express-rate-limit": "^8.0.1",
+        "helmet": "^8.1.0",
         "jsonwebtoken": "^9.0.2",
         "mongoose": "^8.0.3",
+        "morgan": "^1.10.1",
         "nodemailer": "^7.0.5",
         "resend": "^4.7.0",
         "validator": "^13.11.0"

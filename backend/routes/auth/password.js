@@ -1,17 +1,24 @@
 import express from "express";
-import { validateForgotPassword, validateResetPassword } from "../../validators/authValidators.js";
-import { 
-    findUserByEmail, 
-    generatePasswordResetToken, 
-    verifyPasswordResetToken 
+import {
+    validateForgotPassword,
+    validateResetPassword,
+} from "../../validators/authValidators.js";
+import {
+    findUserByEmail,
+    generatePasswordResetToken,
+    verifyPasswordResetToken,
 } from "../../services/authService.js";
 import { sendPasswordResetEmail } from "../../services/resendService.js";
+import {
+    passwordResetLimiter,
+    authLimiter,
+} from "../../middleware/rateLimiter.js";
 import User from "../../models/User.js";
 
 const router = express.Router();
 
-// Forgot password endpoint
-router.post("/forgot", async (req, res) => {
+// Forgot password endpoint with strict rate limiting
+router.post("/forgot", passwordResetLimiter, async (req, res) => {
     try {
         const { email } = req.body;
 
@@ -30,7 +37,8 @@ router.post("/forgot", async (req, res) => {
             // Don't reveal if email exists or not for security
             return res.status(200).json({
                 success: true,
-                message: "If an account with that email exists, a password reset link has been sent.",
+                message:
+                    "If an account with that email exists, a password reset link has been sent.",
             });
         }
 
@@ -39,19 +47,28 @@ router.post("/forgot", async (req, res) => {
 
         // Send password reset email
         const emailResult = await sendPasswordResetEmail(email, resetToken);
-        
+
         if (!emailResult.success) {
-            console.error('Failed to send password reset email:', emailResult.error);
+            console.error(
+                "Failed to send password reset email:",
+                emailResult.error
+            );
             // Still return success to not reveal if email exists
         } else {
-            console.log('Password reset email sent successfully:', emailResult.messageId);
+            console.log(
+                "Password reset email sent successfully:",
+                emailResult.messageId
+            );
         }
 
         res.status(200).json({
             success: true,
-            message: "If an account with that email exists, a password reset link has been sent.",
+            message:
+                "If an account with that email exists, a password reset link has been sent.",
             // For demo/development - remove in production
-            ...(process.env.NODE_ENV === 'development' && { resetToken: resetToken })
+            ...(process.env.NODE_ENV === "development" && {
+                resetToken: resetToken,
+            }),
         });
     } catch (error) {
         console.error("Forgot password error:", error);
@@ -62,13 +79,17 @@ router.post("/forgot", async (req, res) => {
     }
 });
 
-// Reset password endpoint
-router.post("/reset", async (req, res) => {
+// Reset password endpoint with rate limiting
+router.post("/reset", authLimiter, async (req, res) => {
     try {
         const { token, newPassword, confirmPassword } = req.body;
 
         // Validation
-        const validation = validateResetPassword({ token, newPassword, confirmPassword });
+        const validation = validateResetPassword({
+            token,
+            newPassword,
+            confirmPassword,
+        });
         if (!validation.isValid) {
             return res.status(400).json({
                 success: false,
