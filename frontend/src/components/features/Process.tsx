@@ -42,10 +42,8 @@ export function Process() {
     const textColor = useColorModeValue("gray.800", "gray.100");
     const subtextColor = useColorModeValue("gray.600", "gray.300");
     const headerTextColor = useColorModeValue("gray.800", "gray.100");
-    const cellTextColor = useColorModeValue("gray.800", "gray.100");
     const iconColor = useColorModeValue("gray.600", "gray.300");
     const buttonHoverBg = useColorModeValue("gray.50", "gray.700");
-    const tableRowHoverBg = useColorModeValue("gray.50", "gray.700");
 
     const updateProcess = (index: number, key: string, value: any) => {
         const updated = [...processes];
