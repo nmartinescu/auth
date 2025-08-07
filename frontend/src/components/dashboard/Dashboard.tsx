@@ -51,7 +51,7 @@ export function Dashboard() {
     const testTokenRefresh = async () => {
         try {
             console.log("Testing token refresh...");
-            const token = localStorage.getItem("authToken");
+            // const token = localStorage.getItem("authToken");
 
             // Make a simple authenticated request that will trigger token refresh if needed
             const response = await fetch(
