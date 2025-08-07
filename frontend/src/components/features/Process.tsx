@@ -312,9 +312,8 @@ function ProcessRow({
     const tableRowHoverBg = useColorModeValue("gray.50", "gray.700");
     const cellTextColor = useColorModeValue("gray.800", "gray.100");
 
-    // Brighter input styling for dark mode
     const inputTextColor = useColorModeValue("gray.800", "white");
-    const inputBg = useColorModeValue("white", "gray.600");
+    const inputBg = useColorModeValue("gray.50", "gray.700");
 
     return (
         <Table.Row _hover={{ bg: tableRowHoverBg }}>
@@ -333,12 +332,10 @@ function ProcessRow({
                             )
                         }
                         min={0}
+                        variant="subtle"
                     >
                         <NumberInput.Control />
-                        <NumberInput.Input
-                            color={inputTextColor}
-                            bg={inputBg}
-                        />
+                        <NumberInput.Input />
                     </NumberInput.Root>
                 ) : (
                     <Text color={cellTextColor}>{value.arrivalTime}</Text>
@@ -356,12 +353,10 @@ function ProcessRow({
                             )
                         }
                         min={1}
+                        variant="subtle"
                     >
                         <NumberInput.Control />
-                        <NumberInput.Input
-                            color={inputTextColor}
-                            bg={inputBg}
-                        />
+                        <NumberInput.Input />
                     </NumberInput.Root>
                 ) : (
                     <Text color={cellTextColor}>{value.burstTime}</Text>
