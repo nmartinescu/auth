@@ -4,11 +4,9 @@ import {
     Stack,
     Table,
     Box,
-    Button,
     Text,
     NumberInput,
     Input,
-    IconButton,
 } from "@chakra-ui/react";
 import {
     LuPlus,
@@ -19,6 +17,11 @@ import {
     LuSquarePen,
 } from "react-icons/lu";
 import { useColorModeValue } from "../ui/color-mode";
+import { 
+    FormActionButtons, 
+    ActionButton, 
+    DeleteButton 
+} from "../ui/FormActionButtons";
 import type {
     ProcessData,
     ProcessStatFieldProps,
@@ -42,8 +45,6 @@ export function Process() {
     const textColor = useColorModeValue("gray.800", "gray.100");
     const subtextColor = useColorModeValue("gray.600", "gray.300");
     const headerTextColor = useColorModeValue("gray.800", "gray.100");
-    const iconColor = useColorModeValue("gray.600", "gray.300");
-    const buttonHoverBg = useColorModeValue("gray.50", "gray.700");
 
     const updateProcess = (index: number, key: string, value: any) => {
         const updated = [...processes];
@@ -133,30 +134,14 @@ export function Process() {
                     </Stack>
 
                     {/* Action Buttons */}
-                    <Flex justify="end" gap="2" mt="4">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            borderBottom={`3px solid ${borderColor}`}
-                            borderRight={`3px solid ${borderColor}`}
-                            onClick={handleReset}
-                            color={iconColor}
-                            _hover={{ bg: buttonHoverBg }}
-                        >
-                            <LuRotateCcw />
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            borderBottom={`3px solid ${borderColor}`}
-                            borderRight={`3px solid ${borderColor}`}
-                            onClick={handleSave}
-                            color={iconColor}
-                            _hover={{ bg: buttonHoverBg }}
-                        >
-                            {isEditMode ? <LuSave /> : <LuSquarePen />}
-                        </Button>
-                    </Flex>
+                    <FormActionButtons
+                        onReset={handleReset}
+                        onEdit={handleSave}
+                        isEditMode={isEditMode}
+                        resetIcon={<LuRotateCcw />}
+                        editIcon={<LuSquarePen />}
+                        saveIcon={<LuSave />}
+                    />
                 </Flex>
 
                 {/* Process Table */}
@@ -236,31 +221,31 @@ export function Process() {
 
                     {isEditMode && (
                         <Box textAlign="right">
-                            <Button
-                                size="sm"
-                                variant="outline"
+                            <ActionButton
                                 onClick={addProcess}
-                                color={iconColor}
-                                _hover={{ bg: buttonHoverBg }}
-                            >
-                                <LuPlus />
-                                Add Row
-                            </Button>
+                                icon={
+                                    <>
+                                        <LuPlus />
+                                        Add Row
+                                    </>
+                                }
+                                aria-label="Add new process row"
+                            />
                         </Box>
                     )}
 
                     <Box textAlign="right" mb="4">
-                        <Button
-                            size="sm"
-                            variant="outline"
+                        <ActionButton
                             onClick={onSubmit}
                             disabled={isEditMode}
-                            color={iconColor}
-                            _hover={{ bg: buttonHoverBg }}
-                        >
-                            <LuPlay />
-                            Start
-                        </Button>
+                            icon={
+                                <>
+                                    <LuPlay />
+                                    Start
+                                </>
+                            }
+                            aria-label="Start process simulation"
+                        />
                     </Box>
                 </Stack>
             </Flex>
@@ -281,21 +266,20 @@ function ProcessStatField({
     return (
         <Flex
             w="full"
-            flexDirection={isEditMode ? "column" : "row"}
-            justifyContent={isEditMode ? "flex-start" : "space-between"}
+            flexDirection="row"
+            justifyContent="space-between"
+            alignItems="center"
             borderBottom={`2px solid ${borderColor}`}
             borderTop={`2px solid ${borderColor}`}
             px="4"
             py="2"
         >
-            <Text fontWeight="medium" color={subtextColor} w="40%">
+            <Text fontWeight="medium" color={subtextColor}>
                 {label}
             </Text>
-            <Box w={isEditMode ? "100%" : "60%"}>
-                <Text textAlign="right" fontWeight="medium" color={textColor}>
-                    {value}
-                </Text>
-            </Box>
+            <Text fontWeight="medium" color={textColor}>
+                {value}
+            </Text>
         </Flex>
     );
 }
@@ -312,6 +296,11 @@ function ProcessRow({
 
     const inputTextColor = useColorModeValue("gray.800", "white");
     const inputBg = useColorModeValue("gray.50", "gray.700");
+    const inputBorderColor = useColorModeValue("gray.200", "gray.600");
+    const inputFocusBg = useColorModeValue("white", "gray.600");
+    const inputHoverBg = useColorModeValue("gray.100", "gray.650");
+    const focusBorderColor = useColorModeValue("blue.500", "blue.300");
+    const focusBoxShadow = useColorModeValue("0 0 0 1px #3182ce", "0 0 0 1px #63b3ed");
 
     return (
         <Table.Row _hover={{ bg: tableRowHoverBg }}>
@@ -333,7 +322,17 @@ function ProcessRow({
                         variant="subtle"
                     >
                         <NumberInput.Control />
-                        <NumberInput.Input />
+                        <NumberInput.Input
+                            bg={inputBg}
+                            color={inputTextColor}
+                            borderColor={inputBorderColor}
+                            _hover={{ bg: inputHoverBg }}
+                            _focus={{ 
+                                bg: inputFocusBg,
+                                borderColor: focusBorderColor,
+                                boxShadow: focusBoxShadow
+                            }}
+                        />
                     </NumberInput.Root>
                 ) : (
                     <Text color={cellTextColor}>{value.arrivalTime}</Text>
@@ -354,7 +353,17 @@ function ProcessRow({
                         variant="subtle"
                     >
                         <NumberInput.Control />
-                        <NumberInput.Input />
+                        <NumberInput.Input
+                            bg={inputBg}
+                            color={inputTextColor}
+                            borderColor={inputBorderColor}
+                            _hover={{ bg: inputHoverBg }}
+                            _focus={{ 
+                                bg: inputFocusBg,
+                                borderColor: focusBorderColor,
+                                boxShadow: focusBoxShadow
+                            }}
+                        />
                     </NumberInput.Root>
                 ) : (
                     <Text color={cellTextColor}>{value.burstTime}</Text>
@@ -370,6 +379,13 @@ function ProcessRow({
                         size="sm"
                         color={inputTextColor}
                         bg={inputBg}
+                        borderColor={inputBorderColor}
+                        _hover={{ bg: inputHoverBg }}
+                        _focus={{ 
+                            bg: inputFocusBg,
+                            borderColor: focusBorderColor,
+                            boxShadow: focusBoxShadow
+                        }}
                     />
                 ) : (
                     <Text color={cellTextColor}>{value.io}</Text>
@@ -378,18 +394,11 @@ function ProcessRow({
             {isEditMode && (
                 <Table.Cell textAlign="center">
                     {index !== 0 && (
-                        <IconButton
-                            size="sm"
-                            variant="ghost"
+                        <DeleteButton
                             onClick={() => onDelete(index)}
+                            icon={<LuTrash />}
                             aria-label="Delete process"
-                            color={useColorModeValue("red.600", "red.300")}
-                            _hover={{
-                                bg: useColorModeValue("red.50", "red.900"),
-                            }}
-                        >
-                            <LuTrash />
-                        </IconButton>
+                        />
                     )}
                 </Table.Cell>
             )}
