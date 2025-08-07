@@ -12,6 +12,11 @@ export function Dashboard() {
     const cardBg = useColorModeValue("white", "gray.800");
     const textColor = useColorModeValue("gray.800", "white");
     const subtextColor = useColorModeValue("gray.600", "gray.300");
+    const shadowColor = useColorModeValue("md", "2xl");
+    const borderColor = useColorModeValue("gray.200", "gray.600");
+    const iconBg = useColorModeValue("green.50", "green.900");
+    const iconColor = useColorModeValue("#38A169", "#68D391");
+    const buttonTextColor = useColorModeValue("inherit", "white");
 
     useEffect(() => {
         // Check if user is logged in
@@ -50,7 +55,7 @@ export function Dashboard() {
 
             // Make a simple authenticated request that will trigger token refresh if needed
             const response = await fetch(
-                "http://localhost:3000/api/auth/refresh",
+                "http://localhost:5000/api/auth/refresh",
                 {
                     method: "POST",
                     headers: {
@@ -111,27 +116,14 @@ export function Dashboard() {
                         bg={cardBg}
                         p={6}
                         borderRadius="xl"
-                        shadow={useColorModeValue("md", "2xl")}
+                        shadow={shadowColor}
                         border="1px"
-                        borderColor={useColorModeValue("gray.200", "gray.600")}
+                        borderColor={borderColor}
                     >
                         <VStack align="start" gap={4}>
                             <HStack gap={3}>
-                                <Box
-                                    p={3}
-                                    bg={useColorModeValue(
-                                        "green.50",
-                                        "green.900"
-                                    )}
-                                    borderRadius="full"
-                                >
-                                    <LuUser
-                                        size={32}
-                                        color={useColorModeValue(
-                                            "#38A169",
-                                            "#68D391"
-                                        )}
-                                    />
+                                <Box p={3} bg={iconBg} borderRadius="full">
+                                    <LuUser size={32} color={iconColor} />
                                 </Box>
                                 <VStack align="start" gap={1}>
                                     <Text
@@ -161,12 +153,9 @@ export function Dashboard() {
                             bg={cardBg}
                             p={6}
                             borderRadius="xl"
-                            shadow={useColorModeValue("md", "2xl")}
+                            shadow={shadowColor}
                             border="1px"
-                            borderColor={useColorModeValue(
-                                "gray.200",
-                                "gray.600"
-                            )}
+                            borderColor={borderColor}
                             flex="1"
                             minW="250px"
                         >
@@ -199,12 +188,9 @@ export function Dashboard() {
                             bg={cardBg}
                             p={6}
                             borderRadius="xl"
-                            shadow={useColorModeValue("md", "2xl")}
+                            shadow={shadowColor}
                             border="1px"
-                            borderColor={useColorModeValue(
-                                "gray.200",
-                                "gray.600"
-                            )}
+                            borderColor={borderColor}
                             flex="1"
                             minW="250px"
                         >
@@ -221,6 +207,7 @@ export function Dashboard() {
                                         size="sm"
                                         variant="outline"
                                         colorScheme="blue"
+                                        color={buttonTextColor}
                                         onClick={testTokenRefresh}
                                     >
                                         🔄 Test Token Refresh
@@ -229,6 +216,7 @@ export function Dashboard() {
                                         size="sm"
                                         variant="outline"
                                         colorScheme="red"
+                                        color={buttonTextColor}
                                         onClick={() =>
                                             (window.location.href =
                                                 "/delete-account")
