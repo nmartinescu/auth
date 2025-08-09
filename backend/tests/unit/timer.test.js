@@ -1,5 +1,5 @@
 import { describe, it, beforeEach, expect } from "@jest/globals";
-import Timer from "../../Scheduler/Timer.js";
+import Timer from "../../scheduler/Timer.js";
 
 describe("Timer", () => {
     let timer;

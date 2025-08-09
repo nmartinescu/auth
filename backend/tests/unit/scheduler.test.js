@@ -1,7 +1,7 @@
 import { describe, it, beforeEach, expect } from '@jest/globals';
-import SchedulerFCFS from '../../Scheduler/algorithms/SchedulerFCFS.js';
-import SchedulerSJF from '../../Scheduler/algorithms/SchedulerSJF.js';
-import SchedulerRR from '../../Scheduler/algorithms/SchedulerRR.js';
+import SchedulerFCFS from '../../scheduler/algorithms/SchedulerFCFS.js';
+import SchedulerSJF from '../../scheduler/algorithms/SchedulerSJF.js';
+import SchedulerRR from '../../scheduler/algorithms/SchedulerRR.js';
 
 describe('CPU Scheduling Algorithms', () => {
     let testProcesses;

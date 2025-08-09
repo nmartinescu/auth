@@ -17,7 +17,6 @@ class ReadyQueuesManager extends QueueManager {
     }
 
     getQueueQuantum(readyQueueIndex) {
-
         if (!this.queueData.quantum) {
             return -1;
         }
@@ -26,7 +25,7 @@ class ReadyQueuesManager extends QueueManager {
     }
 
     getAllotment() {
-        return this.allotment
+        return this.allotment;
     }
 
     addToReadyQueue(readyQueueIndex, pid) {

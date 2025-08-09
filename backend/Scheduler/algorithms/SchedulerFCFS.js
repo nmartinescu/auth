@@ -1,7 +1,7 @@
-import Scheduler2 from "../Scheduler2.js";
+import Scheduler from "../Scheduler.js";
 import ReadyQueuesManager from "../ReadyQueuesManager.js";
 
-class SchedulerFCFS extends Scheduler2 {
+class SchedulerFCFS extends Scheduler {
     initializeReadyQueues() {
         this.readyQueues = new ReadyQueuesManager(1);
     }

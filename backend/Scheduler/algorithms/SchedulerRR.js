@@ -1,7 +1,7 @@
-import Scheduler2 from "../Scheduler2.js";
+import Scheduler from "../Scheduler.js";
 import ReadyQueuesManager from "../ReadyQueuesManager.js";
 
-class SchedulerRR extends Scheduler2 {
+class SchedulerRR extends Scheduler {
     initializeReadyQueues(extra) {
         this.readyQueues = new ReadyQueuesManager(1, { quantum: [extra.quantum] });
     }
