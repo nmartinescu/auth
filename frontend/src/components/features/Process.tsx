@@ -218,7 +218,7 @@ export function Process() {
                         <ProcessStatField
                             label="Total Processes:"
                             value={processCount.toString()}
-                            isEditMode={isEditMode}
+                            // isEditMode={isEditMode}
                             textColor={textColor}
                             subtextColor={subtextColor}
                             borderColor={borderColor}
@@ -350,7 +350,7 @@ export function Process() {
 function ProcessStatField({
     label,
     value,
-    isEditMode,
+    // isEditMode,
     textColor,
     subtextColor,
     borderColor,

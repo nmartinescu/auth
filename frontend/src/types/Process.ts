@@ -7,7 +7,7 @@ export interface ProcessData {
 export interface ProcessStatFieldProps {
     label: string;
     value: string;
-    isEditMode: boolean;
+    // isEditMode: boolean;
     textColor: string;
     subtextColor: string;
     borderColor: string;
