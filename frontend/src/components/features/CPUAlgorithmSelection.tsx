@@ -55,11 +55,11 @@ export default function CPUAlgorithmSelection({
     const descriptionBgColor = useColorModeValue("gray.50", "gray.700");
 
     // Input styling to match project patterns
-    const inputTextColor = useColorModeValue("gray.800", "white");
-    const inputBg = useColorModeValue("gray.50", "gray.700");
+    const inputTextColor = useColorModeValue("gray.800", "gray.800");
+    const inputBg = useColorModeValue("gray.50", "gray.300");
     const inputBorderColor = useColorModeValue("gray.200", "gray.600");
-    const inputFocusBg = useColorModeValue("white", "gray.600");
-    const inputHoverBg = useColorModeValue("gray.100", "gray.650");
+    const inputFocusBg = useColorModeValue("white", "gray.200");
+    const inputHoverBg = useColorModeValue("gray.100", "gray.250");
     const focusBorderColor = useColorModeValue("blue.500", "blue.300");
     const focusBoxShadow = useColorModeValue(
         "0 0 0 1px #3182ce",
