@@ -17,11 +17,12 @@ import {
     LuSquarePen,
 } from "react-icons/lu";
 import { useColorModeValue } from "../ui/color-mode";
-import { 
-    FormActionButtons, 
-    ActionButton, 
-    DeleteButton 
+import {
+    FormActionButtons,
+    ActionButton,
+    DeleteButton,
 } from "../ui/FormActionButtons";
+import CPUAlgorithmSelection from "./CPUAlgorithmSelection";
 import type {
     ProcessData,
     ProcessStatFieldProps,
@@ -38,6 +39,8 @@ export function Process() {
         },
     ]);
     const [processCount, setProcessCount] = useState(1);
+    const [selectedAlgorithm, setSelectedAlgorithm] = useState("FCFS");
+    const [quantum, setQuantum] = useState(2);
 
     // Color mode values
     const cardBg = useColorModeValue("white", "gray.800");
@@ -79,8 +82,88 @@ export function Process() {
         setIsEditMode(!isEditMode);
     };
 
-    const onSubmit = () => {
-        // Submit logic will be implemented later
+    const onSubmit = async () => {
+        try {
+            console.log("🚀 Starting CPU scheduling simulation...");
+            console.log("Input processes:", processes);
+
+            // Prepare the data for the API
+            const apiData = {
+                algorithm: selectedAlgorithm,
+                ...(selectedAlgorithm === "RR" && { quantum }), // Add quantum only for Round Robin
+                processes: processes.map((process) => ({
+                    arrivalTime: process.arrivalTime,
+                    burstTime: process.burstTime,
+                    io: process.io
+                        ? typeof process.io === "string"
+                            ? // Parse IO string if it's a string (simple format like "2:1,4:2")
+                              process.io
+                                  .split(",")
+                                  .map((ioStr) => {
+                                      const [start, duration] = ioStr
+                                          .split(":")
+                                          .map(Number);
+                                      return {
+                                          start: start || 0,
+                                          duration: duration || 1,
+                                      };
+                                  })
+                                  .filter(
+                                      (io) =>
+                                          !isNaN(io.start) &&
+                                          !isNaN(io.duration)
+                                  )
+                            : // If it's already an array, use it as is
+                              process.io
+                        : [],
+                })),
+            };
+
+            console.log("📤 Sending API request:", apiData);
+
+            // Make the API call
+            const response = await fetch("/api/cpu", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(apiData),
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                console.log("✅ CPU Scheduling Result:", result);
+                console.log("📊 Algorithm:", result.data.algorithm);
+                console.log("🔢 Total Processes:", result.data.processes);
+                console.log("📈 Performance Metrics:", result.data.metrics);
+                console.log("🎯 Simulation Steps:", result.data.solution);
+
+                // Show a brief summary in the console
+                console.log("\n📋 SIMULATION SUMMARY:");
+                console.log(`Algorithm: ${result.data.algorithm}`);
+                console.log(`Processes: ${result.data.processes}`);
+                console.log(
+                    `Average Waiting Time: ${result.data.metrics.averageWaitingTime}`
+                );
+                console.log(
+                    `Average Turnaround Time: ${result.data.metrics.averageTurnaroundTime}`
+                );
+                console.log(
+                    `CPU Utilization: ${result.data.metrics.cpuUtilization}%`
+                );
+                console.log(`Throughput: ${result.data.metrics.throughput}`);
+            } else {
+                console.error(
+                    "❌ API Error:",
+                    result.message || "Unknown error"
+                );
+                console.error("Full response:", result);
+            }
+        } catch (error) {
+            console.error("❌ Network Error:", error);
+            console.error("Failed to connect to the CPU scheduling API");
+        }
     };
 
     return (
@@ -121,6 +204,15 @@ export function Process() {
                     flexDirection="column"
                     gap="4"
                 >
+                    {/* Algorithm Selection */}
+                    <CPUAlgorithmSelection
+                        selectedAlgorithm={selectedAlgorithm}
+                        onAlgorithmChange={setSelectedAlgorithm}
+                        quantum={quantum}
+                        onQuantumChange={setQuantum}
+                        isEditMode={isEditMode}
+                    />
+
                     {/* Stats Display */}
                     <Stack gap="4">
                         <ProcessStatField
@@ -300,7 +392,10 @@ function ProcessRow({
     const inputFocusBg = useColorModeValue("white", "gray.600");
     const inputHoverBg = useColorModeValue("gray.100", "gray.650");
     const focusBorderColor = useColorModeValue("blue.500", "blue.300");
-    const focusBoxShadow = useColorModeValue("0 0 0 1px #3182ce", "0 0 0 1px #63b3ed");
+    const focusBoxShadow = useColorModeValue(
+        "0 0 0 1px #3182ce",
+        "0 0 0 1px #63b3ed"
+    );
 
     return (
         <Table.Row _hover={{ bg: tableRowHoverBg }}>
@@ -327,10 +422,10 @@ function ProcessRow({
                             color={inputTextColor}
                             borderColor={inputBorderColor}
                             _hover={{ bg: inputHoverBg }}
-                            _focus={{ 
+                            _focus={{
                                 bg: inputFocusBg,
                                 borderColor: focusBorderColor,
-                                boxShadow: focusBoxShadow
+                                boxShadow: focusBoxShadow,
                             }}
                         />
                     </NumberInput.Root>
@@ -358,10 +453,10 @@ function ProcessRow({
                             color={inputTextColor}
                             borderColor={inputBorderColor}
                             _hover={{ bg: inputHoverBg }}
-                            _focus={{ 
+                            _focus={{
                                 bg: inputFocusBg,
                                 borderColor: focusBorderColor,
-                                boxShadow: focusBoxShadow
+                                boxShadow: focusBoxShadow,
                             }}
                         />
                     </NumberInput.Root>
@@ -381,10 +476,10 @@ function ProcessRow({
                         bg={inputBg}
                         borderColor={inputBorderColor}
                         _hover={{ bg: inputHoverBg }}
-                        _focus={{ 
+                        _focus={{
                             bg: inputFocusBg,
                             borderColor: focusBorderColor,
-                            boxShadow: focusBoxShadow
+                            boxShadow: focusBoxShadow,
                         }}
                     />
                 ) : (
