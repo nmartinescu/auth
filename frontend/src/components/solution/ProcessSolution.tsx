@@ -69,6 +69,10 @@ export default function ProcessSolution({
     const solutionLength = solution.data.solution.length;
     const explaination = solution.data.solution[stepIndex].explaination;
 
+    const timerInfo = solution.data.solution[stepIndex].timer;
+    const readyQueue = solution.data.solution[stepIndex].readyQueues;
+    const newQueue = solution.data.solution[stepIndex].newProcesses;
+
     return (
         <>
             <Flex
@@ -195,6 +199,35 @@ export default function ProcessSolution({
                         Step {stepIndex + 1} / {solutionLength}
                     </p>
                     <p>{explaination || "No explanation available."}</p>
+                    <Box mt="4" fontSize="sm" color="gray.700">
+                        <strong>Timer:</strong>
+                        {timerInfo !== undefined
+                            ? ` ${timerInfo}`
+                            : " No timer information available."}
+                    </Box>
+                    <Box mt="2" fontSize="sm" color="gray.700">
+                        <strong>Ready Queues:</strong>
+                        {Array.isArray(readyQueue) && readyQueue.length > 0 ? (
+                            <>
+                                {readyQueue.map((queue: any, idx: number) => (
+                                    <div key={idx}>
+                                        <span style={{ fontWeight: "bold" }}>Queue {idx + 1}:</span>
+                                        {Array.isArray(queue) && queue.length > 0
+                                            ? ` ${queue.join(", ")}`
+                                            : " (empty)"}
+                                    </div>
+                                ))}
+                            </>
+                        ) : (
+                            " No ready queue information available."
+                        )}
+                    </Box>
+                    <Box mt="2" fontSize="sm" color="gray.700">
+                        <strong>New Queue:</strong>
+                        {Array.isArray(newQueue) && newQueue.length > 0
+                            ? ` ${newQueue.join(", ")}`
+                            : " (empty)"}
+                    </Box>
                     <Button
                         mt="auto"
                         w="100%"
