@@ -28,6 +28,7 @@ import type {
     ProcessStatFieldProps,
     ProcessRowProps,
 } from "../../types/Process";
+import ProcessSolution from "../solution/ProcessSolution";
 
 export function Process() {
     const [isEditMode, setIsEditMode] = useState(false);
@@ -41,13 +42,15 @@ export function Process() {
     const [processCount, setProcessCount] = useState(1);
     const [selectedAlgorithm, setSelectedAlgorithm] = useState("FCFS");
     const [quantum, setQuantum] = useState(2);
+    const [solution, setSolution] = useState(null);
 
-    // Color mode values
+    // Color mode values - MUST be called before any conditional returns
     const cardBg = useColorModeValue("white", "gray.800");
     const borderColor = useColorModeValue("#E5E7EB", "#4A5568");
     const textColor = useColorModeValue("gray.800", "gray.100");
     const subtextColor = useColorModeValue("gray.600", "gray.300");
     const headerTextColor = useColorModeValue("gray.800", "gray.100");
+    const tableHeaderBg = useColorModeValue("gray.100", "gray.700");
 
     const updateProcess = (index: number, key: string, value: any) => {
         const updated = [...processes];
@@ -133,6 +136,7 @@ export function Process() {
             const result = await response.json();
 
             if (response.ok && result.success) {
+                setSolution(result);
                 console.log("✅ CPU Scheduling Result:", result);
                 console.log("📊 Algorithm:", result.data.algorithm);
                 console.log("🔢 Total Processes:", result.data.processes);
@@ -166,7 +170,12 @@ export function Process() {
         }
     };
 
-    return (
+    return solution ? (
+        <ProcessSolution 
+            solution={solution} 
+            onBack={() => setSolution(null)} 
+        />
+    ) : (
         <Flex
             maxW="1200px"
             w="90%"
@@ -257,7 +266,7 @@ export function Process() {
 
                         <Table.Header>
                             <Table.Row
-                                bg={useColorModeValue("gray.100", "gray.700")}
+                                bg={tableHeaderBg}
                             >
                                 <Table.ColumnHeader
                                     textAlign="center"
