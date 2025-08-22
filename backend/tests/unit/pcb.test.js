@@ -1,7 +1,6 @@
 import { describe, it, beforeEach, expect, jest } from "@jest/globals";
 import { PROCESSES } from "../../constants.js";
 
-// Create a simplified PCB manager for testing without external dependencies
 class TestProcessControlBlockManager {
     constructor(processes) {
         this.PCB = [];
@@ -97,7 +96,7 @@ class TestProcessControlBlockManager {
     }
 
     setScheduledTime(pid) {
-        const time = 5; // Mock time
+        const time = 5;
         if (this.PCB[pid].scheduledTime !== undefined) {
             return;
         }
@@ -106,7 +105,7 @@ class TestProcessControlBlockManager {
     }
 
     setEndTime(pid) {
-        const time = 10; // Mock time
+        const time = 10;
         this.PCB[pid].endTime = time;
         this.PCB[pid].turnaroundTime = time - this.PCB[pid].arrivalTime;
     }
@@ -152,7 +151,7 @@ describe("ProcessControlBlockManager", () => {
         it("should create PCB entries for all processes", () => {
             const pcb = pcbManager.getPCB();
 
-            expect(pcb.length).toBe(4); // Index 0 is unused, processes start at index 1
+            expect(pcb.length).toBe(4);
             expect(pcb[1]).toBeDefined();
             expect(pcb[2]).toBeDefined();
             expect(pcb[3]).toBeDefined();
@@ -207,7 +206,6 @@ describe("ProcessControlBlockManager", () => {
         it("should check if all processes are finished", () => {
             expect(pcbManager.isFinished()).toBe(false);
 
-            // Mark all processes as done
             pcbManager.setProcessState(1, PROCESSES.STATES.DONE);
             pcbManager.setProcessState(2, PROCESSES.STATES.DONE);
             pcbManager.setProcessState(3, PROCESSES.STATES.DONE);
@@ -257,10 +255,10 @@ describe("ProcessControlBlockManager", () => {
     describe("I/O Operations", () => {
         it("should detect when process has I/O at current CPU time", () => {
             const pcb = pcbManager.getPCB();
-            pcb[1].cpuTime = 2; // I/O starts at CPU time 2
+            pcb[1].cpuTime = 2;
 
             expect(pcbManager.hasIo(1)).toBe(true);
-            expect(pcbManager.hasIo(2)).toBe(false); // Process 2 has no I/O
+            expect(pcbManager.hasIo(2)).toBe(false);
         });
 
         it("should add process to wait queue and set I/O time", () => {
@@ -269,8 +267,8 @@ describe("ProcessControlBlockManager", () => {
 
             pcbManager.addToWaitQueue(1);
 
-            expect(pcb[1].ioTime).toBe(2); // Duration from I/O operation
-            expect(pcb[1].io.length).toBe(0); // I/O operation should be removed
+            expect(pcb[1].ioTime).toBe(2);
+            expect(pcb[1].io.length).toBe(0);
         });
 
         it("should handle I/O time decrement", () => {
@@ -309,11 +307,7 @@ describe("ProcessControlBlockManager", () => {
         it("should calculate waiting time correctly", () => {
             const pcb = pcbManager.getPCB();
             pcb[1].arrivalTime = 2;
-
-            // Mock timer to return scheduled time of 7
             pcbManager.setScheduledTime(1);
-
-            // Waiting time should be scheduledTime - arrivalTime
             expect(pcb[1].waitingTime).toBeDefined();
         });
 
@@ -394,7 +388,6 @@ describe("ProcessControlBlockManager", () => {
             );
             const pcb = pcbManager.getPCB();
 
-            // Test I/O at different CPU times
             pcb[1].cpuTime = 2;
             expect(pcbManager.hasIo(1)).toBe(true);
 

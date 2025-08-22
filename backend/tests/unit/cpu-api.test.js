@@ -1,6 +1,5 @@
 import { describe, it, expect } from '@jest/globals';
 
-// Simple validation tests for CPU API logic
 const validateProcesses = (processes) => {
     if (!processes || !Array.isArray(processes) || processes.length === 0) {
         return { valid: false, message: "Processes array is required and must not be empty" };
@@ -17,12 +16,10 @@ const validateProcesses = (processes) => {
             return { valid: false, message: `Process ${i + 1}: burstTime must be a positive number` };
         }
         
-        // Validate IO array if provided
         if (process.io && !Array.isArray(process.io)) {
             return { valid: false, message: `Process ${i + 1}: io must be an array` };
         }
         
-        // Validate each IO operation
         if (process.io) {
             for (let j = 0; j < process.io.length; j++) {
                 const io = process.io[j];
@@ -174,7 +171,6 @@ describe('CPU API Validation Logic', () => {
                 ]
             }];
             
-            // Simulate the sorting logic from the API
             processes.forEach(process => {
                 if (process.io) {
                     process.io.sort((a, b) => a.start - b.start);
@@ -192,7 +188,6 @@ describe('CPU API Validation Logic', () => {
                 { arrivalTime: 1, burstTime: 3 }
             ];
             
-            // Simulate setting default IO arrays
             processes.forEach(process => {
                 if (!process.io) {
                     process.io = [];

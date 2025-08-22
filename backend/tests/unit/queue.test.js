@@ -61,7 +61,7 @@ describe('QueueManager', () => {
             queueManager.add(1);
             queueManager.add(2);
             
-            queueManager.remove(99); // Element not in queue
+            queueManager.remove(99);
             
             expect(queueManager.getQueue()).toEqual([1, 2]);
         });
@@ -85,7 +85,6 @@ describe('ReadyQueuesManager', () => {
     let readyQueuesManager;
 
     beforeEach(() => {
-        // Create manager with 3 ready queues
         readyQueuesManager = new ReadyQueuesManager(3);
     });
 
@@ -212,21 +211,18 @@ describe('ReadyQueuesManager', () => {
         });
 
         it('should handle adding to invalid queue index', () => {
-            // This should throw an error for invalid index
             expect(() => {
                 readyQueuesManager.addToReadyQueue(10, 1);
             }).toThrow();
         });
 
         it('should handle getting queue at invalid index', () => {
-            // This should throw an error for invalid index
             expect(() => {
                 readyQueuesManager.getQueue(10);
             }).toThrow();
         });
 
         it('should handle complex queue operations', () => {
-            // Add multiple processes to different queues
             for (let i = 1; i <= 10; i++) {
                 readyQueuesManager.addToReadyQueue(i % 3, i);
             }
@@ -235,7 +231,6 @@ describe('ReadyQueuesManager', () => {
             expect(readyQueuesManager.getQueue(1)).toEqual([1, 4, 7, 10]);
             expect(readyQueuesManager.getQueue(2)).toEqual([2, 5, 8]);
             
-            // Remove some processes
             readyQueuesManager.removeFromReadyQueue(4);
             readyQueuesManager.removeFromReadyQueue(8);
             

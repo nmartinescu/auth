@@ -7,7 +7,6 @@ describe('CPU Scheduling Algorithms', () => {
     let testProcesses;
 
     beforeEach(() => {
-        // Reset test processes before each test
         testProcesses = [
             {
                 arrivalTime: 0,
@@ -95,7 +94,7 @@ describe('CPU Scheduling Algorithms', () => {
         it('should select shortest job first', () => {
             const processes = [
                 { arrivalTime: 0, burstTime: 5, io: [] },
-                { arrivalTime: 0, burstTime: 2, io: [] }, // Shortest
+                { arrivalTime: 0, burstTime: 2, io: [] }, 
                 { arrivalTime: 0, burstTime: 4, io: [] }
             ];
             
@@ -170,12 +169,10 @@ describe('CPU Scheduling Algorithms', () => {
                 { arrivalTime: 1, burstTime: 4, io: [] }
             ];
             
-            // Test with quantum = 1
             const scheduler1 = new SchedulerRR(processes, { quantum: 1 });
             scheduler1.start();
             const solution1 = scheduler1.getSolution();
             
-            // Test with quantum = 3
             const scheduler3 = new SchedulerRR(processes, { quantum: 3 });
             scheduler3.start();
             const solution3 = scheduler3.getSolution();
