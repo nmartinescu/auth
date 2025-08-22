@@ -28,7 +28,7 @@ import type {
     ProcessStatFieldProps,
     ProcessRowProps,
 } from "../../types/Process";
-import ProcessSolution from "../solution/ProcessSolution";
+import ProcessSolution from "../solution/process/ProcessSolution";
 
 export function Process() {
     const [isEditMode, setIsEditMode] = useState(false);
