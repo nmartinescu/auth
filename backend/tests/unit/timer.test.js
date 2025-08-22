@@ -5,7 +5,6 @@ describe("Timer", () => {
     let timer;
 
     beforeEach(() => {
-        // Get the singleton instance and reset it
         timer = Timer;
         timer.reset();
     });
