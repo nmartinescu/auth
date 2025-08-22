@@ -2,6 +2,7 @@ import express from "express";
 import SchedulerFCFS from "../scheduler/algorithms/SchedulerFCFS.js";
 import SchedulerSJF from "../scheduler/algorithms/SchedulerSJF.js";
 import SchedulerRR from "../scheduler/algorithms/SchedulerRR.js";
+import SchedulerSTCF from "../scheduler/algorithms/SchedulerSTCF.js";
 
 const router = express.Router();
 
@@ -120,10 +121,13 @@ router.post("/", async (req, res) => {
             case "RR":
                 scheduler = new SchedulerRR(processes, { quantum });
                 break;
+            case "STCF":
+                scheduler = new SchedulerSTCF(processes);
+                break;
             default:
                 return res.status(400).json({
                     success: false,
-                    message: `Unsupported algorithm: ${algorithm}. Supported algorithms: FCFS, SJF, RR`
+                    message: `Unsupported algorithm: ${algorithm}. Supported algorithms: FCFS, SJF, RR, STCF`
                 });
         }
 

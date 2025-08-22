@@ -36,6 +36,12 @@ const algorithms: Algorithm[] = [
         description: "Preemptive scheduling with time quantum",
         requiresQuantum: true,
     },
+    {
+        value: "STCF",
+        label: "Shortest Time to Completion First (STCF)",
+        description: "Preemptive scheduling based on shortest remaining time",
+        requiresQuantum: false,
+    },
 ];
 
 export default function CPUAlgorithmSelection({
