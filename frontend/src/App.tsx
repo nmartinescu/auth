@@ -12,6 +12,7 @@ import { DeleteAccount } from "./components/auth/DeleteAccount";
 import { ProtectedRoute } from "./components/routing/ProtectedRoute";
 import { ThemeToggle } from "./components/ui/ThemeToggle";
 import { Box } from "@chakra-ui/react";
+import TestPage from "./components/TestPage";
 
 function App() {
     return (
@@ -26,6 +27,7 @@ function App() {
                 <Route path="/process" element={<Process />} />
                 <Route path="/memory" element={<Memory />} />
                 <Route path="/disk" element={<Disk />} />
+                <Route path="/test" element={<TestPage />} />
                 
                 {/* Protected routes */}
                 <Route
