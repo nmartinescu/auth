@@ -190,7 +190,7 @@ export function Process() {
                     Process Management Simulator
                 </Text>
                 <Text fontSize="lg" color={subtextColor}>
-                    Manage and monitor system processes
+                    Simulate process scheduling algorithms
                 </Text>
             </Box>
 
