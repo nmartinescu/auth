@@ -20,3 +20,9 @@ export interface ProcessRowProps {
     onDelete: (index: number) => void;
     isEditMode: boolean;
 }
+
+export interface ProcessSimulationData {
+    processes: ProcessData[];
+    selectedAlgorithm: string;
+    quantum?: number;
+}

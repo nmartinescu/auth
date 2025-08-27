@@ -27,8 +27,10 @@ import type {
     ProcessData,
     ProcessStatFieldProps,
     ProcessRowProps,
+    ProcessSimulationData,
 } from "../../types/Process";
 import ProcessSolution from "../solution/process/ProcessSolution";
+import ActionModal from "../ui/ActionModal";
 
 export function Process() {
     const [isEditMode, setIsEditMode] = useState(false);
@@ -233,6 +235,26 @@ export function Process() {
                             borderColor={borderColor}
                         />
                     </Stack>
+
+                    {/* Save/Restore Simulation Modal */}
+                    <Box>
+                        <ActionModal<ProcessSimulationData>
+                            buttonText="Actions"
+                            modalTitle="Process Simulation Actions"
+                            filename="process-simulation.json"
+                            exportDataCallback={() => ({
+                                processes,
+                                selectedAlgorithm,
+                                ...(selectedAlgorithm === "RR" && { quantum }),
+                            })}
+                            importDataCallback={(data) => {
+                                setProcesses(data.processes);
+                                setProcessCount(data.processes.length);
+                                setSelectedAlgorithm(data.selectedAlgorithm);
+                                if (data.quantum) setQuantum(data.quantum);
+                            }}
+                        />
+                    </Box>
 
                     {/* Action Buttons */}
                     <FormActionButtons
