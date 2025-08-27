@@ -242,6 +242,7 @@ export function Process() {
                             buttonText="Actions"
                             modalTitle="Process Simulation Actions"
                             filename="process-simulation.json"
+                            simulationType="process"
                             exportDataCallback={() => ({
                                 processes,
                                 selectedAlgorithm,
@@ -253,6 +254,9 @@ export function Process() {
                                 setSelectedAlgorithm(data.selectedAlgorithm);
                                 if (data.quantum) setQuantum(data.quantum);
                             }}
+                            // User is logged in - show account features
+                            isLoggedIn={true} 
+                            onLoadFromAccount={() => console.log("Loading from account...")}
                         />
                     </Box>
 

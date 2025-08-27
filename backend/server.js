@@ -92,6 +92,12 @@ app.use("/api/auth", authRoutes);
 // CPU scheduling routes
 app.use("/api/cpu", cpuRoutes);
 
+// Import simulation routes
+import simulationRoutes from "./routes/simulations/index.js";
+
+// Simulation routes
+app.use("/api/simulations", simulationRoutes);
+
 // Logs routes (development only)
 app.use("/api/logs", logsRoutes);
 

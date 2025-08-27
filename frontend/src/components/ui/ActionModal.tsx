@@ -4,10 +4,12 @@ import {
     Input,
     Box,
 } from "@chakra-ui/react";
-import { useRef } from "react";
-import { LuCopy, LuImport, LuFolderOpen, LuDownload } from "react-icons/lu";
+import { useRef, useState } from "react";
+import { LuCopy, LuImport, LuFolderOpen, LuDownload, LuSave } from "react-icons/lu";
 import { useColorModeValue } from "./color-mode";
 import { useBoolean } from "./hooks";
+import NameInputModal from "./NameInputModal";
+import { simulationService } from "../../services/simulationService";
 
 // Simple modal styling - responsive overlay with content
 const ModalOverlay = ({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) => {
@@ -84,6 +86,18 @@ export interface ActionModalProps<T> {
      * Optional modal title (default: "Simulation Actions")
      */
     modalTitle?: string;
+    /**
+     * Whether the user is currently logged in
+     */
+    isLoggedIn?: boolean;
+    /**
+     * Optional callback for loading simulation from user account
+     */
+    onLoadFromAccount?: () => void;
+    /**
+     * Optional simulation type identifier
+     */
+    simulationType?: string;
 }
 
 /**
@@ -95,8 +109,12 @@ export default function ActionModal<T>({
     filename = "simulation-data.json",
     buttonText = "Actions",
     modalTitle = "Simulation Actions",
+    isLoggedIn = false,
+    onLoadFromAccount,
+    simulationType = "process",
 }: ActionModalProps<T>) {
     const [isOpen, { on: onOpen, off: onClose }] = useBoolean(false);
+    const [isNameModalOpen, { on: openNameModal, off: closeNameModal }] = useBoolean(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Color values
@@ -180,6 +198,38 @@ export default function ActionModal<T>({
         e.stopPropagation();
     };
 
+    // Handle save to account
+    const handleSaveToAccount = async (name: string) => {
+        console.log("🔄 Starting save to account...", { name, simulationType });
+        try {
+            const data = exportDataCallback();
+            console.log("📊 Data to save:", data);
+            
+            const result = await simulationService.saveSimulation(name, simulationType, data);
+            console.log("✅ Save successful:", result);
+            
+            showNotification("Simulation saved successfully");
+            onClose(); // Close the main modal after saving
+        } catch (error) {
+            console.error("❌ Error saving to account:", error);
+            
+            // More detailed error logging
+            if (error instanceof Error) {
+                console.error("Error message:", error.message);
+                console.error("Error stack:", error.stack);
+            }
+            
+            // Check if it's an axios error
+            if (typeof error === 'object' && error !== null && 'response' in error) {
+                const axiosError = error as any;
+                console.error("Response status:", axiosError.response?.status);
+                console.error("Response data:", axiosError.response?.data);
+            }
+            
+            showNotification("Failed to save simulation", "error");
+        }
+    };
+
     return (
         <>
             <Button
@@ -194,6 +244,14 @@ export default function ActionModal<T>({
             >
                 {buttonText}
             </Button>
+            
+            <NameInputModal
+                isOpen={isNameModalOpen}
+                onClose={closeNameModal}
+                onSubmit={handleSaveToAccount}
+                title="Save Simulation"
+                placeholder="Enter simulation name"
+            />
 
             <ModalOverlay isOpen={isOpen} onClose={onClose} />
             <ModalContent isOpen={isOpen}>
@@ -253,6 +311,55 @@ export default function ActionModal<T>({
                                     <span>Download JSON</span>
                                 </Flex>
                             </Button>
+                            
+                            {isLoggedIn && (
+                                <>
+                                    <Box 
+                                        borderTopWidth="1px" 
+                                        borderTopColor={borderColor}
+                                        pt={3}
+                                        mt={2}
+                                        mb={1}
+                                    >
+                                        <Flex justify="center" mb={2}>
+                                            <Box 
+                                                fontSize="sm" 
+                                                fontWeight="medium"
+                                                color="gray.600"
+                                                _dark={{ color: "gray.300" }}
+                                            >
+                                                Account Features
+                                            </Box>
+                                        </Flex>
+                                        
+                                        <Button
+                                            {...actionButtonStyle}
+                                            onClick={openNameModal}
+                                            width="100%"
+                                            colorScheme="blue"
+                                            variant="outline"
+                                        >
+                                            <Flex align="center" gap={2}>
+                                                <LuSave />
+                                                <span>Save to Account</span>
+                                            </Flex>
+                                        </Button>
+                                        
+                                        <Button
+                                            {...actionButtonStyle}
+                                            onClick={onLoadFromAccount}
+                                            width="100%"
+                                            colorScheme="blue"
+                                            variant="outline"
+                                        >
+                                            <Flex align="center" gap={2}>
+                                                <LuFolderOpen />
+                                                <span>Load from Account</span>
+                                            </Flex>
+                                        </Button>
+                                    </Box>
+                                </>
+                            )}
 
                         <Input
                             type="file"
