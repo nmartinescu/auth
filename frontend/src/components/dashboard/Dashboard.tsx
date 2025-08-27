@@ -1,15 +1,19 @@
-import { Box, Flex, Text, Button, VStack, HStack } from "@chakra-ui/react";
+import { Box, Flex, Text, Button, VStack, HStack, Grid, Spinner } from "@chakra-ui/react";
 import { useColorModeValue } from "../ui/color-mode";
 import { useState, useEffect } from "react";
-import { LuUser, LuTrash2 } from "react-icons/lu";
+import { LuUser, LuTrash2, LuPlay, LuCalendar, LuCpu, LuHardDrive, LuMemoryStick } from "react-icons/lu";
 import type { User } from "../../types/user";
+import { simulationService, type Simulation } from "../../services/simulationService";
 
 export function Dashboard() {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [simulations, setSimulations] = useState<Simulation[]>([]);
+    const [simulationsLoading, setSimulationsLoading] = useState(false);
 
     const bgColor = useColorModeValue("gray.50", "gray.900");
     const cardBg = useColorModeValue("white", "gray.800");
+    const simulationCardBg = useColorModeValue("gray.50", "gray.700");
     const textColor = useColorModeValue("gray.800", "white");
     const subtextColor = useColorModeValue("gray.600", "gray.300");
     const shadowColor = useColorModeValue("md", "2xl");
@@ -32,8 +36,9 @@ export function Dashboard() {
         try {
             const parsedUser = JSON.parse(userData);
             setUser(parsedUser);
-
-            // Removed automatic test - now manual via button
+            
+            // Load user's simulations
+            loadSimulations();
         } catch (error) {
             console.error("Error parsing user data:", error);
             handleLogout();
@@ -42,54 +47,84 @@ export function Dashboard() {
         }
     }, []);
 
+    const loadSimulations = async () => {
+        setSimulationsLoading(true);
+        try {
+            const userSimulations = await simulationService.getSimulations();
+            setSimulations(Array.isArray(userSimulations) ? userSimulations : []);
+        } catch (error) {
+            console.error("Error loading simulations:", error);
+            setSimulations([]); // Ensure simulations is always an array
+            
+            // Check if it's an authentication error
+            if (typeof error === 'object' && error !== null && 'response' in error) {
+                const axiosError = error as any;
+                if (axiosError.response?.status === 401) {
+                    console.log("Authentication failed, redirecting to login...");
+                    handleLogout();
+                    return;
+                }
+            }
+        } finally {
+            setSimulationsLoading(false);
+        }
+    };
+
+    const handleDeleteSimulation = async (simulationId: string) => {
+        try {
+            await simulationService.deleteSimulation(simulationId);
+            // Reload simulations after deletion
+            loadSimulations();
+        } catch (error) {
+            console.error("Error deleting simulation:", error);
+        }
+    };
+
+    const handleLoadSimulation = async (simulationId: string, simulationType: string) => {
+        try {
+            // Get the full simulation data
+            const simulation = await simulationService.getSimulationById(simulationId);
+            
+            // Encode the simulation data to pass it via URL
+            const encodedData = encodeURIComponent(JSON.stringify(simulation.data));
+            
+            // Navigate to the simulation page with the data
+            window.location.href = `/${simulationType}?loadData=${encodedData}`;
+        } catch (error) {
+            console.error("Error loading simulation:", error);
+        }
+    };
+
+    const getSimulationIcon = (type: string) => {
+        switch (type) {
+            case 'process':
+                return <LuCpu size={20} />;
+            case 'memory':
+                return <LuMemoryStick size={20} />;
+            case 'disk':
+                return <LuHardDrive size={20} />;
+            default:
+                return <LuCpu size={20} />;
+        }
+    };
+
+    const getSimulationTypeColor = (type: string) => {
+        switch (type) {
+            case 'process':
+                return 'blue';
+            case 'memory':
+                return 'green';
+            case 'disk':
+                return 'purple';
+            default:
+                return 'gray';
+        }
+    };
+
     const handleLogout = () => {
         localStorage.removeItem("authToken");
         localStorage.removeItem("user");
         window.location.href = "/login";
-    };
-
-    const testTokenRefresh = async () => {
-        try {
-            console.log("Testing token refresh...");
-            // const token = localStorage.getItem("authToken");
-
-            // Make a simple authenticated request that will trigger token refresh if needed
-            const response = await fetch(
-                "http://localhost:5000/api/auth/refresh",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        refreshToken: JSON.parse(
-                            localStorage.getItem("tokenData") || "{}"
-                        ).refreshToken,
-                    }),
-                }
-            );
-
-            const data = await response.json();
-            console.log("Token refresh test result:", data);
-
-            if (data.success) {
-                // Update tokens
-                const { accessToken, refreshToken, expiresIn } = data.data;
-                localStorage.setItem(
-                    "tokenData",
-                    JSON.stringify({
-                        accessToken,
-                        refreshToken,
-                        expiresIn,
-                        expiresAt: Date.now() + expiresIn,
-                    })
-                );
-                localStorage.setItem("authToken", accessToken);
-                console.log("✅ Token refresh successful!");
-            }
-        } catch (error) {
-            console.log("❌ Token refresh test error:", error);
-        }
     };
 
     if (isLoading) {
@@ -110,7 +145,7 @@ export function Dashboard() {
         <Box minH="100vh" bg={bgColor}>
             {/* Main Content */}
             <Box p={6}>
-                <VStack gap={6} align="stretch" maxW="4xl" mx="auto">
+                <VStack gap={6} align="stretch" maxW="6xl" mx="auto">
                     {/* Welcome Card */}
                     <Box
                         bg={cardBg}
@@ -140,14 +175,144 @@ export function Dashboard() {
                             </HStack>
 
                             <Text color={subtextColor}>
-                                Welcome to your OS Sim dashboard. Here you can
-                                monitor system resources, manage processes, and
-                                explore operating system concepts.
+                                Welcome to your OS Simulator dashboard. Here you can
+                                view and manage your saved simulations.
                             </Text>
                         </VStack>
                     </Box>
 
-                    {/* Stats Cards */}
+                    {/* Saved Simulations Section */}
+                    <Box
+                        bg={cardBg}
+                        p={6}
+                        borderRadius="xl"
+                        shadow={shadowColor}
+                        border="1px"
+                        borderColor={borderColor}
+                    >
+                        <VStack align="start" gap={4}>
+                            <HStack justify="space-between" w="100%">
+                                <Text
+                                    fontSize="xl"
+                                    fontWeight="bold"
+                                    color={textColor}
+                                >
+                                    Saved Simulations ({simulations.length})
+                                </Text>
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={loadSimulations}
+                                    disabled={simulationsLoading}
+                                >
+                                    🔄 Refresh
+                                </Button>
+                            </HStack>
+
+                            {simulationsLoading ? (
+                                <Flex justify="center" p={8}>
+                                    <Spinner size="lg" color="blue.500" />
+                                </Flex>
+                            ) : simulations.length === 0 ? (
+                                <Box textAlign="center" p={8}>
+                                    <Text color={subtextColor} fontSize="lg">
+                                        No simulations saved yet
+                                    </Text>
+                                    <Text color={subtextColor} mt={2}>
+                                        Start by creating and saving simulations from the simulation pages
+                                    </Text>
+                                </Box>
+                            ) : (
+                                <Grid
+                                    templateColumns="repeat(auto-fill, minmax(300px, 1fr))"
+                                    gap={4}
+                                    w="100%"
+                                >
+                                    {(Array.isArray(simulations) ? simulations : []).map((simulation) => (
+                                        <Box
+                                            key={simulation.id}
+                                            bg={simulationCardBg}
+                                            p={4}
+                                            borderRadius="lg"
+                                            border="1px"
+                                            borderColor={borderColor}
+                                            _hover={{
+                                                shadow: "md",
+                                                transform: "translateY(-2px)",
+                                                transition: "all 0.2s"
+                                            }}
+                                        >
+                                            <VStack align="start" gap={3}>
+                                                <HStack justify="space-between" w="100%">
+                                                    <HStack gap={2}>
+                                                        <Box
+                                                            p={2}
+                                                            bg={`${getSimulationTypeColor(simulation.type)}.100`}
+                                                            borderRadius="md"
+                                                            color={`${getSimulationTypeColor(simulation.type)}.600`}
+                                                            _dark={{
+                                                                bg: `${getSimulationTypeColor(simulation.type)}.900`,
+                                                                color: `${getSimulationTypeColor(simulation.type)}.300`
+                                                            }}
+                                                        >
+                                                            {getSimulationIcon(simulation.type)}
+                                                        </Box>
+                                                        <VStack align="start" gap={0}>
+                                                            <Text
+                                                                fontWeight="semibold"
+                                                                color={textColor}
+                                                                fontSize="sm"
+                                                            >
+                                                                {simulation.name}
+                                                            </Text>
+                                                            <Text
+                                                                color={subtextColor}
+                                                                fontSize="xs"
+                                                                textTransform="capitalize"
+                                                            >
+                                                                {simulation.type} Simulation
+                                                            </Text>
+                                                        </VStack>
+                                                    </HStack>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        colorScheme="red"
+                                                        onClick={() => handleDeleteSimulation(simulation.id!)}
+                                                        p={1}
+                                                    >
+                                                        <LuTrash2 size={16} />
+                                                    </Button>
+                                                </HStack>
+
+                                                <HStack gap={2} fontSize="xs" color={subtextColor}>
+                                                    <LuCalendar size={14} />
+                                                    <Text>
+                                                        {new Date(simulation.createdAt!).toLocaleDateString()}
+                                                    </Text>
+                                                </HStack>
+
+                                                <Button
+                                                    size="sm"
+                                                    colorScheme={getSimulationTypeColor(simulation.type)}
+                                                    variant="outline"
+                                                    onClick={() => handleLoadSimulation(simulation.id!, simulation.type)}
+                                                    w="100%"
+                                                >
+                                                    <Flex align="center" gap={2}>
+                                                        <LuPlay size={14} />
+                                                        Open Simulation
+                                                    </Flex>
+                                                </Button>
+                                            </VStack>
+                                        </Box>
+                                    ))}
+                                </Grid>
+                            )}
+                        </VStack>
+                    </Box>
+
+                    {/* Account Actions */}
                     <Flex gap={6} wrap="wrap">
                         <Box
                             bg={cardBg}
@@ -203,15 +368,6 @@ export function Dashboard() {
                                     Quick Actions
                                 </Text>
                                 <VStack align="stretch" gap={2}>
-                                    <Button
-                                        size="sm"
-                                        variant="outline"
-                                        colorScheme="blue"
-                                        color={buttonTextColor}
-                                        onClick={testTokenRefresh}
-                                    >
-                                        🔄 Test Token Refresh
-                                    </Button>
                                     <Button
                                         size="sm"
                                         variant="outline"

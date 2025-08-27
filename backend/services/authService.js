@@ -4,7 +4,7 @@ import User from "../models/User.js";
 // Generate access token (short-lived)
 export const generateAccessToken = (userId) => {
     return jwt.sign({ userId, type: "access" }, process.env.JWT_SECRET, {
-        expiresIn: "1m", // 1 minute for testing
+        expiresIn: "24h", // 24 hours - more reasonable for development
     });
 };
 
@@ -23,7 +23,7 @@ export const generateTokens = (userId) => {
     return {
         accessToken,
         refreshToken,
-        expiresIn: 1 * 60 * 1000, // 1 minute in milliseconds for testing
+        expiresIn: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
     };
 };
 
@@ -45,11 +45,15 @@ export const generatePasswordResetToken = (userId) => {
 export const verifyAccessToken = (token) => {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        console.log("🔍 Token decoded successfully:", { userId: decoded.userId, type: decoded.type, exp: new Date(decoded.exp * 1000) });
+        
         if (decoded.type !== "access") {
+            console.log("❌ Invalid token type:", decoded.type);
             throw new Error("Invalid token type");
         }
         return { success: true, decoded };
     } catch (error) {
+        console.log("❌ Token verification error:", error.message);
         return { success: false, error: error.message };
     }
 };

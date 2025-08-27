@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Get token from local storage
 const getToken = () => {
-  return localStorage.getItem('token');
+  return localStorage.getItem('authToken'); // Changed from 'token' to 'authToken'
 };
 
 // Create axios instance with default config
@@ -41,10 +41,16 @@ apiClient.interceptors.response.use(
   (error) => {
     // Handle session expiry or unauthorized
     if (error.response?.status === 401) {
-      // Could redirect to login page or refresh token
       console.error('Session expired or unauthorized');
-      // Remove token if it's invalid
-      localStorage.removeItem('token');
+      // Remove invalid token
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('user');
+      
+      // Only redirect if we're not already on the login page
+      if (window.location.pathname !== '/login') {
+        console.log('Redirecting to login due to expired token...');
+        window.location.href = '/login';
+      }
     }
     
     return Promise.reject(error);

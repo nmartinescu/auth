@@ -30,13 +30,10 @@ const NameInputModal = ({
     const [isSubmitting, { on: startSubmitting, off: stopSubmitting }] = useBoolean(false);
     const [error, setError] = useState("");
     
-    // Color values
     const borderColor = useColorModeValue("#E5E7EB", "#4A5568");
     const buttonHoverBg = useColorModeValue("gray.50", "gray.700");
     
-    // Handle form submit
     const handleSubmit = () => {
-        // Validate name
         if (!name.trim()) {
             setError("Please enter a name");
             return;
@@ -47,7 +44,6 @@ const NameInputModal = ({
         
         try {
             onSubmit(name);
-            // Close modal on success
             onClose();
         } catch (err) {
             console.error("Error submitting name:", err);
@@ -57,14 +53,12 @@ const NameInputModal = ({
         }
     };
     
-    // Handle key press for submit on enter
     const handleKeyPress = (e: React.KeyboardEvent) => {
         if (e.key === "Enter") {
             handleSubmit();
         }
     };
     
-    // Stop propagation on content click
     const handleContentClick = (e: React.MouseEvent) => {
         e.stopPropagation();
     };

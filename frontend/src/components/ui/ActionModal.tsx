@@ -4,7 +4,7 @@ import {
     Input,
     Box,
 } from "@chakra-ui/react";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { LuCopy, LuImport, LuFolderOpen, LuDownload, LuSave } from "react-icons/lu";
 import { useColorModeValue } from "./color-mode";
 import { useBoolean } from "./hooks";
@@ -100,9 +100,6 @@ export interface ActionModalProps<T> {
     simulationType?: string;
 }
 
-/**
- * A reusable modal component for providing import/export functionality
- */
 export default function ActionModal<T>({
     exportDataCallback,
     importDataCallback,
@@ -116,12 +113,9 @@ export default function ActionModal<T>({
     const [isOpen, { on: onOpen, off: onClose }] = useBoolean(false);
     const [isNameModalOpen, { on: openNameModal, off: closeNameModal }] = useBoolean(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
-
-    // Color values
     const borderColor = useColorModeValue("#E5E7EB", "#4A5568");
     const buttonHoverBg = useColorModeValue("gray.50", "gray.700");
 
-    // Notification function - could be replaced with a toast system when available
     const showNotification = (message: string, type: "success" | "error" = "success") => {
         console.log(`${type === "success" ? "✅" : "❌"} ${message}`);
         // You could implement a toast notification here
@@ -193,7 +187,6 @@ export default function ActionModal<T>({
         _hover: { bg: buttonHoverBg },
     };
 
-    // Handle click stop propagation to prevent modal close when clicking content
     const handleContentClick = (e: React.MouseEvent) => {
         e.stopPropagation();
     };
@@ -209,6 +202,7 @@ export default function ActionModal<T>({
             console.log("✅ Save successful:", result);
             
             showNotification("Simulation saved successfully");
+            closeNameModal(); // Close the name modal
             onClose(); // Close the main modal after saving
         } catch (error) {
             console.error("❌ Error saving to account:", error);
@@ -224,6 +218,13 @@ export default function ActionModal<T>({
                 const axiosError = error as any;
                 console.error("Response status:", axiosError.response?.status);
                 console.error("Response data:", axiosError.response?.data);
+                
+                // Handle 401 Unauthorized specifically
+                if (axiosError.response?.status === 401) {
+                    showNotification("Please log in to save simulations to your account", "error");
+                    closeNameModal(); // Close the name modal
+                    return;
+                }
             }
             
             showNotification("Failed to save simulation", "error");

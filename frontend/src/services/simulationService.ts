@@ -1,6 +1,7 @@
 import { apiClient } from './apiClient';
 
 export interface Simulation {
+  id?: string;
   _id?: string;
   userId?: string;
   name: string;
@@ -40,7 +41,7 @@ export const simulationService = {
    */
   getSimulations: async (): Promise<Simulation[]> => {
     const response = await apiClient.get('/api/simulations');
-    return response.data;
+    return response.data.simulations || [];
   },
 
   /**
@@ -50,7 +51,7 @@ export const simulationService = {
    */
   getSimulationById: async (id: string): Promise<Simulation> => {
     const response = await apiClient.get(`/api/simulations/${id}`);
-    return response.data;
+    return response.data.simulation;
   },
 
   /**

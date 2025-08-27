@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     Flex,
     Stack,
@@ -31,6 +31,7 @@ import type {
 } from "../../types/Process";
 import ProcessSolution from "../solution/process/ProcessSolution";
 import ActionModal from "../ui/ActionModal";
+import { isAuthenticated } from "../../utils/auth";
 
 export function Process() {
     const [isEditMode, setIsEditMode] = useState(false);
@@ -53,6 +54,38 @@ export function Process() {
     const subtextColor = useColorModeValue("gray.600", "gray.300");
     const headerTextColor = useColorModeValue("gray.800", "gray.100");
     const tableHeaderBg = useColorModeValue("gray.100", "gray.700");
+
+    // Check for simulation data in URL parameters on component mount
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const loadData = urlParams.get('loadData');
+        
+        if (loadData) {
+            try {
+                const simulationData: ProcessSimulationData = JSON.parse(decodeURIComponent(loadData));
+                
+                // Load the simulation data into the component state
+                if (simulationData.processes) {
+                    setProcesses(simulationData.processes);
+                    setProcessCount(simulationData.processes.length);
+                }
+                if (simulationData.selectedAlgorithm) {
+                    setSelectedAlgorithm(simulationData.selectedAlgorithm);
+                }
+                if (simulationData.quantum !== undefined) {
+                    setQuantum(simulationData.quantum);
+                }
+                
+                // Clear the URL parameter after loading
+                const newUrl = window.location.pathname;
+                window.history.replaceState(null, '', newUrl);
+                
+                console.log("Loaded simulation data:", simulationData);
+            } catch (error) {
+                console.error("Error loading simulation data from URL:", error);
+            }
+        }
+    }, []);
 
     const updateProcess = (index: number, key: string, value: any) => {
         const updated = [...processes];
@@ -254,8 +287,8 @@ export function Process() {
                                 setSelectedAlgorithm(data.selectedAlgorithm);
                                 if (data.quantum) setQuantum(data.quantum);
                             }}
-                            // User is logged in - show account features
-                            isLoggedIn={true} 
+                            // Check real authentication status
+                            isLoggedIn={isAuthenticated()} 
                             onLoadFromAccount={() => console.log("Loading from account...")}
                         />
                     </Box>

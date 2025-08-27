@@ -9,9 +9,6 @@ type UseBooleanReturn = [
   }
 ];
 
-/**
- * Custom hook to manage boolean state with convenient on/off/toggle functions
- */
 export function useBoolean(initialValue = false): UseBooleanReturn {
   const [value, setValue] = useState(initialValue);
 
