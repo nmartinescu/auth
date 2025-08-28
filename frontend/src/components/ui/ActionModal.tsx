@@ -4,7 +4,7 @@ import {
     Input,
     Box,
 } from "@chakra-ui/react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { LuCopy, LuImport, LuFolderOpen, LuDownload, LuSave } from "react-icons/lu";
 import { useColorModeValue } from "./color-mode";
 import { useBoolean } from "./hooks";
@@ -112,13 +112,15 @@ export default function ActionModal<T>({
 }: ActionModalProps<T>) {
     const [isOpen, { on: onOpen, off: onClose }] = useBoolean(false);
     const [isNameModalOpen, { on: openNameModal, off: closeNameModal }] = useBoolean(false);
+    const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const borderColor = useColorModeValue("#E5E7EB", "#4A5568");
     const buttonHoverBg = useColorModeValue("gray.50", "gray.700");
 
     const showNotification = (message: string, type: "success" | "error" = "success") => {
-        console.log(`${type === "success" ? "✅" : "❌"} ${message}`);
-        // You could implement a toast notification here
+        setToast({ message, type });
+        // Auto-hide toast after 3 seconds
+        setTimeout(() => setToast(null), 3000);
     };
 
     const copyFormData = () => {
@@ -386,6 +388,27 @@ export default function ActionModal<T>({
                     </Flex>
                 </Box>
             </ModalContent>
+
+            {/* Toast notification */}
+            {toast && (
+                <Box
+                    position="fixed"
+                    top="20px"
+                    right="20px"
+                    zIndex="2000"
+                    bg={toast.type === "success" ? "green.500" : "red.500"}
+                    color="white"
+                    px={4}
+                    py={3}
+                    borderRadius="md"
+                    boxShadow="lg"
+                    fontSize="sm"
+                    fontWeight="medium"
+                    maxWidth="400px"
+                >
+                    {toast.message}
+                </Box>
+            )}
         </>
     );
 }
