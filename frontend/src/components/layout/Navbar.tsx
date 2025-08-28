@@ -1,7 +1,7 @@
 import { Flex, Heading, Button } from "@chakra-ui/react";
 import { NavButton } from "../ui/NavButton";
 import { useColorModeValue } from "../ui/color-mode";
-import { LuCpu, LuMemoryStick, LuHardDrive, LuLogOut, LuLogIn, LuLayoutDashboard } from "react-icons/lu";
+import { LuCpu, LuMemoryStick, LuHardDrive, LuLogOut, LuLogIn, LuLayoutDashboard, LuFileText } from "react-icons/lu";
 import { useState, useEffect } from "react";
 
 export function Navbar() {
@@ -24,6 +24,7 @@ export function Navbar() {
         { to: "/process", label: "Process", icon: LuCpu },
         { to: "/memory", label: "Memory", icon: LuMemoryStick },
         { to: "/disk", label: "Disk", icon: LuHardDrive },
+        { to: "/test", label: "Test", icon: LuFileText },
     ];
 
     const loggedInNavItems = [

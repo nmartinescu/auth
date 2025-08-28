@@ -9,22 +9,56 @@ import {
     Text
 } from "@chakra-ui/react";
 import { useColorModeValue } from "./ui/color-mode";
+import { testSessionManager } from "../services/testSessionManager";
+import type { TestConfig } from "../types/Test";
 
-const TestPage: React.FC = () => {
-    const [includeScheduling, setIncludeScheduling] = useState(false);
-    const [numQuestions, setNumQuestions] = useState("");
+interface TestPageProps {
+    onTestStart?: (sessionId: string) => void;
+}
+
+const TestPage: React.FC<TestPageProps> = ({ onTestStart }) => {
+    const [includeScheduling, setIncludeScheduling] = useState(true);
+    const [numQuestions, setNumQuestions] = useState("5");
     const [difficulty, setDifficulty] = useState("easy");
     const [touched, setTouched] = useState(false);
+    const [isStarting, setIsStarting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const questionsError =
         includeScheduling && touched && (!numQuestions || parseInt(numQuestions, 10) < 1);
     
-    const handleStartTest = () => {
-        console.log({
-            includeScheduling,
-            numQuestions: includeScheduling ? parseInt(numQuestions, 10) : null,
-            difficulty
-        });
+    const handleStartTest = async () => {
+        if (!includeScheduling) {
+            setError("Currently only scheduling tests are supported.");
+            return;
+        }
+
+        if (questionsError) {
+            setTouched(true);
+            return;
+        }
+
+        setIsStarting(true);
+        setError(null);
+
+        try {
+            const config: TestConfig = {
+                includeScheduling,
+                numQuestions: parseInt(numQuestions, 10),
+                difficulty: difficulty as 'easy' | 'medium' | 'hard'
+            };
+
+            const session = await testSessionManager.startTest(config);
+            
+            if (onTestStart) {
+                onTestStart(session.id);
+            }
+        } catch (err) {
+            console.error('Failed to start test:', err);
+            setError('Failed to start test. Please try again.');
+        } finally {
+            setIsStarting(false);
+        }
     };
 
     // UI Colors
@@ -53,6 +87,14 @@ const TestPage: React.FC = () => {
                 borderColor={borderColor}
             >
                 <Flex direction="column" gap={5}>
+                    {error && (
+                        <Box p={4} borderRadius="md" bg="red.50" border="1px solid" borderColor="red.200">
+                            <Text color="red.600" fontSize="sm">
+                                {error}
+                            </Text>
+                        </Box>
+                    )}
+
                     <Box>
                         <label>
                             <Flex alignItems="center" gap={2}>
@@ -77,14 +119,15 @@ const TestPage: React.FC = () => {
                                 value={numQuestions} 
                                 onChange={(e: ChangeEvent<HTMLInputElement>) => setNumQuestions(e.target.value)}
                                 onBlur={() => setTouched(true)}
-                                placeholder="Enter number of questions"
+                                placeholder="Enter number of questions (1-10)"
                                 borderColor={questionsError ? errorColor : undefined}
                                 _focus={{ borderColor: questionsError ? errorColor : "blue.500" }}
                                 min={1}
+                                max={10}
                             />
                             {questionsError && (
                                 <Text color={errorColor} fontSize="sm" mt={1}>
-                                    Please enter a valid number of questions (minimum 1)
+                                    Please enter a valid number of questions (1-10)
                                 </Text>
                             )}
                         </Box>
@@ -106,19 +149,19 @@ const TestPage: React.FC = () => {
                             value={difficulty}
                             onChange={(e) => setDifficulty(e.target.value)}
                         >
-                            <option value="easy">Easy</option>
-                            <option value="medium">Medium</option>
-                            <option value="hard">Hard</option>
+                            <option value="easy">Easy (2-3 processes, no I/O)</option>
+                            <option value="medium">Medium (4-6 processes, 1 I/O)</option>
+                            <option value="hard">Hard (7-8 processes, 2-3 I/O)</option>
                         </select>
                     </Box>
 
                     <Button 
                         colorScheme="blue" 
                         onClick={handleStartTest}
-                        disabled={includeScheduling && questionsError}
+                        disabled={(!includeScheduling) || (includeScheduling && questionsError) || isStarting}
                         mt={4}
                     >
-                        Start Test
+                        {isStarting ? "Generating questions..." : "Start Test"}
                     </Button>
                 </Flex>
             </Box>
