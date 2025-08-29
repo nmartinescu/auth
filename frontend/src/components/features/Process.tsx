@@ -22,16 +22,47 @@ import {
     ActionButton,
     DeleteButton,
 } from "../ui/FormActionButtons";
-import CPUAlgorithmSelection from "./CPUAlgorithmSelection";
+import {
+    SelectContent,
+    SelectItem,
+    SelectRoot,
+    SelectTrigger,
+    SelectValueText,
+} from "@chakra-ui/react";
+import { createListCollection } from "@chakra-ui/react";
 import type {
     ProcessData,
-    ProcessStatFieldProps,
     ProcessRowProps,
     ProcessSimulationData,
 } from "../../types/Process";
 import ProcessSolution from "../solution/process/ProcessSolution";
 import ActionModal from "../ui/ActionModal";
 import { isAuthenticated } from "../../utils/auth";
+
+const CPU_ALGORITHMS = [
+    {
+        label: "FCFS",
+        value: "FCFS",
+        description: "First Come First Served - Non-preemptive scheduling based on arrival time",
+    },
+    {
+        label: "SJF",
+        value: "SJF", 
+        description: "Shortest Job First - Non-preemptive scheduling based on burst time",
+    },
+    {
+        label: "RR",
+        value: "RR",
+        description: "Round Robin - Preemptive scheduling with time quantum",
+    },
+    {
+        label: "STCF",
+        value: "STCF",
+        description: "Shortest Time to Completion First - Preemptive scheduling based on shortest remaining time",
+    },
+];
+
+const algorithmOptions = createListCollection({ items: CPU_ALGORITHMS });
 
 export function Process() {
     const [isEditMode, setIsEditMode] = useState(false);
@@ -230,44 +261,85 @@ export function Process() {
             </Box>
 
             <Flex
-                direction={{ base: "column", md: "row" }}
-                justify="space-between"
+                direction={{ base: "column", lg: "row" }}
+                justify="center"
                 align="flex-start"
-                gap="4"
+                gap="6"
                 w="100%"
             >
                 {/* Configuration Panel */}
                 <Flex
                     p="6"
                     w="100%"
-                    maxW="600px"
+                    maxW="500px"
                     borderBottom={`5px solid ${borderColor}`}
                     borderRight={`5px solid ${borderColor}`}
                     borderRadius="lg"
                     bg={cardBg}
                     flexDirection="column"
-                    gap="4"
+                    gap="6"
                 >
                     {/* Algorithm Selection */}
-                    <CPUAlgorithmSelection
-                        selectedAlgorithm={selectedAlgorithm}
-                        onAlgorithmChange={setSelectedAlgorithm}
-                        quantum={quantum}
-                        onQuantumChange={setQuantum}
-                        isEditMode={isEditMode}
-                    />
+                    <Box>
+                        <Text fontWeight="medium" color={subtextColor} mb="3">
+                            Scheduling Algorithm:
+                        </Text>
+                        {isEditMode ? (
+                            <SelectRoot
+                                collection={algorithmOptions}
+                                value={[selectedAlgorithm]}
+                                onValueChange={(e) => setSelectedAlgorithm(e.value[0])}
+                                size="md"
+                                width="100%"
+                            >
+                                <SelectTrigger>
+                                    <SelectValueText placeholder="Select algorithm" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {CPU_ALGORITHMS.map((algorithm) => (
+                                        <SelectItem item={algorithm} key={algorithm.value}>
+                                            {algorithm.label} - {algorithm.description}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </SelectRoot>
+                        ) : (
+                            <Text color={textColor} fontSize="lg">
+                                {CPU_ALGORITHMS.find(alg => alg.value === selectedAlgorithm)?.label} - {CPU_ALGORITHMS.find(alg => alg.value === selectedAlgorithm)?.description}
+                            </Text>
+                        )}
+                    </Box>
+
+                    {/* Quantum Input (only for Round Robin) */}
+                    {selectedAlgorithm === "RR" && (
+                        <Box>
+                            <Text fontWeight="medium" color={subtextColor} mb="3">
+                                Time Quantum:
+                            </Text>
+                            {isEditMode ? (
+                                <NumberInput.Root
+                                    value={quantum.toString()}
+                                    min={1}
+                                    max={20}
+                                    onValueChange={(e) => setQuantum(Number(e.value) || 1)}
+                                >
+                                    <NumberInput.Control />
+                                    <NumberInput.Input />
+                                </NumberInput.Root>
+                            ) : (
+                                <Text color={textColor} fontSize="lg">
+                                    {quantum} time units
+                                </Text>
+                            )}
+                        </Box>
+                    )}
 
                     {/* Stats Display */}
-                    <Stack gap="4">
-                        <ProcessStatField
-                            label="Total Processes:"
-                            value={processCount.toString()}
-                            // isEditMode={isEditMode}
-                            textColor={textColor}
-                            subtextColor={subtextColor}
-                            borderColor={borderColor}
-                        />
-                    </Stack>
+                    <Box>
+                        <Text fontWeight="medium" color={subtextColor} mb="3">
+                            Total Processes: {processCount}
+                        </Text>
+                    </Box>
 
                     {/* Save/Restore Simulation Modal */}
                     <Box>
@@ -294,14 +366,28 @@ export function Process() {
                     </Box>
 
                     {/* Action Buttons */}
-                    <FormActionButtons
-                        onReset={handleReset}
-                        onEdit={handleSave}
-                        isEditMode={isEditMode}
-                        resetIcon={<LuRotateCcw />}
-                        editIcon={<LuSquarePen />}
-                        saveIcon={<LuSave />}
-                    />
+                    <Stack gap="3">
+                        <FormActionButtons
+                            onReset={handleReset}
+                            onEdit={handleSave}
+                            isEditMode={isEditMode}
+                            resetIcon={<LuRotateCcw />}
+                            editIcon={<LuSquarePen />}
+                            saveIcon={<LuSave />}
+                        />
+
+                        <ActionButton
+                            onClick={onSubmit}
+                            disabled={isEditMode}
+                            icon={
+                                <>
+                                    <LuPlay />
+                                    Start Simulation
+                                </>
+                            }
+                            aria-label="Start process simulation"
+                        />
+                    </Stack>
                 </Flex>
 
                 {/* Process Table */}
@@ -394,19 +480,7 @@ export function Process() {
                         </Box>
                     )}
 
-                    <Box textAlign="right" mb="4">
-                        <ActionButton
-                            onClick={onSubmit}
-                            disabled={isEditMode}
-                            icon={
-                                <>
-                                    <LuPlay />
-                                    Start
-                                </>
-                            }
-                            aria-label="Start process simulation"
-                        />
-                    </Box>
+
                 </Stack>
             </Flex>
         </Flex>
@@ -414,35 +488,6 @@ export function Process() {
 }
 
 // Helper Components
-
-function ProcessStatField({
-    label,
-    value,
-    // isEditMode,
-    textColor,
-    subtextColor,
-    borderColor,
-}: ProcessStatFieldProps) {
-    return (
-        <Flex
-            w="full"
-            flexDirection="row"
-            justifyContent="space-between"
-            alignItems="center"
-            borderBottom={`2px solid ${borderColor}`}
-            borderTop={`2px solid ${borderColor}`}
-            px="4"
-            py="2"
-        >
-            <Text fontWeight="medium" color={subtextColor}>
-                {label}
-            </Text>
-            <Text fontWeight="medium" color={textColor}>
-                {value}
-            </Text>
-        </Flex>
-    );
-}
 
 function ProcessRow({
     index,
