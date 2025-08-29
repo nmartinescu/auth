@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Box, Text, Spinner, Flex } from "@chakra-ui/react";
+import { useColorModeValue } from "./ui/color-mode";
 import TestPage from "./TestPage";
 import TestQuestionComponent from "./TestQuestionComponent";
 import TestResults from "./TestResults";
@@ -14,6 +15,10 @@ const TestContainer: React.FC = () => {
     const [currentQuestion, setCurrentQuestion] = useState<TestQuestion | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Color mode values
+    const spinnerColor = useColorModeValue("blue.500", "blue.300");
+    const errorColor = useColorModeValue("red.500", "red.300");
 
     useEffect(() => {
         // Update current question when session changes
@@ -138,7 +143,7 @@ const TestContainer: React.FC = () => {
                 flexDirection="column"
                 gap={4}
             >
-                <Spinner size="xl" color="blue.500" />
+                <Spinner size="xl" color={spinnerColor} />
                 <Text>Preparing your test...</Text>
             </Flex>
         );
@@ -147,7 +152,7 @@ const TestContainer: React.FC = () => {
     if (error) {
         return (
             <Box p={6} textAlign="center">
-                <Text color="red.500" fontSize="lg" mb={4}>
+                <Text color={errorColor} fontSize="lg" mb={4}>
                     {error}
                 </Text>
                 <button onClick={handleRestart}>

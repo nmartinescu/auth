@@ -116,6 +116,7 @@ export default function ActionModal<T>({
     const fileInputRef = useRef<HTMLInputElement>(null);
     const borderColor = useColorModeValue("#E5E7EB", "#4A5568");
     const buttonHoverBg = useColorModeValue("gray.50", "gray.700");
+    const buttonTextColor = useColorModeValue("gray.600", "gray.300");
 
     const showNotification = (message: string, type: "success" | "error" = "success") => {
         setToast({ message, type });
@@ -241,6 +242,7 @@ export default function ActionModal<T>({
                 onClick={onOpen}
                 borderBottom={`3px solid ${borderColor}`}
                 borderRight={`3px solid ${borderColor}`}
+                color={buttonTextColor}
                 _hover={{ bg: buttonHoverBg }}
                 minWidth="auto"
                 px={3}

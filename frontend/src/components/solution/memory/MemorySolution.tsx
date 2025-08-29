@@ -110,7 +110,7 @@ export default function MemorySolution({ solution, onBack }: MemorySolutionProps
                                 <Table.Header>
                                     <Table.Row>
                                         {Array.from({ length: frameCount }, (_, colIndex) => (
-                                            <Table.ColumnHeader key={colIndex} textAlign="center">
+                                            <Table.ColumnHeader key={colIndex} textAlign="center" color={textColor}>
                                                 Frame {colIndex}
                                             </Table.ColumnHeader>
                                         ))}
@@ -120,7 +120,7 @@ export default function MemorySolution({ solution, onBack }: MemorySolutionProps
                                     {currentSequence.map((row, rowIndex) => (
                                         <Table.Row key={rowIndex}>
                                             {row.map((cell: number, colIndex: number) => (
-                                                <Table.Cell key={colIndex} textAlign="center">
+                                                <Table.Cell key={colIndex} textAlign="center" color={textColor}>
                                                     {cell === -1 ? "Empty" : cell}
                                                 </Table.Cell>
                                             ))}

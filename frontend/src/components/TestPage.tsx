@@ -68,6 +68,11 @@ const TestPage: React.FC<TestPageProps> = ({ onTestStart }) => {
     const borderColor = useColorModeValue("gray.200", "gray.600");
     const errorColor = useColorModeValue("red.500", "red.300");
     const labelColor = useColorModeValue("gray.600", "gray.300");
+    const errorBg = useColorModeValue("red.50", "red.900");
+    const errorBorderColor = useColorModeValue("red.200", "red.600");
+    const primaryTextColor = useColorModeValue("gray.900", "white");
+    const selectBg = useColorModeValue("white", "gray.700");
+    const selectTextColor = useColorModeValue("gray.900", "white");
 
     return (
         <Flex
@@ -78,7 +83,7 @@ const TestPage: React.FC<TestPageProps> = ({ onTestStart }) => {
             gap="10"
             mt="10"
         >
-            <Heading size="lg" mb={6}>Test Configuration</Heading>
+            <Heading size="lg" mb={6} color={primaryTextColor}>Test Configuration</Heading>
             
             <Box 
                 p={6} 
@@ -90,8 +95,8 @@ const TestPage: React.FC<TestPageProps> = ({ onTestStart }) => {
             >
                 <Flex direction="column" gap={5}>
                     {error && (
-                        <Box p={4} borderRadius="md" bg="red.50" border="1px solid" borderColor="red.200">
-                            <Text color="red.600" fontSize="sm">
+                        <Box p={4} borderRadius="md" bg={errorBg} border="1px solid" borderColor={errorBorderColor}>
+                            <Text color={errorColor} fontSize="sm">
                                 {error}
                             </Text>
                         </Box>
@@ -106,7 +111,7 @@ const TestPage: React.FC<TestPageProps> = ({ onTestStart }) => {
                                     onChange={(e: ChangeEvent<HTMLInputElement>) => setIncludeScheduling(e.target.checked)}
                                     style={{ marginRight: '8px' }}
                                 />
-                                <Text>Include scheduling questions</Text>
+                                <Text color={primaryTextColor}>Include scheduling questions</Text>
                             </Flex>
                         </label>
                     </Box>
@@ -120,7 +125,7 @@ const TestPage: React.FC<TestPageProps> = ({ onTestStart }) => {
                                     onChange={(e: ChangeEvent<HTMLInputElement>) => setIncludeMemory(e.target.checked)}
                                     style={{ marginRight: '8px' }}
                                 />
-                                <Text>Include memory management questions</Text>
+                                <Text color={primaryTextColor}>Include memory management questions</Text>
                             </Flex>
                         </label>
                     </Box>
@@ -140,6 +145,7 @@ const TestPage: React.FC<TestPageProps> = ({ onTestStart }) => {
                                 _focus={{ borderColor: questionsError ? errorColor : "blue.500" }}
                                 min={1}
                                 max={10}
+                                color={primaryTextColor}
                             />
                             {questionsError && (
                                 <Text color={errorColor} fontSize="sm" mt={1}>
@@ -159,15 +165,17 @@ const TestPage: React.FC<TestPageProps> = ({ onTestStart }) => {
                                 padding: "8px",
                                 borderWidth: "1px",
                                 borderRadius: "0.375rem",
-                                backgroundColor: boxBg,
-                                borderColor: borderColor
+                                backgroundColor: selectBg,
+                                borderColor: borderColor,
+                                color: "black",
+                                border: `1px solid ${borderColor}`
                             }}
                             value={difficulty}
                             onChange={(e) => setDifficulty(e.target.value)}
                         >
-                            <option value="easy">Easy (2-3 processes, no I/O)</option>
-                            <option value="medium">Medium (4-6 processes, 1 I/O)</option>
-                            <option value="hard">Hard (7-8 processes, 2-3 I/O)</option>
+                            <option value="easy" style={{ backgroundColor: selectBg, color: "black" }}>Easy</option>
+                            <option value="medium" style={{ backgroundColor: selectBg, color: "black" }}>Medium</option>
+                            <option value="hard" style={{ backgroundColor: selectBg, color: "black" }}>Hard</option>
                         </select>
                     </Box>
 

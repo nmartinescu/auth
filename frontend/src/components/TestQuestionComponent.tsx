@@ -105,6 +105,11 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
     const boxBg = useColorModeValue("white", "gray.800");
     const borderColor = useColorModeValue("gray.200", "gray.600");
     const headerBg = useColorModeValue("gray.50", "gray.700");
+    const textColor = useColorModeValue("gray.600", "gray.300");
+    const progressBg = useColorModeValue("gray.200", "gray.600");
+    const valueColor = useColorModeValue("blue.600", "blue.300");
+    const primaryTextColor = useColorModeValue("gray.900", "white");
+    const headerTextColor = useColorModeValue("gray.700", "gray.200");
 
     useEffect(() => {
         // Update averages when process results change
@@ -233,12 +238,12 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
             {/* Header */}
             <Box>
                 <Flex justifyContent="space-between" alignItems="center" mb={4}>
-                    <Heading size="lg">Question {questionNumber} of {totalQuestions}</Heading>
+                    <Heading size="lg" color={primaryTextColor}>Question {questionNumber} of {totalQuestions}</Heading>
                     <Badge colorScheme={getDifficultyColor(question.difficulty)} fontSize="md" p={2}>
                         {question.difficulty.toUpperCase()}
                     </Badge>
                 </Flex>
-                <Box h="4px" bg="gray.200" borderRadius="md" mb={4}>
+                <Box h="4px" bg={progressBg} borderRadius="md" mb={4}>
                     <Box 
                         h="100%" 
                         bg="blue.500" 
@@ -260,47 +265,47 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
             >
                 <VStack align="start" gap={4}>
                     <Box>
-                        <Text fontSize="lg" fontWeight="semibold" mb={2}>
+                        <Text fontSize="lg" fontWeight="semibold" mb={2} color={primaryTextColor}>
                             Algorithm: {question.algorithm}
                             {question.quantum && ` (Quantum = ${question.quantum})`}
                         </Text>
-                        <Text color="gray.600">{question.description}</Text>
+                        <Text color={textColor}>{question.description}</Text>
                     </Box>
 
                     {/* Process Information Grid - Only for scheduling questions */}
                     {question.type === 'scheduling' && question.processes && (
                         <Box w="100%">
-                            <Text fontSize="md" fontWeight="semibold" mb={3}>Process Information:</Text>
+                            <Text fontSize="md" fontWeight="semibold" mb={3} color={primaryTextColor}>Process Information:</Text>
                             <Box border="1px" borderColor={borderColor} borderRadius="md" overflow="hidden">
                                 {/* Header */}
                                 <Grid templateColumns="repeat(4, 1fr)" bg={headerBg}>
                                     <GridItem p={3} borderRight="1px" borderColor={borderColor}>
-                                        <Text fontWeight="semibold">Process ID</Text>
+                                        <Text fontWeight="semibold" color={headerTextColor}>Process ID</Text>
                                     </GridItem>
                                     <GridItem p={3} borderRight="1px" borderColor={borderColor}>
-                                        <Text fontWeight="semibold">Arrival Time</Text>
+                                        <Text fontWeight="semibold" color={headerTextColor}>Arrival Time</Text>
                                     </GridItem>
                                     <GridItem p={3} borderRight="1px" borderColor={borderColor}>
-                                        <Text fontWeight="semibold">Burst Time</Text>
+                                        <Text fontWeight="semibold" color={headerTextColor}>Burst Time</Text>
                                     </GridItem>
                                     <GridItem p={3}>
-                                        <Text fontWeight="semibold">I/O Operations</Text>
+                                        <Text fontWeight="semibold" color={headerTextColor}>I/O Operations</Text>
                                     </GridItem>
                                 </Grid>
                                 {/* Rows */}
                                 {question.processes.map((process, index) => (
                                     <Grid key={process.id} templateColumns="repeat(4, 1fr)" borderTop={index > 0 ? "1px" : "none"} borderColor={borderColor}>
                                         <GridItem p={3} borderRight="1px" borderColor={borderColor}>
-                                            <Text>P{process.id}</Text>
+                                            <Text color={primaryTextColor}>P{process.id}</Text>
                                         </GridItem>
                                         <GridItem p={3} borderRight="1px" borderColor={borderColor}>
-                                            <Text>{process.arrivalTime}</Text>
+                                            <Text color={primaryTextColor}>{process.arrivalTime}</Text>
                                         </GridItem>
                                         <GridItem p={3} borderRight="1px" borderColor={borderColor}>
-                                            <Text>{process.burstTime}</Text>
+                                            <Text color={primaryTextColor}>{process.burstTime}</Text>
                                         </GridItem>
                                         <GridItem p={3}>
-                                            <Text>{formatIOOperations(process.io)}</Text>
+                                            <Text color={primaryTextColor}>{formatIOOperations(process.io)}</Text>
                                         </GridItem>
                                     </Grid>
                                 ))}
@@ -311,12 +316,12 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                     {/* Memory Information - Only for memory questions */}
                     {question.type === 'memory' && (
                         <Box w="100%">
-                            <Text fontSize="md" fontWeight="semibold" mb={3}>Memory Configuration:</Text>
+                            <Text fontSize="md" fontWeight="semibold" mb={3} color={primaryTextColor}>Memory Configuration:</Text>
                             <Box border="1px" borderColor={borderColor} borderRadius="md" p={4}>
                                 <VStack align="start" gap={3}>
-                                    <Text><strong>Frame Count:</strong> {question.frameCount}</Text>
-                                    <Text><strong>Page Reference Sequence:</strong> {question.pageReferences?.join(', ')}</Text>
-                                    <Text><strong>Algorithm:</strong> {question.algorithm}</Text>
+                                    <Text color={primaryTextColor}><strong>Frame Count:</strong> {question.frameCount}</Text>
+                                    <Text color={primaryTextColor}><strong>Page Reference Sequence:</strong> {question.pageReferences?.join(', ')}</Text>
+                                    <Text color={primaryTextColor}><strong>Algorithm:</strong> {question.algorithm}</Text>
                                 </VStack>
                             </Box>
                         </Box>
@@ -333,7 +338,7 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                 bg={boxBg} 
                 borderColor={borderColor}
             >
-                <Text fontSize="lg" fontWeight="semibold" mb={4}>
+                <Text fontSize="lg" fontWeight="semibold" mb={4} color={primaryTextColor}>
                     {reviewMode ? "Your Answer vs Correct Answer:" : "Your Answer:"}
                 </Text>
                 
@@ -344,25 +349,25 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                             {/* Header */}
                             <Grid templateColumns="repeat(7, 1fr)" bg={headerBg}>
                                 <GridItem p={3} borderRight="1px" borderColor={borderColor}>
-                                    <Text fontWeight="semibold">Process ID</Text>
+                                    <Text fontWeight="semibold" color={headerTextColor}>Process ID</Text>
                                 </GridItem>
                                 <GridItem p={3} borderRight="1px" borderColor={borderColor}>
-                                    <Text fontWeight="semibold">Arrival Time</Text>
+                                    <Text fontWeight="semibold" color={headerTextColor}>Arrival Time</Text>
                                 </GridItem>
                                 <GridItem p={3} borderRight="1px" borderColor={borderColor}>
-                                    <Text fontWeight="semibold">Burst Time</Text>
+                                    <Text fontWeight="semibold" color={headerTextColor}>Burst Time</Text>
                                 </GridItem>
                                 <GridItem p={3} borderRight="1px" borderColor={borderColor}>
-                                    <Text fontWeight="semibold">Scheduled Time</Text>
+                                    <Text fontWeight="semibold" color={headerTextColor}>Scheduled Time</Text>
                                 </GridItem>
                                 <GridItem p={3} borderRight="1px" borderColor={borderColor}>
-                                    <Text fontWeight="semibold">Waiting Time</Text>
+                                    <Text fontWeight="semibold" color={headerTextColor}>Waiting Time</Text>
                                 </GridItem>
                                 <GridItem p={3} borderRight="1px" borderColor={borderColor}>
-                                    <Text fontWeight="semibold">Turnaround Time</Text>
+                                    <Text fontWeight="semibold" color={headerTextColor}>Turnaround Time</Text>
                                 </GridItem>
                                 <GridItem p={3}>
-                                    <Text fontWeight="semibold">Completion Time</Text>
+                                    <Text fontWeight="semibold" color={headerTextColor}>Completion Time</Text>
                                 </GridItem>
                             </Grid>
                             {/* Rows */}
@@ -374,13 +379,13 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                                 return (
                                     <Grid key={process.pid} templateColumns="repeat(7, 1fr)" borderTop={index > 0 ? "1px" : "none"} borderColor={borderColor}>
                                         <GridItem p={3} borderRight="1px" borderColor={borderColor} display="flex" alignItems="center">
-                                            <Text>P{process.pid}</Text>
+                                            <Text color={primaryTextColor}>P{process.pid}</Text>
                                         </GridItem>
                                         <GridItem p={3} borderRight="1px" borderColor={borderColor} display="flex" alignItems="center">
-                                            <Text>{process.arrivalTime}</Text>
+                                            <Text color={primaryTextColor}>{process.arrivalTime}</Text>
                                         </GridItem>
                                         <GridItem p={3} borderRight="1px" borderColor={borderColor} display="flex" alignItems="center">
-                                            <Text>{process.burstTime}</Text>
+                                            <Text color={primaryTextColor}>{process.burstTime}</Text>
                                         </GridItem>
                                         <GridItem p={3} borderRight="1px" borderColor={borderColor}>
                                             {reviewMode ? (
@@ -392,7 +397,7 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                                                         Your: {process.scheduledTime}
                                                     </Text>
                                                     {correctProcess && (
-                                                        <Text color="gray.600" fontSize="sm">
+                                                        <Text color={textColor} fontSize="sm">
                                                             Correct: {correctProcess.scheduledTime}
                                                         </Text>
                                                     )}
@@ -406,6 +411,7 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                                                     w="80px"
                                                     min={0}
                                                     step={0.1}
+                                                    color={primaryTextColor}
                                                 />
                                             )}
                                         </GridItem>
@@ -419,7 +425,7 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                                                         Your: {process.waitingTime}
                                                     </Text>
                                                     {correctProcess && (
-                                                        <Text color="gray.600" fontSize="sm">
+                                                        <Text color={textColor} fontSize="sm">
                                                             Correct: {correctProcess.waitingTime}
                                                         </Text>
                                                     )}
@@ -433,6 +439,7 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                                                     w="80px"
                                                     min={0}
                                                     step={0.1}
+                                                    color={primaryTextColor}
                                                 />
                                             )}
                                         </GridItem>
@@ -446,7 +453,7 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                                                         Your: {process.turnaroundTime}
                                                     </Text>
                                                     {correctProcess && (
-                                                        <Text color="gray.600" fontSize="sm">
+                                                        <Text color={textColor} fontSize="sm">
                                                             Correct: {correctProcess.turnaroundTime}
                                                         </Text>
                                                     )}
@@ -460,6 +467,7 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                                                     w="80px"
                                                     min={0}
                                                     step={0.1}
+                                                    color={primaryTextColor}
                                                 />
                                             )}
                                         </GridItem>
@@ -473,7 +481,7 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                                                         Your: {process.completionTime}
                                                     </Text>
                                                     {correctProcess && (
-                                                        <Text color="gray.600" fontSize="sm">
+                                                        <Text color={textColor} fontSize="sm">
                                                             Correct: {correctProcess.completionTime}
                                                         </Text>
                                                     )}
@@ -487,6 +495,7 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                                                     w="80px"
                                                     min={0}
                                                     step={0.1}
+                                                    color={primaryTextColor}
                                                 />
                                             )}
                                         </GridItem>
@@ -499,53 +508,53 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                         <Box mt={6} p={4} bg={headerBg} borderRadius="md">
                             <Flex gap={8} flexWrap="wrap">
                                 <Box>
-                                    <Text fontWeight="semibold">Average Waiting Time:</Text>
+                                    <Text fontWeight="semibold" color={primaryTextColor}>Average Waiting Time:</Text>
                                     {reviewMode && correctSolution && 'avgWaitingTime' in correctSolution ? (
                                         <VStack align="start" gap={1}>
                                             <Text fontSize="lg" color={Math.abs(avgWaitingTime - correctSolution.avgWaitingTime) <= 0.1 ? "green.600" : "red.600"}>
                                                 Your: {avgWaitingTime}
                                             </Text>
-                                            <Text fontSize="sm" color="gray.600">
+                                            <Text fontSize="sm" color={textColor}>
                                                 Correct: {correctSolution.avgWaitingTime}
                                             </Text>
                                         </VStack>
                                     ) : (
-                                        <Text fontSize="lg" color="blue.600">{avgWaitingTime}</Text>
+                                        <Text fontSize="lg" color={valueColor}>{avgWaitingTime}</Text>
                                     )}
                                 </Box>
                                 <Box>
-                                    <Text fontWeight="semibold">Average Turnaround Time:</Text>
+                                    <Text fontWeight="semibold" color={primaryTextColor}>Average Turnaround Time:</Text>
                                     {reviewMode && correctSolution && 'avgTurnaroundTime' in correctSolution ? (
                                         <VStack align="start" gap={1}>
                                             <Text fontSize="lg" color={Math.abs(avgTurnaroundTime - correctSolution.avgTurnaroundTime) <= 0.1 ? "green.600" : "red.600"}>
                                                 Your: {avgTurnaroundTime}
                                             </Text>
-                                            <Text fontSize="sm" color="gray.600">
+                                            <Text fontSize="sm" color={textColor}>
                                                 Correct: {correctSolution.avgTurnaroundTime}
                                             </Text>
                                         </VStack>
                                     ) : (
-                                        <Text fontSize="lg" color="blue.600">{avgTurnaroundTime}</Text>
+                                        <Text fontSize="lg" color={valueColor}>{avgTurnaroundTime}</Text>
                                     )}
                                 </Box>
                                 <Box>
-                                    <Text fontWeight="semibold">Total Completion Time:</Text>
+                                    <Text fontWeight="semibold" color={primaryTextColor}>Total Completion Time:</Text>
                                     {reviewMode && correctSolution && 'completionTime' in correctSolution ? (
                                         <VStack align="start" gap={1}>
                                             <Text fontSize="lg" color={Math.abs(completionTime - correctSolution.completionTime) <= 0.1 ? "green.600" : "red.600"}>
                                                 Your: {completionTime}
                                             </Text>
-                                            <Text fontSize="sm" color="gray.600">
+                                            <Text fontSize="sm" color={textColor}>
                                                 Correct: {correctSolution.completionTime}
                                             </Text>
                                         </VStack>
                                     ) : (
-                                        <Text fontSize="lg" color="blue.600">{completionTime}</Text>
+                                        <Text fontSize="lg" color={valueColor}>{completionTime}</Text>
                                     )}
                                 </Box>
                                 {reviewMode && userScore !== undefined && (
                                     <Box>
-                                        <Text fontWeight="semibold">Your Score:</Text>
+                                        <Text fontWeight="semibold" color={primaryTextColor}>Your Score:</Text>
                                         <Text fontSize="lg" color={userScore >= 80 ? "green.600" : userScore >= 60 ? "yellow.600" : "red.600"}>
                                             {userScore}/100
                                         </Text>
@@ -561,15 +570,15 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                             {/* Header */}
                             <Grid templateColumns={`80px repeat(${question.frameCount || 3}, 1fr) 100px`} bg={headerBg}>
                                 <GridItem p={3} borderRight="1px" borderColor={borderColor}>
-                                    <Text fontWeight="semibold">Page Ref</Text>
+                                    <Text fontWeight="semibold" color={headerTextColor}>Page Ref</Text>
                                 </GridItem>
                                 {Array.from({ length: question.frameCount || 3 }, (_, i) => (
                                     <GridItem key={i} p={3} borderRight="1px" borderColor={borderColor}>
-                                        <Text fontWeight="semibold">Frame {i}</Text>
+                                        <Text fontWeight="semibold" color={headerTextColor}>Frame {i}</Text>
                                     </GridItem>
                                 ))}
                                 <GridItem p={3}>
-                                    <Text fontWeight="semibold">Page Fault?</Text>
+                                    <Text fontWeight="semibold" color={headerTextColor}>Page Fault?</Text>
                                 </GridItem>
                             </Grid>
                             
@@ -587,7 +596,7 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                                         borderColor={borderColor}
                                     >
                                         <GridItem p={3} borderRight="1px" borderColor={borderColor} display="flex" alignItems="center">
-                                            <Text fontWeight="semibold">{step.pageReference}</Text>
+                                            <Text fontWeight="semibold" color={primaryTextColor}>{step.pageReference}</Text>
                                         </GridItem>
                                         
                                         {step.frameState.map((frameValue, frameIndex) => (
@@ -605,7 +614,7 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                                                             Your: {frameValue ?? '-'}
                                                         </Text>
                                                         {correctStep && (
-                                                            <Text color="gray.600" fontSize="sm">
+                                                            <Text color={textColor} fontSize="sm">
                                                                 Correct: {correctStep.frameState[frameIndex] ?? '-'}
                                                             </Text>
                                                         )}
@@ -619,6 +628,7 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                                                         w="60px"
                                                         min={1}
                                                         placeholder="-"
+                                                        color={primaryTextColor}
                                                     />
                                                 )}
                                             </GridItem>
@@ -634,7 +644,7 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                                                         Your: {step.pageFault ? "Yes" : "No"}
                                                     </Text>
                                                     {correctStep && (
-                                                        <Text color="gray.600" fontSize="sm">
+                                                        <Text color={textColor} fontSize="sm">
                                                             Correct: {correctStep.pageFault ? "Yes" : "No"}
                                                         </Text>
                                                     )}
@@ -657,20 +667,20 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                         <Box mt={6} p={4} bg={headerBg} borderRadius="md">
                             <Flex gap={8} flexWrap="wrap" align="center">
                                 <Box>
-                                    <Text fontWeight="semibold">Total Page Faults:</Text>
-                                    <Text fontSize="lg" color="blue.600">
+                                    <Text fontWeight="semibold" color={primaryTextColor}>Total Page Faults:</Text>
+                                    <Text fontSize="lg" color={valueColor}>
                                         {memorySteps.filter(step => step.pageFault).length}
                                     </Text>
                                 </Box>
                                 <Box>
-                                    <Text fontWeight="semibold">Total References:</Text>
-                                    <Text fontSize="lg" color="blue.600">
+                                    <Text fontWeight="semibold" color={primaryTextColor}>Total References:</Text>
+                                    <Text fontSize="lg" color={valueColor}>
                                         {memorySteps.length}
                                     </Text>
                                 </Box>
                                 <Box>
-                                    <Text fontWeight="semibold">Hit Rate:</Text>
-                                    <Text fontSize="lg" color="blue.600">
+                                    <Text fontWeight="semibold" color={primaryTextColor}>Hit Rate:</Text>
+                                    <Text fontSize="lg" color={valueColor}>
                                         {memorySteps.length > 0 
                                             ? ((memorySteps.length - memorySteps.filter(step => step.pageFault).length) / memorySteps.length * 100).toFixed(1)
                                             : 0}%
@@ -678,7 +688,7 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                                 </Box>
                                 {reviewMode && userScore !== undefined && (
                                     <Box>
-                                        <Text fontWeight="semibold">Your Score:</Text>
+                                        <Text fontWeight="semibold" color={primaryTextColor}>Your Score:</Text>
                                         <Text fontSize="lg" color={userScore >= 80 ? "green.600" : userScore >= 60 ? "yellow.600" : "red.600"}>
                                             {userScore}/100
                                         </Text>
@@ -696,6 +706,9 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                     onClick={onPreviousQuestion}
                     disabled={!hasPrevious || reviewMode}
                     variant="outline"
+                    color={primaryTextColor}
+                    borderColor={borderColor}
+                    _hover={{ bg: headerBg }}
                 >
                     Previous
                 </Button>

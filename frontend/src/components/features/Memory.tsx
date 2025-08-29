@@ -202,11 +202,16 @@ export function Memory() {
                                 <SelectTrigger>
                                     <SelectValueText placeholder="Select algorithm" />
                                 </SelectTrigger>
-                                <SelectContent zIndex={1000}>
+                                <SelectContent
+                                    zIndex={1000}
+                                    bg={cardBg}
+                                    color={textColor}
+                                >
                                     {MEMORY_ALGORITHMS.map((algorithm) => (
                                         <SelectItem
                                             item={algorithm}
                                             key={algorithm.value}
+                                            color={textColor}
                                         >
                                             {algorithm.label} -{" "}
                                             {algorithm.description}
@@ -246,7 +251,7 @@ export function Memory() {
                                 }
                             >
                                 <NumberInput.Control />
-                                <NumberInput.Input />
+                                <NumberInput.Input color={textColor} />
                             </NumberInput.Root>
                         ) : (
                             <Text color={textColor} fontSize="lg">
@@ -299,7 +304,9 @@ export function Memory() {
                                             max={100}
                                         >
                                             <NumberInput.Control />
-                                            <NumberInput.Input />
+                                            <NumberInput.Input
+                                                color={textColor}
+                                            />
                                         </NumberInput.Root>
                                     </Box>
                                     <Button
