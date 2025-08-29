@@ -21,10 +21,7 @@ import {
     LuSquarePen,
 } from "react-icons/lu";
 import { useColorModeValue } from "../ui/color-mode";
-import {
-    FormActionButtons,
-    ActionButton,
-} from "../ui/FormActionButtons";
+import { FormActionButtons, ActionButton } from "../ui/FormActionButtons";
 import { API_BASE_URL } from "../../config/constants";
 import { MEMORY_ALGORITHMS } from "../../config/memoryConstants";
 import { createListCollection } from "@chakra-ui/react";
@@ -44,25 +41,32 @@ export function Memory() {
     const [isEditMode, setIsEditMode] = useState(false);
     const [selectedAlgorithm, setSelectedAlgorithm] = useState("fifo");
     const [frameCount, setFrameCount] = useState(3);
-    const [pageReferences, setPageReferences] = useState<number[]>([1, 2, 3, 4, 1, 2, 5, 1, 2, 3, 4, 5]);
+    const [pageReferences, setPageReferences] = useState<number[]>([1]);
     const [newPage, setNewPage] = useState(0);
     const [solution, setSolution] = useState(null);
 
-    // Color mode values
+    // Color mode values - ALL hooks must be called at the top level
     const cardBg = useColorModeValue("white", "gray.800");
     const borderColor = useColorModeValue("#E5E7EB", "#4A5568");
     const textColor = useColorModeValue("gray.800", "gray.100");
     const subtextColor = useColorModeValue("gray.600", "gray.300");
+    const algorithmBoxBg = useColorModeValue("gray.50", "gray.700");
+    const frameCountBoxBg = useColorModeValue("gray.50", "gray.700");
+    const pageReferencesBoxBg = useColorModeValue("gray.50", "gray.700");
+    const pageReferencesInnerBg = useColorModeValue("white", "gray.600");
+    const statsBoxBg = useColorModeValue("gray.50", "gray.700");
 
     // Check for simulation data in URL parameters on component mount
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
-        const loadData = urlParams.get('loadData');
-        
+        const loadData = urlParams.get("loadData");
+
         if (loadData) {
             try {
-                const simulationData: MemorySimulationData = JSON.parse(decodeURIComponent(loadData));
-                
+                const simulationData: MemorySimulationData = JSON.parse(
+                    decodeURIComponent(loadData)
+                );
+
                 if (simulationData.selectedAlgorithm) {
                     setSelectedAlgorithm(simulationData.selectedAlgorithm);
                 }
@@ -72,11 +76,11 @@ export function Memory() {
                 if (simulationData.pageReferences) {
                     setPageReferences(simulationData.pageReferences);
                 }
-                
+
                 // Clear the URL parameter after loading
                 const newUrl = window.location.pathname;
-                window.history.replaceState(null, '', newUrl);
-                
+                window.history.replaceState(null, "", newUrl);
+
                 console.log("Loaded memory simulation data:", simulationData);
             } catch (error) {
                 console.error("Error loading simulation data from URL:", error);
@@ -86,7 +90,7 @@ export function Memory() {
 
     const handleReset = () => {
         setFrameCount(3);
-        setPageReferences([1, 2, 3, 4, 1, 2, 5, 1, 2, 3, 4, 5]);
+        setPageReferences([1]);
         setSelectedAlgorithm("fifo");
         setIsEditMode(false);
     };
@@ -108,10 +112,10 @@ export function Memory() {
 
     const onSubmit = async () => {
         try {
-            const body = { 
-                frameCount, 
-                selectedAlgorithm: [selectedAlgorithm], 
-                pageReferences 
+            const body = {
+                frameCount,
+                selectedAlgorithm: [selectedAlgorithm],
+                pageReferences,
             };
             console.log("🚀 Starting memory management simulation...");
             console.log("Input data:", body);
@@ -130,7 +134,10 @@ export function Memory() {
                 setSolution(result);
                 console.log("✅ Memory Management Result:", result);
             } else {
-                console.error("❌ API Error:", result.message || "Unknown error");
+                console.error(
+                    "❌ API Error:",
+                    result.message || "Unknown error"
+                );
             }
         } catch (error) {
             console.error("❌ Network Error:", error);
@@ -138,10 +145,7 @@ export function Memory() {
     };
 
     return solution ? (
-        <MemorySolution 
-            solution={solution} 
-            onBack={() => setSolution(null)} 
-        />
+        <MemorySolution solution={solution} onBack={() => setSolution(null)} />
     ) : (
         <Flex
             maxW="1200px"
@@ -173,46 +177,62 @@ export function Memory() {
                     p="6"
                     w="100%"
                     maxW="500px"
-                    borderBottom={`5px solid ${borderColor}`}
-                    borderRight={`5px solid ${borderColor}`}
-                    borderRadius="lg"
                     bg={cardBg}
+                    borderRadius="lg"
+                    boxShadow="md"
                     flexDirection="column"
                     gap="6"
                 >
                     {/* Algorithm Selection */}
-                    <Box>
+                    <Box p="4" bg={algorithmBoxBg} borderRadius="md">
                         <Text fontWeight="medium" color={subtextColor} mb="3">
-                            Algorithm:
+                            Page Replacement Algorithm:
                         </Text>
                         {isEditMode ? (
                             <SelectRoot
                                 collection={algorithmOptions}
                                 value={[selectedAlgorithm]}
-                                onValueChange={(e) => setSelectedAlgorithm(e.value[0])}
+                                onValueChange={(e) =>
+                                    setSelectedAlgorithm(e.value[0])
+                                }
                                 size="md"
                                 width="100%"
+                                positioning={{ strategy: "absolute" }}
                             >
                                 <SelectTrigger>
                                     <SelectValueText placeholder="Select algorithm" />
                                 </SelectTrigger>
-                                <SelectContent>
+                                <SelectContent zIndex={1000}>
                                     {MEMORY_ALGORITHMS.map((algorithm) => (
-                                        <SelectItem item={algorithm} key={algorithm.value}>
-                                            {algorithm.label} - {algorithm.description}
+                                        <SelectItem
+                                            item={algorithm}
+                                            key={algorithm.value}
+                                        >
+                                            {algorithm.label} -{" "}
+                                            {algorithm.description}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
                             </SelectRoot>
                         ) : (
                             <Text color={textColor} fontSize="lg">
-                                {MEMORY_ALGORITHMS.find(alg => alg.value === selectedAlgorithm)?.label} - {MEMORY_ALGORITHMS.find(alg => alg.value === selectedAlgorithm)?.description}
+                                {
+                                    MEMORY_ALGORITHMS.find(
+                                        (alg) => alg.value === selectedAlgorithm
+                                    )?.label
+                                }{" "}
+                                -{" "}
+                                {
+                                    MEMORY_ALGORITHMS.find(
+                                        (alg) => alg.value === selectedAlgorithm
+                                    )?.description
+                                }
                             </Text>
                         )}
                     </Box>
 
                     {/* Frame Count */}
-                    <Box>
+                    <Box p="4" borderRadius="md" bg={frameCountBoxBg}>
                         <Text fontWeight="medium" color={subtextColor} mb="3">
                             Frame Count:
                         </Text>
@@ -221,20 +241,22 @@ export function Memory() {
                                 value={frameCount.toString()}
                                 min={1}
                                 max={20}
-                                onValueChange={(e) => setFrameCount(Number(e.value) || 1)}
+                                onValueChange={(e) =>
+                                    setFrameCount(Number(e.value) || 1)
+                                }
                             >
                                 <NumberInput.Control />
                                 <NumberInput.Input />
                             </NumberInput.Root>
                         ) : (
                             <Text color={textColor} fontSize="lg">
-                                {frameCount}
+                                {frameCount} frames
                             </Text>
                         )}
                     </Box>
 
                     {/* Page References */}
-                    <Box>
+                    <Box p="4" borderRadius="md" bg={pageReferencesBoxBg}>
                         <Text fontWeight="medium" color={subtextColor} mb="3">
                             Page References:
                         </Text>
@@ -242,8 +264,8 @@ export function Memory() {
                             <Box
                                 p="4"
                                 borderRadius="xl"
-                                bg="gray.50"
-                                _dark={{ bg: "gray.700" }}
+                                bg={pageReferencesInnerBg}
+                                border={`1px solid ${borderColor}`}
                                 boxShadow="sm"
                             >
                                 <Box maxH="120px" overflowY="auto" mb="3">
@@ -255,7 +277,9 @@ export function Memory() {
                                                 variant="outline"
                                                 colorScheme="gray"
                                                 borderRadius="full"
-                                                onClick={() => removePage(index)}
+                                                onClick={() =>
+                                                    removePage(index)
+                                                }
                                             >
                                                 {page} ✕
                                             </Button>
@@ -267,7 +291,9 @@ export function Memory() {
                                     <Box flex={1}>
                                         <NumberInput.Root
                                             value={newPage.toString()}
-                                            onValueChange={(e) => setNewPage(Number(e.value) || 0)}
+                                            onValueChange={(e) =>
+                                                setNewPage(Number(e.value) || 0)
+                                            }
                                             size="sm"
                                             min={0}
                                             max={100}
@@ -276,7 +302,11 @@ export function Memory() {
                                             <NumberInput.Input />
                                         </NumberInput.Root>
                                     </Box>
-                                    <Button size="sm" colorScheme="blue" onClick={addPage}>
+                                    <Button
+                                        size="sm"
+                                        colorScheme="blue"
+                                        onClick={addPage}
+                                    >
                                         <LuPlus /> Add
                                     </Button>
                                 </Flex>
@@ -289,9 +319,15 @@ export function Memory() {
                     </Box>
 
                     {/* Stats */}
-                    <Box>
-                        <Text fontWeight="medium" color={subtextColor} mb="3">
+                    <Box p="4" borderRadius="md" bg={statsBoxBg}>
+                        <Text fontWeight="medium" color={subtextColor} mb="1">
+                            Configuration Summary:
+                        </Text>
+                        <Text color={textColor} fontSize="lg">
                             Total Pages: {pageReferences.length}
+                        </Text>
+                        <Text color={textColor} fontSize="lg">
+                            Memory Frames: {frameCount}
                         </Text>
                     </Box>
 
@@ -312,8 +348,10 @@ export function Memory() {
                                 setFrameCount(data.frameCount);
                                 setPageReferences(data.pageReferences);
                             }}
-                            isLoggedIn={isAuthenticated()} 
-                            onLoadFromAccount={() => console.log("Loading from account...")}
+                            isLoggedIn={isAuthenticated()}
+                            onLoadFromAccount={() =>
+                                console.log("Loading from account...")
+                            }
                         />
                     </Box>
 

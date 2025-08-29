@@ -85,6 +85,9 @@ export function Process() {
     const subtextColor = useColorModeValue("gray.600", "gray.300");
     const headerTextColor = useColorModeValue("gray.800", "gray.100");
     const tableHeaderBg = useColorModeValue("gray.100", "gray.700");
+    const algorithmBoxBg = useColorModeValue("gray.50", "gray.700");
+    const quantumBoxBg = useColorModeValue("blue.50", "blue.900");
+    const statsBoxBg = useColorModeValue("gray.50", "gray.700");
 
     // Check for simulation data in URL parameters on component mount
     useEffect(() => {
@@ -272,15 +275,14 @@ export function Process() {
                     p="6"
                     w="100%"
                     maxW="500px"
-                    borderBottom={`5px solid ${borderColor}`}
-                    borderRight={`5px solid ${borderColor}`}
-                    borderRadius="lg"
                     bg={cardBg}
+                    borderRadius="lg"
+                    boxShadow="md"
                     flexDirection="column"
                     gap="6"
                 >
                     {/* Algorithm Selection */}
-                    <Box>
+                    <Box p="4" bg={algorithmBoxBg} borderRadius="md">
                         <Text fontWeight="medium" color={subtextColor} mb="3">
                             Scheduling Algorithm:
                         </Text>
@@ -291,11 +293,12 @@ export function Process() {
                                 onValueChange={(e) => setSelectedAlgorithm(e.value[0])}
                                 size="md"
                                 width="100%"
+                                positioning={{ strategy: "absolute" }}
                             >
                                 <SelectTrigger>
                                     <SelectValueText placeholder="Select algorithm" />
                                 </SelectTrigger>
-                                <SelectContent>
+                                <SelectContent zIndex={1000}>
                                     {CPU_ALGORITHMS.map((algorithm) => (
                                         <SelectItem item={algorithm} key={algorithm.value}>
                                             {algorithm.label} - {algorithm.description}
@@ -312,7 +315,11 @@ export function Process() {
 
                     {/* Quantum Input (only for Round Robin) */}
                     {selectedAlgorithm === "RR" && (
-                        <Box>
+                        <Box
+                            p="4"
+                            borderRadius="md"
+                            bg={quantumBoxBg}
+                        >
                             <Text fontWeight="medium" color={subtextColor} mb="3">
                                 Time Quantum:
                             </Text>
@@ -335,8 +342,15 @@ export function Process() {
                     )}
 
                     {/* Stats Display */}
-                    <Box>
-                        <Text fontWeight="medium" color={subtextColor} mb="3">
+                    <Box
+                        p="4"
+                        borderRadius="md"
+                        bg={statsBoxBg}
+                    >
+                        <Text fontWeight="medium" color={subtextColor} mb="1">
+                            Configuration Summary:
+                        </Text>
+                        <Text color={textColor} fontSize="lg">
                             Total Processes: {processCount}
                         </Text>
                     </Box>
