@@ -124,6 +124,43 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
         }
     }, [processResults]);
 
+    // Reset state when question changes
+    useEffect(() => {
+        if (question.type === 'memory' && question.pageReferences && question.frameCount) {
+            // Reset memory steps for new question
+            if (initialAnswer && 'stepResults' in initialAnswer) {
+                setMemorySteps(initialAnswer.stepResults);
+            } else {
+                setMemorySteps(question.pageReferences.map(pageRef => ({
+                    pageReference: pageRef,
+                    frameState: new Array(question.frameCount).fill(null),
+                    pageFault: false
+                })));
+            }
+        } else if (question.type === 'scheduling' && question.processes) {
+            // Reset scheduling data for new question
+            if (initialAnswer && 'processes' in initialAnswer) {
+                setProcessResults(initialAnswer.processes);
+                setAvgWaitingTime(initialAnswer.avgWaitingTime);
+                setAvgTurnaroundTime(initialAnswer.avgTurnaroundTime);
+                setCompletionTime(initialAnswer.completionTime);
+            } else {
+                setProcessResults(question.processes.map(p => ({
+                    pid: p.id,
+                    arrivalTime: p.arrivalTime,
+                    burstTime: p.burstTime,
+                    scheduledTime: 0,
+                    waitingTime: 0,
+                    turnaroundTime: 0,
+                    completionTime: 0
+                })));
+                setAvgWaitingTime(0);
+                setAvgTurnaroundTime(0);
+                setCompletionTime(0);
+            }
+        }
+    }, [question, initialAnswer]);
+
     const handleProcessFieldChange = (pid: number, field: string, value: string) => {
         const numValue = parseFloat(value) || 0;
         setProcessResults(prev => prev.map(p => 
@@ -567,8 +604,9 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                     <>
                         {/* Memory Step-by-Step Table */}
                         <Box border="1px" borderColor={borderColor} borderRadius="md" overflow="hidden">
+                            <Box overflowX="auto" maxW="100%">
                             {/* Header */}
-                            <Grid templateColumns={`80px repeat(${question.frameCount || 3}, 1fr) 100px`} bg={headerBg}>
+                            <Grid templateColumns={`80px repeat(${question.frameCount || 3}, 1fr) 100px`} bg={headerBg} minW={`${180 + (question.frameCount || 3) * 80}px`}>
                                 <GridItem p={3} borderRight="1px" borderColor={borderColor}>
                                     <Text fontWeight="semibold" color={headerTextColor}>Page Ref</Text>
                                 </GridItem>
@@ -594,6 +632,7 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                                         templateColumns={`80px repeat(${question.frameCount || 3}, 1fr) 100px`} 
                                         borderTop="1px" 
                                         borderColor={borderColor}
+                                        minW={`${180 + (question.frameCount || 3) * 80}px`}
                                     >
                                         <GridItem p={3} borderRight="1px" borderColor={borderColor} display="flex" alignItems="center">
                                             <Text fontWeight="semibold" color={primaryTextColor}>{step.pageReference}</Text>
@@ -661,6 +700,7 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                                     </Grid>
                                 );
                             })}
+                            </Box>
                         </Box>
 
                         {/* Memory Summary */}
