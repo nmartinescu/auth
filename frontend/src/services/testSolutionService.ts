@@ -1,4 +1,4 @@
-import type { TestQuestion, TestSolution, ProcessResult, GanttEntry } from '../types/Test';
+import type { TestQuestion, TestSolution, MemoryTestSolution, ProcessResult, GanttEntry } from '../types/Test';
 
 class TestSolutionService {
     private static instance: TestSolutionService;
@@ -10,46 +10,81 @@ class TestSolutionService {
         return TestSolutionService.instance;
     }
 
-    async calculateSolution(question: TestQuestion): Promise<TestSolution> {
+    async calculateSolution(question: TestQuestion): Promise<TestSolution | MemoryTestSolution> {
         try {
-            // Convert test processes to backend format
-            const processes = question.processes.map(p => ({
-                arrivalTime: p.arrivalTime,
-                burstTime: p.burstTime,
-                io: p.io
-            }));
-
-            // Prepare request data
-            const requestData: any = {
-                algorithm: question.algorithm,
-                processes
-            };
-
-            if (question.quantum) {
-                requestData.quantum = question.quantum;
+            if (question.type === 'memory') {
+                return this.calculateMemorySolution(question);
+            } else {
+                return this.calculateSchedulingSolution(question);
             }
-
-            // Call backend scheduler
-            const response = await fetch('/api/cpu', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(requestData)
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to calculate solution: ${response.statusText}`);
-            }
-
-            const result = await response.json();
-            
-            // Convert backend response to test solution format
-            return this.convertBackendResponseToSolution(result, question);
         } catch (error) {
             console.error('Error calculating solution:', error);
             throw error;
         }
+    }
+
+    private async calculateSchedulingSolution(question: TestQuestion): Promise<TestSolution> {
+        // Convert test processes to backend format
+        const processes = question.processes!.map(p => ({
+            arrivalTime: p.arrivalTime,
+            burstTime: p.burstTime,
+            io: p.io
+        }));
+
+        // Prepare request data
+        const requestData: any = {
+            algorithm: question.algorithm,
+            processes
+        };
+
+        if (question.quantum) {
+            requestData.quantum = question.quantum;
+        }
+
+        // Call backend scheduler
+        const response = await fetch('/api/cpu', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData)
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to calculate solution: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        
+        // Convert backend response to test solution format
+        return this.convertBackendResponseToSolution(result, question);
+    }
+
+    private async calculateMemorySolution(question: TestQuestion): Promise<MemoryTestSolution> {
+        // Prepare request data for memory management
+        const requestData = {
+            frameCount: question.frameCount!,
+            selectedAlgorithm: [question.algorithm.toLowerCase()],
+            pageReferences: question.pageReferences!
+        };
+
+        // Call backend memory management API
+        const response = await fetch('/api/memory', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData)
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to calculate memory solution: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        
+        // Convert backend response to memory test solution format
+        return this.convertMemoryBackendResponseToSolution(result);
     }
 
     private convertBackendResponseToSolution(
@@ -164,7 +199,96 @@ class TestSolutionService {
         return ganttChart;
     }
 
-    compareAnswers(userSolution: TestSolution, correctSolution: TestSolution): {
+    private convertMemoryBackendResponseToSolution(backendResponse: any): MemoryTestSolution {
+        console.log('=== MEMORY BACKEND RESPONSE CONVERSION DEBUG ===');
+        console.log('Backend Response:', JSON.stringify(backendResponse, null, 2));
+        
+        const data = backendResponse.data || backendResponse;
+        
+        console.log('Extracted data:', {
+            algorithm: data.algorithm,
+            frameCount: data.frameCount,
+            pageReferences: data.pageReferences,
+            totalPageFaults: data.totalPageFaults,
+            hitRate: data.hitRate,
+            framesLength: data.frames?.length,
+            customDataLength: data.customData?.length
+        });
+        
+        // Convert frames and customData to step results
+        const stepResults = this.convertFramesToStepResults(
+            data.frames || [], 
+            data.customData || [], 
+            data.pageReferences || []
+        );
+        
+        const solution: MemoryTestSolution = {
+            algorithm: data.algorithm || 'FIFO',
+            frameCount: data.frameCount || 0,
+            pageReferences: data.pageReferences || [],
+            totalPageFaults: data.totalPageFaults || 0,
+            hitRate: data.hitRate || 0,
+            frames: data.frames || [],
+            customData: data.customData || [],
+            stepResults
+        };
+        
+        console.log('Final Memory Solution with stepResults:', JSON.stringify(solution, null, 2));
+        console.log('=== END MEMORY BACKEND RESPONSE CONVERSION DEBUG ===');
+        
+        return solution;
+    }
+
+    private convertFramesToStepResults(frames: number[][], customData: any[], pageReferences: number[]): any[] {
+        const stepResults = [];
+        
+        console.log('=== CONVERSION DEBUG ===');
+        console.log('Frames:', frames);
+        console.log('CustomData:', customData);
+        console.log('PageReferences:', pageReferences);
+        
+        for (let i = 0; i < pageReferences.length; i++) {
+            const frameState = frames[i] || [];
+            const stepData = customData[i] || {};
+            
+            // Convert -1 to null for empty frames
+            const convertedFrameState = frameState.map(f => f === -1 ? null : f);
+            
+            const stepResult = {
+                pageReference: pageReferences[i],
+                frameState: convertedFrameState,
+                pageFault: stepData.pageFault === true || stepData.pageFault === 'true'
+            };
+            
+            console.log(`Step ${i}:`, stepResult);
+            stepResults.push(stepResult);
+        }
+        
+        console.log('Final stepResults:', stepResults);
+        console.log('=== END CONVERSION DEBUG ===');
+        
+        return stepResults;
+    }
+
+    compareAnswers(userSolution: TestSolution | MemoryTestSolution, correctSolution: TestSolution | MemoryTestSolution): {
+        isCorrect: boolean;
+        score: number;
+        maxScore: number;
+        details: any;
+    } {
+        console.log('=== COMPARISON DEBUG ===');
+        console.log('User Solution:', JSON.stringify(userSolution, null, 2));
+        console.log('Correct Solution:', JSON.stringify(correctSolution, null, 2));
+        
+        // Check if this is a memory question
+        if ('totalPageFaults' in userSolution && 'totalPageFaults' in correctSolution) {
+            return this.compareMemoryAnswers(userSolution, correctSolution);
+        } else {
+            return this.compareSchedulingAnswers(userSolution as TestSolution, correctSolution as TestSolution);
+        }
+    }
+
+    private compareSchedulingAnswers(userSolution: TestSolution, correctSolution: TestSolution): {
         isCorrect: boolean;
         score: number;
         maxScore: number;
@@ -175,10 +299,6 @@ class TestSolutionService {
             completionTimeCorrect: boolean;
         };
     } {
-        console.log('=== COMPARISON DEBUG ===');
-        console.log('User Solution:', JSON.stringify(userSolution, null, 2));
-        console.log('Correct Solution:', JSON.stringify(correctSolution, null, 2));
-        
         const maxScore = 100;
         let score = 0;
         const tolerance = 0.1; // Allow small rounding differences
@@ -228,6 +348,117 @@ class TestSolutionService {
                 avgWaitingTimeCorrect: waitingTimeCorrect,
                 avgTurnaroundTimeCorrect: turnaroundTimeCorrect,
                 completionTimeCorrect: completionTimeCorrect
+            }
+        };
+    }
+
+    private compareMemoryAnswers(userSolution: MemoryTestSolution, correctSolution: MemoryTestSolution): {
+        isCorrect: boolean;
+        score: number;
+        maxScore: number;
+        details: {
+            stepResultsCorrect: boolean;
+            pageFaultsCorrect: boolean;
+        };
+    } {
+        const maxScore = 100;
+        let score = 0;
+
+        console.log('=== MEMORY STEP COMPARISON DEBUG ===');
+        console.log('User Steps:', userSolution.stepResults);
+        console.log('Correct Steps:', correctSolution.stepResults);
+
+        if (!userSolution.stepResults || !correctSolution.stepResults) {
+            console.log('Missing step results');
+            return {
+                isCorrect: false,
+                score: 0,
+                maxScore,
+                details: {
+                    stepResultsCorrect: false,
+                    pageFaultsCorrect: false
+                }
+            };
+        }
+
+        const totalSteps = correctSolution.stepResults.length;
+        let correctSteps = 0;
+        let correctPageFaults = 0;
+
+        // Compare each step (80% of score)
+        for (let i = 0; i < totalSteps; i++) {
+            const userStep = userSolution.stepResults[i];
+            const correctStep = correctSolution.stepResults[i];
+            
+            if (!userStep || !correctStep) {
+                console.log(`Step ${i + 1}: Missing step data`);
+                continue;
+            }
+
+            console.log(`Step ${i + 1} Comparison:`);
+            console.log('  User Step:', JSON.stringify(userStep));
+            console.log('  Correct Step:', JSON.stringify(correctStep));
+
+            // Check frame state
+            let frameStateCorrect = true;
+            if (userStep.frameState.length === correctStep.frameState.length) {
+                for (let j = 0; j < correctStep.frameState.length; j++) {
+                    const userFrame = userStep.frameState[j];
+                    const correctFrame = correctStep.frameState[j];
+                    
+                    // Handle null/undefined comparison carefully
+                    // Both null/undefined should be considered equal (empty frame)
+                    const userIsEmpty = userFrame === null || userFrame === undefined;
+                    const correctIsEmpty = correctFrame === null || correctFrame === undefined;
+                    
+                    const framesMatch = (userFrame === correctFrame) || 
+                                       (userIsEmpty && correctIsEmpty);
+                    
+                    if (!framesMatch) {
+                        console.log(`  Frame ${j} mismatch: user=${userFrame}, correct=${correctFrame}`);
+                        frameStateCorrect = false;
+                        break;
+                    }
+                }
+            } else {
+                console.log(`  Frame state length mismatch: user=${userStep.frameState.length}, correct=${correctStep.frameState.length}`);
+                frameStateCorrect = false;
+            }
+
+            // Check page fault
+            const pageFaultCorrect = userStep.pageFault === correctStep.pageFault;
+            
+            console.log(`  Frame State Correct: ${frameStateCorrect}, Page Fault Correct: ${pageFaultCorrect}`);
+            console.log(`  User Page Fault: ${userStep.pageFault}, Correct Page Fault: ${correctStep.pageFault}`);
+            
+            if (frameStateCorrect && pageFaultCorrect) {
+                correctSteps++;
+            }
+            
+            if (pageFaultCorrect) {
+                correctPageFaults++;
+            }
+        }
+
+        // Score based on correct steps (80%) and page fault accuracy (20%)
+        const stepScore = (correctSteps / totalSteps) * 80;
+        const pageFaultScore = (correctPageFaults / totalSteps) * 20;
+        score = stepScore + pageFaultScore;
+
+        console.log(`Correct Steps: ${correctSteps}/${totalSteps}, Correct Page Faults: ${correctPageFaults}/${totalSteps}`);
+        console.log(`Step Score: ${stepScore}, Page Fault Score: ${pageFaultScore}, Total: ${score}`);
+
+        const isCorrect = score >= 80; // 80% threshold for correct answer
+        console.log('Final Memory Score:', score, 'Is Correct:', isCorrect);
+        console.log('=== END MEMORY STEP COMPARISON DEBUG ===');
+
+        return {
+            isCorrect,
+            score: Math.round(score),
+            maxScore,
+            details: {
+                stepResultsCorrect: correctSteps === totalSteps,
+                pageFaultsCorrect: correctPageFaults === totalSteps
             }
         };
     }

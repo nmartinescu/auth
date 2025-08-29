@@ -13,21 +13,21 @@ import {
     GridItem
 } from "@chakra-ui/react";
 import { useColorModeValue } from "./ui/color-mode";
-import type { TestQuestion, TestSolution, ProcessResult } from "../types/Test";
+import type { TestQuestion, TestSolution, MemoryTestSolution, ProcessResult, MemoryStepResult } from "../types/Test";
 
 interface TestQuestionComponentProps {
     question: TestQuestion;
     questionNumber: number;
     totalQuestions: number;
-    onSubmitAnswer: (solution: TestSolution) => void;
+    onSubmitAnswer: (solution: TestSolution | MemoryTestSolution) => void;
     onNextQuestion: () => void;
     onPreviousQuestion: () => void;
     onFinishTest: () => void;
     hasNext: boolean;
     hasPrevious: boolean;
-    initialAnswer?: TestSolution;
+    initialAnswer?: TestSolution | MemoryTestSolution;
     reviewMode?: boolean;
-    correctSolution?: TestSolution;
+    correctSolution?: TestSolution | MemoryTestSolution;
     userScore?: number;
 }
 
@@ -46,24 +46,60 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
     correctSolution,
     userScore
 }) => {
+    // Scheduling-specific state
     const [processResults, setProcessResults] = useState<ProcessResult[]>(() => {
-        if (initialAnswer) {
+        if (question.type === 'scheduling' && initialAnswer && 'processes' in initialAnswer) {
             return initialAnswer.processes;
         }
-        return question.processes.map(p => ({
-            pid: p.id,
-            arrivalTime: p.arrivalTime,
-            burstTime: p.burstTime,
-            scheduledTime: 0,
-            waitingTime: 0,
-            turnaroundTime: 0,
-            completionTime: 0
-        }));
+        if (question.type === 'scheduling' && question.processes) {
+            return question.processes.map(p => ({
+                pid: p.id,
+                arrivalTime: p.arrivalTime,
+                burstTime: p.burstTime,
+                scheduledTime: 0,
+                waitingTime: 0,
+                turnaroundTime: 0,
+                completionTime: 0
+            }));
+        }
+        return [];
     });
 
-    const [avgWaitingTime, setAvgWaitingTime] = useState(initialAnswer?.avgWaitingTime || 0);
-    const [avgTurnaroundTime, setAvgTurnaroundTime] = useState(initialAnswer?.avgTurnaroundTime || 0);
-    const [completionTime, setCompletionTime] = useState(initialAnswer?.completionTime || 0);
+    const [avgWaitingTime, setAvgWaitingTime] = useState(() => {
+        if (initialAnswer && 'avgWaitingTime' in initialAnswer) {
+            return initialAnswer.avgWaitingTime;
+        }
+        return 0;
+    });
+    
+    const [avgTurnaroundTime, setAvgTurnaroundTime] = useState(() => {
+        if (initialAnswer && 'avgTurnaroundTime' in initialAnswer) {
+            return initialAnswer.avgTurnaroundTime;
+        }
+        return 0;
+    });
+    
+    const [completionTime, setCompletionTime] = useState(() => {
+        if (initialAnswer && 'completionTime' in initialAnswer) {
+            return initialAnswer.completionTime;
+        }
+        return 0;
+    });
+
+    // Memory-specific state
+    const [memorySteps, setMemorySteps] = useState<MemoryStepResult[]>(() => {
+        if (initialAnswer && 'stepResults' in initialAnswer) {
+            return initialAnswer.stepResults;
+        }
+        if (question.type === 'memory' && question.pageReferences && question.frameCount) {
+            return question.pageReferences.map(pageRef => ({
+                pageReference: pageRef,
+                frameState: new Array(question.frameCount).fill(null),
+                pageFault: false
+            }));
+        }
+        return [];
+    });
 
     // UI Colors
     const boxBg = useColorModeValue("white", "gray.800");
@@ -90,20 +126,74 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
         ));
     };
 
-    const handleSubmit = () => {
-        const solution: TestSolution = {
-            processes: processResults,
-            avgWaitingTime,
-            avgTurnaroundTime,
-            completionTime,
-            ganttChart: [] // For simplicity, we'll let the backend calculate this
-        };
+    const handleMemoryFrameChange = (stepIndex: number, frameIndex: number, value: string) => {
+        let numValue: number | null = null;
+        if (value !== '') {
+            const parsed = parseInt(value);
+            if (!isNaN(parsed)) {
+                numValue = parsed;
+            }
+        }
+        
+        setMemorySteps(prev => prev.map((step, idx) => 
+            idx === stepIndex 
+                ? { 
+                    ...step, 
+                    frameState: step.frameState.map((frame, fIdx) => 
+                        fIdx === frameIndex ? numValue : frame
+                    )
+                }
+                : step
+        ));
+    };
 
-        console.log('=== USER SUBMISSION DEBUG ===');
-        console.log('User Solution Being Submitted:', JSON.stringify(solution, null, 2));
-        console.log('Process Results:', processResults);
-        console.log('Calculated averages - Waiting:', avgWaitingTime, 'Turnaround:', avgTurnaroundTime, 'Completion:', completionTime);
-        console.log('=== END USER SUBMISSION DEBUG ===');
+    const handlePageFaultChange = (stepIndex: number, isPageFault: boolean) => {
+        setMemorySteps(prev => prev.map((step, idx) => 
+            idx === stepIndex ? { ...step, pageFault: isPageFault } : step
+        ));
+    };
+
+    const handleSubmit = () => {
+        let solution: TestSolution | MemoryTestSolution;
+        
+        if (question.type === 'memory') {
+            // Calculate total page faults from user's step results
+            const totalPageFaults = memorySteps.filter(step => step.pageFault).length;
+            
+            solution = {
+                algorithm: question.algorithm,
+                frameCount: question.frameCount || 0,
+                pageReferences: question.pageReferences || [],
+                totalPageFaults,
+                hitRate: 0, // Will be calculated by backend
+                frames: [], // For simplicity, we'll let the backend calculate this
+                customData: [], // For simplicity, we'll let the backend calculate this
+                stepResults: memorySteps
+            };
+            
+            console.log('=== USER MEMORY SUBMISSION DEBUG ===');
+            console.log('User Memory Solution Being Submitted:', JSON.stringify(solution, null, 2));
+            console.log('Memory Steps Details:');
+            memorySteps.forEach((step, i) => {
+                console.log(`  Step ${i}: Page ${step.pageReference}, Frames: [${step.frameState.join(', ')}], Page Fault: ${step.pageFault}`);
+            });
+            console.log('Total Page Faults:', totalPageFaults);
+            console.log('=== END USER MEMORY SUBMISSION DEBUG ===');
+        } else {
+            solution = {
+                processes: processResults,
+                avgWaitingTime,
+                avgTurnaroundTime,
+                completionTime,
+                ganttChart: [] // For simplicity, we'll let the backend calculate this
+            };
+
+            console.log('=== USER SCHEDULING SUBMISSION DEBUG ===');
+            console.log('User Scheduling Solution Being Submitted:', JSON.stringify(solution, null, 2));
+            console.log('Process Results:', processResults);
+            console.log('Calculated averages - Waiting:', avgWaitingTime, 'Turnaround:', avgTurnaroundTime, 'Completion:', completionTime);
+            console.log('=== END USER SCHEDULING SUBMISSION DEBUG ===');
+        }
 
         onSubmitAnswer(solution);
         
@@ -177,48 +267,64 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                         <Text color="gray.600">{question.description}</Text>
                     </Box>
 
-                    {/* Process Information Grid */}
-                    <Box w="100%">
-                        <Text fontSize="md" fontWeight="semibold" mb={3}>Process Information:</Text>
-                        <Box border="1px" borderColor={borderColor} borderRadius="md" overflow="hidden">
-                            {/* Header */}
-                            <Grid templateColumns="repeat(4, 1fr)" bg={headerBg}>
-                                <GridItem p={3} borderRight="1px" borderColor={borderColor}>
-                                    <Text fontWeight="semibold">Process ID</Text>
-                                </GridItem>
-                                <GridItem p={3} borderRight="1px" borderColor={borderColor}>
-                                    <Text fontWeight="semibold">Arrival Time</Text>
-                                </GridItem>
-                                <GridItem p={3} borderRight="1px" borderColor={borderColor}>
-                                    <Text fontWeight="semibold">Burst Time</Text>
-                                </GridItem>
-                                <GridItem p={3}>
-                                    <Text fontWeight="semibold">I/O Operations</Text>
-                                </GridItem>
-                            </Grid>
-                            {/* Rows */}
-                            {question.processes.map((process, index) => (
-                                <Grid key={process.id} templateColumns="repeat(4, 1fr)" borderTop={index > 0 ? "1px" : "none"} borderColor={borderColor}>
+                    {/* Process Information Grid - Only for scheduling questions */}
+                    {question.type === 'scheduling' && question.processes && (
+                        <Box w="100%">
+                            <Text fontSize="md" fontWeight="semibold" mb={3}>Process Information:</Text>
+                            <Box border="1px" borderColor={borderColor} borderRadius="md" overflow="hidden">
+                                {/* Header */}
+                                <Grid templateColumns="repeat(4, 1fr)" bg={headerBg}>
                                     <GridItem p={3} borderRight="1px" borderColor={borderColor}>
-                                        <Text>P{process.id}</Text>
+                                        <Text fontWeight="semibold">Process ID</Text>
                                     </GridItem>
                                     <GridItem p={3} borderRight="1px" borderColor={borderColor}>
-                                        <Text>{process.arrivalTime}</Text>
+                                        <Text fontWeight="semibold">Arrival Time</Text>
                                     </GridItem>
                                     <GridItem p={3} borderRight="1px" borderColor={borderColor}>
-                                        <Text>{process.burstTime}</Text>
+                                        <Text fontWeight="semibold">Burst Time</Text>
                                     </GridItem>
                                     <GridItem p={3}>
-                                        <Text>{formatIOOperations(process.io)}</Text>
+                                        <Text fontWeight="semibold">I/O Operations</Text>
                                     </GridItem>
                                 </Grid>
-                            ))}
+                                {/* Rows */}
+                                {question.processes.map((process, index) => (
+                                    <Grid key={process.id} templateColumns="repeat(4, 1fr)" borderTop={index > 0 ? "1px" : "none"} borderColor={borderColor}>
+                                        <GridItem p={3} borderRight="1px" borderColor={borderColor}>
+                                            <Text>P{process.id}</Text>
+                                        </GridItem>
+                                        <GridItem p={3} borderRight="1px" borderColor={borderColor}>
+                                            <Text>{process.arrivalTime}</Text>
+                                        </GridItem>
+                                        <GridItem p={3} borderRight="1px" borderColor={borderColor}>
+                                            <Text>{process.burstTime}</Text>
+                                        </GridItem>
+                                        <GridItem p={3}>
+                                            <Text>{formatIOOperations(process.io)}</Text>
+                                        </GridItem>
+                                    </Grid>
+                                ))}
+                            </Box>
                         </Box>
-                    </Box>
+                    )}
+
+                    {/* Memory Information - Only for memory questions */}
+                    {question.type === 'memory' && (
+                        <Box w="100%">
+                            <Text fontSize="md" fontWeight="semibold" mb={3}>Memory Configuration:</Text>
+                            <Box border="1px" borderColor={borderColor} borderRadius="md" p={4}>
+                                <VStack align="start" gap={3}>
+                                    <Text><strong>Frame Count:</strong> {question.frameCount}</Text>
+                                    <Text><strong>Page Reference Sequence:</strong> {question.pageReferences?.join(', ')}</Text>
+                                    <Text><strong>Algorithm:</strong> {question.algorithm}</Text>
+                                </VStack>
+                            </Box>
+                        </Box>
+                    )}
                 </VStack>
             </Box>
 
-            {/* Answer Grid */}
+            {/* Answer Section */}
             <Box 
                 p={6} 
                 borderWidth={1} 
@@ -231,219 +337,357 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                     {reviewMode ? "Your Answer vs Correct Answer:" : "Your Answer:"}
                 </Text>
                 
-                <Box border="1px" borderColor={borderColor} borderRadius="md" overflow="hidden">
-                    {/* Header */}
-                    <Grid templateColumns="repeat(7, 1fr)" bg={headerBg}>
-                        <GridItem p={3} borderRight="1px" borderColor={borderColor}>
-                            <Text fontWeight="semibold">Process ID</Text>
-                        </GridItem>
-                        <GridItem p={3} borderRight="1px" borderColor={borderColor}>
-                            <Text fontWeight="semibold">Arrival Time</Text>
-                        </GridItem>
-                        <GridItem p={3} borderRight="1px" borderColor={borderColor}>
-                            <Text fontWeight="semibold">Burst Time</Text>
-                        </GridItem>
-                        <GridItem p={3} borderRight="1px" borderColor={borderColor}>
-                            <Text fontWeight="semibold">Scheduled Time</Text>
-                        </GridItem>
-                        <GridItem p={3} borderRight="1px" borderColor={borderColor}>
-                            <Text fontWeight="semibold">Waiting Time</Text>
-                        </GridItem>
-                        <GridItem p={3} borderRight="1px" borderColor={borderColor}>
-                            <Text fontWeight="semibold">Turnaround Time</Text>
-                        </GridItem>
-                        <GridItem p={3}>
-                            <Text fontWeight="semibold">Completion Time</Text>
-                        </GridItem>
-                    </Grid>
-                    {/* Rows */}
-                    {processResults.map((process, index) => {
-                        const correctProcess = reviewMode && correctSolution 
-                            ? correctSolution.processes.find(p => p.pid === process.pid)
-                            : null;
-                        
-                        return (
-                            <Grid key={process.pid} templateColumns="repeat(7, 1fr)" borderTop={index > 0 ? "1px" : "none"} borderColor={borderColor}>
-                                <GridItem p={3} borderRight="1px" borderColor={borderColor} display="flex" alignItems="center">
-                                    <Text>P{process.pid}</Text>
-                                </GridItem>
-                                <GridItem p={3} borderRight="1px" borderColor={borderColor} display="flex" alignItems="center">
-                                    <Text>{process.arrivalTime}</Text>
-                                </GridItem>
-                                <GridItem p={3} borderRight="1px" borderColor={borderColor} display="flex" alignItems="center">
-                                    <Text>{process.burstTime}</Text>
+                {question.type === 'scheduling' ? (
+                    <>
+                        {/* Scheduling Answer Grid */}
+                        <Box border="1px" borderColor={borderColor} borderRadius="md" overflow="hidden">
+                            {/* Header */}
+                            <Grid templateColumns="repeat(7, 1fr)" bg={headerBg}>
+                                <GridItem p={3} borderRight="1px" borderColor={borderColor}>
+                                    <Text fontWeight="semibold">Process ID</Text>
                                 </GridItem>
                                 <GridItem p={3} borderRight="1px" borderColor={borderColor}>
-                                    {reviewMode ? (
-                                        <VStack align="start" gap={1}>
-                                            <Text 
-                                                color={correctProcess && Math.abs(process.scheduledTime - correctProcess.scheduledTime) <= 0.1 ? "green.600" : "red.600"}
-                                                fontWeight="semibold"
-                                            >
-                                                Your: {process.scheduledTime}
-                                            </Text>
-                                            {correctProcess && (
-                                                <Text color="gray.600" fontSize="sm">
-                                                    Correct: {correctProcess.scheduledTime}
-                                                </Text>
-                                            )}
-                                        </VStack>
-                                    ) : (
-                                        <Input
-                                            type="number"
-                                            value={process.scheduledTime}
-                                            onChange={(e) => handleProcessFieldChange(process.pid, 'scheduledTime', e.target.value)}
-                                            size="sm"
-                                            w="80px"
-                                            min={0}
-                                            step={0.1}
-                                        />
-                                    )}
+                                    <Text fontWeight="semibold">Arrival Time</Text>
                                 </GridItem>
                                 <GridItem p={3} borderRight="1px" borderColor={borderColor}>
-                                    {reviewMode ? (
-                                        <VStack align="start" gap={1}>
-                                            <Text 
-                                                color={correctProcess && Math.abs(process.waitingTime - correctProcess.waitingTime) <= 0.1 ? "green.600" : "red.600"}
-                                                fontWeight="semibold"
-                                            >
-                                                Your: {process.waitingTime}
-                                            </Text>
-                                            {correctProcess && (
-                                                <Text color="gray.600" fontSize="sm">
-                                                    Correct: {correctProcess.waitingTime}
-                                                </Text>
-                                            )}
-                                        </VStack>
-                                    ) : (
-                                        <Input
-                                            type="number"
-                                            value={process.waitingTime}
-                                            onChange={(e) => handleProcessFieldChange(process.pid, 'waitingTime', e.target.value)}
-                                            size="sm"
-                                            w="80px"
-                                            min={0}
-                                            step={0.1}
-                                        />
-                                    )}
+                                    <Text fontWeight="semibold">Burst Time</Text>
                                 </GridItem>
                                 <GridItem p={3} borderRight="1px" borderColor={borderColor}>
-                                    {reviewMode ? (
-                                        <VStack align="start" gap={1}>
-                                            <Text 
-                                                color={correctProcess && Math.abs(process.turnaroundTime - correctProcess.turnaroundTime) <= 0.1 ? "green.600" : "red.600"}
-                                                fontWeight="semibold"
-                                            >
-                                                Your: {process.turnaroundTime}
-                                            </Text>
-                                            {correctProcess && (
-                                                <Text color="gray.600" fontSize="sm">
-                                                    Correct: {correctProcess.turnaroundTime}
-                                                </Text>
-                                            )}
-                                        </VStack>
-                                    ) : (
-                                        <Input
-                                            type="number"
-                                            value={process.turnaroundTime}
-                                            onChange={(e) => handleProcessFieldChange(process.pid, 'turnaroundTime', e.target.value)}
-                                            size="sm"
-                                            w="80px"
-                                            min={0}
-                                            step={0.1}
-                                        />
-                                    )}
+                                    <Text fontWeight="semibold">Scheduled Time</Text>
+                                </GridItem>
+                                <GridItem p={3} borderRight="1px" borderColor={borderColor}>
+                                    <Text fontWeight="semibold">Waiting Time</Text>
+                                </GridItem>
+                                <GridItem p={3} borderRight="1px" borderColor={borderColor}>
+                                    <Text fontWeight="semibold">Turnaround Time</Text>
                                 </GridItem>
                                 <GridItem p={3}>
-                                    {reviewMode ? (
-                                        <VStack align="start" gap={1}>
-                                            <Text 
-                                                color={correctProcess && Math.abs(process.completionTime - correctProcess.completionTime) <= 0.1 ? "green.600" : "red.600"}
-                                                fontWeight="semibold"
-                                            >
-                                                Your: {process.completionTime}
-                                            </Text>
-                                            {correctProcess && (
-                                                <Text color="gray.600" fontSize="sm">
-                                                    Correct: {correctProcess.completionTime}
-                                                </Text>
-                                            )}
-                                        </VStack>
-                                    ) : (
-                                        <Input
-                                            type="number"
-                                            value={process.completionTime}
-                                            onChange={(e) => handleProcessFieldChange(process.pid, 'completionTime', e.target.value)}
-                                            size="sm"
-                                            w="80px"
-                                            min={0}
-                                            step={0.1}
-                                        />
-                                    )}
+                                    <Text fontWeight="semibold">Completion Time</Text>
                                 </GridItem>
                             </Grid>
-                        );
-                    })}
-                </Box>
+                            {/* Rows */}
+                            {processResults.map((process, index) => {
+                                const correctProcess = reviewMode && correctSolution && 'processes' in correctSolution
+                                    ? correctSolution.processes.find(p => p.pid === process.pid)
+                                    : null;
+                                
+                                return (
+                                    <Grid key={process.pid} templateColumns="repeat(7, 1fr)" borderTop={index > 0 ? "1px" : "none"} borderColor={borderColor}>
+                                        <GridItem p={3} borderRight="1px" borderColor={borderColor} display="flex" alignItems="center">
+                                            <Text>P{process.pid}</Text>
+                                        </GridItem>
+                                        <GridItem p={3} borderRight="1px" borderColor={borderColor} display="flex" alignItems="center">
+                                            <Text>{process.arrivalTime}</Text>
+                                        </GridItem>
+                                        <GridItem p={3} borderRight="1px" borderColor={borderColor} display="flex" alignItems="center">
+                                            <Text>{process.burstTime}</Text>
+                                        </GridItem>
+                                        <GridItem p={3} borderRight="1px" borderColor={borderColor}>
+                                            {reviewMode ? (
+                                                <VStack align="start" gap={1}>
+                                                    <Text 
+                                                        color={correctProcess && Math.abs(process.scheduledTime - correctProcess.scheduledTime) <= 0.1 ? "green.600" : "red.600"}
+                                                        fontWeight="semibold"
+                                                    >
+                                                        Your: {process.scheduledTime}
+                                                    </Text>
+                                                    {correctProcess && (
+                                                        <Text color="gray.600" fontSize="sm">
+                                                            Correct: {correctProcess.scheduledTime}
+                                                        </Text>
+                                                    )}
+                                                </VStack>
+                                            ) : (
+                                                <Input
+                                                    type="number"
+                                                    value={process.scheduledTime}
+                                                    onChange={(e) => handleProcessFieldChange(process.pid, 'scheduledTime', e.target.value)}
+                                                    size="sm"
+                                                    w="80px"
+                                                    min={0}
+                                                    step={0.1}
+                                                />
+                                            )}
+                                        </GridItem>
+                                        <GridItem p={3} borderRight="1px" borderColor={borderColor}>
+                                            {reviewMode ? (
+                                                <VStack align="start" gap={1}>
+                                                    <Text 
+                                                        color={correctProcess && Math.abs(process.waitingTime - correctProcess.waitingTime) <= 0.1 ? "green.600" : "red.600"}
+                                                        fontWeight="semibold"
+                                                    >
+                                                        Your: {process.waitingTime}
+                                                    </Text>
+                                                    {correctProcess && (
+                                                        <Text color="gray.600" fontSize="sm">
+                                                            Correct: {correctProcess.waitingTime}
+                                                        </Text>
+                                                    )}
+                                                </VStack>
+                                            ) : (
+                                                <Input
+                                                    type="number"
+                                                    value={process.waitingTime}
+                                                    onChange={(e) => handleProcessFieldChange(process.pid, 'waitingTime', e.target.value)}
+                                                    size="sm"
+                                                    w="80px"
+                                                    min={0}
+                                                    step={0.1}
+                                                />
+                                            )}
+                                        </GridItem>
+                                        <GridItem p={3} borderRight="1px" borderColor={borderColor}>
+                                            {reviewMode ? (
+                                                <VStack align="start" gap={1}>
+                                                    <Text 
+                                                        color={correctProcess && Math.abs(process.turnaroundTime - correctProcess.turnaroundTime) <= 0.1 ? "green.600" : "red.600"}
+                                                        fontWeight="semibold"
+                                                    >
+                                                        Your: {process.turnaroundTime}
+                                                    </Text>
+                                                    {correctProcess && (
+                                                        <Text color="gray.600" fontSize="sm">
+                                                            Correct: {correctProcess.turnaroundTime}
+                                                        </Text>
+                                                    )}
+                                                </VStack>
+                                            ) : (
+                                                <Input
+                                                    type="number"
+                                                    value={process.turnaroundTime}
+                                                    onChange={(e) => handleProcessFieldChange(process.pid, 'turnaroundTime', e.target.value)}
+                                                    size="sm"
+                                                    w="80px"
+                                                    min={0}
+                                                    step={0.1}
+                                                />
+                                            )}
+                                        </GridItem>
+                                        <GridItem p={3}>
+                                            {reviewMode ? (
+                                                <VStack align="start" gap={1}>
+                                                    <Text 
+                                                        color={correctProcess && Math.abs(process.completionTime - correctProcess.completionTime) <= 0.1 ? "green.600" : "red.600"}
+                                                        fontWeight="semibold"
+                                                    >
+                                                        Your: {process.completionTime}
+                                                    </Text>
+                                                    {correctProcess && (
+                                                        <Text color="gray.600" fontSize="sm">
+                                                            Correct: {correctProcess.completionTime}
+                                                        </Text>
+                                                    )}
+                                                </VStack>
+                                            ) : (
+                                                <Input
+                                                    type="number"
+                                                    value={process.completionTime}
+                                                    onChange={(e) => handleProcessFieldChange(process.pid, 'completionTime', e.target.value)}
+                                                    size="sm"
+                                                    w="80px"
+                                                    min={0}
+                                                    step={0.1}
+                                                />
+                                            )}
+                                        </GridItem>
+                                    </Grid>
+                                );
+                            })}
+                        </Box>
 
-                {/* Summary Statistics */}
-                <Box mt={6} p={4} bg={headerBg} borderRadius="md">
-                    <Flex gap={8} flexWrap="wrap">
-                        <Box>
-                            <Text fontWeight="semibold">Average Waiting Time:</Text>
-                            {reviewMode && correctSolution ? (
-                                <VStack align="start" gap={1}>
-                                    <Text fontSize="lg" color={Math.abs(avgWaitingTime - correctSolution.avgWaitingTime) <= 0.1 ? "green.600" : "red.600"}>
-                                        Your: {avgWaitingTime}
-                                    </Text>
-                                    <Text fontSize="sm" color="gray.600">
-                                        Correct: {correctSolution.avgWaitingTime}
-                                    </Text>
-                                </VStack>
-                            ) : (
-                                <Text fontSize="lg" color="blue.600">{avgWaitingTime}</Text>
-                            )}
+                        {/* Scheduling Summary Statistics */}
+                        <Box mt={6} p={4} bg={headerBg} borderRadius="md">
+                            <Flex gap={8} flexWrap="wrap">
+                                <Box>
+                                    <Text fontWeight="semibold">Average Waiting Time:</Text>
+                                    {reviewMode && correctSolution && 'avgWaitingTime' in correctSolution ? (
+                                        <VStack align="start" gap={1}>
+                                            <Text fontSize="lg" color={Math.abs(avgWaitingTime - correctSolution.avgWaitingTime) <= 0.1 ? "green.600" : "red.600"}>
+                                                Your: {avgWaitingTime}
+                                            </Text>
+                                            <Text fontSize="sm" color="gray.600">
+                                                Correct: {correctSolution.avgWaitingTime}
+                                            </Text>
+                                        </VStack>
+                                    ) : (
+                                        <Text fontSize="lg" color="blue.600">{avgWaitingTime}</Text>
+                                    )}
+                                </Box>
+                                <Box>
+                                    <Text fontWeight="semibold">Average Turnaround Time:</Text>
+                                    {reviewMode && correctSolution && 'avgTurnaroundTime' in correctSolution ? (
+                                        <VStack align="start" gap={1}>
+                                            <Text fontSize="lg" color={Math.abs(avgTurnaroundTime - correctSolution.avgTurnaroundTime) <= 0.1 ? "green.600" : "red.600"}>
+                                                Your: {avgTurnaroundTime}
+                                            </Text>
+                                            <Text fontSize="sm" color="gray.600">
+                                                Correct: {correctSolution.avgTurnaroundTime}
+                                            </Text>
+                                        </VStack>
+                                    ) : (
+                                        <Text fontSize="lg" color="blue.600">{avgTurnaroundTime}</Text>
+                                    )}
+                                </Box>
+                                <Box>
+                                    <Text fontWeight="semibold">Total Completion Time:</Text>
+                                    {reviewMode && correctSolution && 'completionTime' in correctSolution ? (
+                                        <VStack align="start" gap={1}>
+                                            <Text fontSize="lg" color={Math.abs(completionTime - correctSolution.completionTime) <= 0.1 ? "green.600" : "red.600"}>
+                                                Your: {completionTime}
+                                            </Text>
+                                            <Text fontSize="sm" color="gray.600">
+                                                Correct: {correctSolution.completionTime}
+                                            </Text>
+                                        </VStack>
+                                    ) : (
+                                        <Text fontSize="lg" color="blue.600">{completionTime}</Text>
+                                    )}
+                                </Box>
+                                {reviewMode && userScore !== undefined && (
+                                    <Box>
+                                        <Text fontWeight="semibold">Your Score:</Text>
+                                        <Text fontSize="lg" color={userScore >= 80 ? "green.600" : userScore >= 60 ? "yellow.600" : "red.600"}>
+                                            {userScore}/100
+                                        </Text>
+                                    </Box>
+                                )}
+                            </Flex>
                         </Box>
-                        <Box>
-                            <Text fontWeight="semibold">Average Turnaround Time:</Text>
-                            {reviewMode && correctSolution ? (
-                                <VStack align="start" gap={1}>
-                                    <Text fontSize="lg" color={Math.abs(avgTurnaroundTime - correctSolution.avgTurnaroundTime) <= 0.1 ? "green.600" : "red.600"}>
-                                        Your: {avgTurnaroundTime}
-                                    </Text>
-                                    <Text fontSize="sm" color="gray.600">
-                                        Correct: {correctSolution.avgTurnaroundTime}
-                                    </Text>
-                                </VStack>
-                            ) : (
-                                <Text fontSize="lg" color="blue.600">{avgTurnaroundTime}</Text>
-                            )}
+                    </>
+                ) : (
+                    <>
+                        {/* Memory Step-by-Step Table */}
+                        <Box border="1px" borderColor={borderColor} borderRadius="md" overflow="hidden">
+                            {/* Header */}
+                            <Grid templateColumns={`80px repeat(${question.frameCount || 3}, 1fr) 100px`} bg={headerBg}>
+                                <GridItem p={3} borderRight="1px" borderColor={borderColor}>
+                                    <Text fontWeight="semibold">Page Ref</Text>
+                                </GridItem>
+                                {Array.from({ length: question.frameCount || 3 }, (_, i) => (
+                                    <GridItem key={i} p={3} borderRight="1px" borderColor={borderColor}>
+                                        <Text fontWeight="semibold">Frame {i}</Text>
+                                    </GridItem>
+                                ))}
+                                <GridItem p={3}>
+                                    <Text fontWeight="semibold">Page Fault?</Text>
+                                </GridItem>
+                            </Grid>
+                            
+                            {/* Memory Steps */}
+                            {memorySteps.map((step, stepIndex) => {
+                                const correctStep = reviewMode && correctSolution && 'stepResults' in correctSolution
+                                    ? correctSolution.stepResults[stepIndex]
+                                    : null;
+                                
+                                return (
+                                    <Grid 
+                                        key={stepIndex} 
+                                        templateColumns={`80px repeat(${question.frameCount || 3}, 1fr) 100px`} 
+                                        borderTop="1px" 
+                                        borderColor={borderColor}
+                                    >
+                                        <GridItem p={3} borderRight="1px" borderColor={borderColor} display="flex" alignItems="center">
+                                            <Text fontWeight="semibold">{step.pageReference}</Text>
+                                        </GridItem>
+                                        
+                                        {step.frameState.map((frameValue, frameIndex) => (
+                                            <GridItem key={frameIndex} p={3} borderRight="1px" borderColor={borderColor}>
+                                                {reviewMode ? (
+                                                    <VStack align="start" gap={1}>
+                                                        <Text 
+                                                            color={correctStep && (() => {
+                                                                const userIsEmpty = frameValue === null || frameValue === undefined;
+                                                                const correctIsEmpty = correctStep.frameState[frameIndex] === null || correctStep.frameState[frameIndex] === undefined;
+                                                                return (frameValue === correctStep.frameState[frameIndex]) || (userIsEmpty && correctIsEmpty);
+                                                            })() ? "green.600" : "red.600"}
+                                                            fontWeight="semibold"
+                                                        >
+                                                            Your: {frameValue ?? '-'}
+                                                        </Text>
+                                                        {correctStep && (
+                                                            <Text color="gray.600" fontSize="sm">
+                                                                Correct: {correctStep.frameState[frameIndex] ?? '-'}
+                                                            </Text>
+                                                        )}
+                                                    </VStack>
+                                                ) : (
+                                                    <Input
+                                                        type="number"
+                                                        value={frameValue ?? ''}
+                                                        onChange={(e) => handleMemoryFrameChange(stepIndex, frameIndex, e.target.value)}
+                                                        size="sm"
+                                                        w="60px"
+                                                        min={1}
+                                                        placeholder="-"
+                                                    />
+                                                )}
+                                            </GridItem>
+                                        ))}
+                                        
+                                        <GridItem p={3} display="flex" alignItems="center" justifyContent="center">
+                                            {reviewMode ? (
+                                                <VStack align="center" gap={1}>
+                                                    <Text 
+                                                        color={correctStep && step.pageFault === correctStep.pageFault ? "green.600" : "red.600"}
+                                                        fontWeight="semibold"
+                                                    >
+                                                        Your: {step.pageFault ? "Yes" : "No"}
+                                                    </Text>
+                                                    {correctStep && (
+                                                        <Text color="gray.600" fontSize="sm">
+                                                            Correct: {correctStep.pageFault ? "Yes" : "No"}
+                                                        </Text>
+                                                    )}
+                                                </VStack>
+                                            ) : (
+                                                <input
+                                                    type="checkbox"
+                                                    checked={step.pageFault}
+                                                    onChange={(e) => handlePageFaultChange(stepIndex, e.target.checked)}
+                                                    style={{ transform: 'scale(1.2)' }}
+                                                />
+                                            )}
+                                        </GridItem>
+                                    </Grid>
+                                );
+                            })}
                         </Box>
-                        <Box>
-                            <Text fontWeight="semibold">Total Completion Time:</Text>
-                            {reviewMode && correctSolution ? (
-                                <VStack align="start" gap={1}>
-                                    <Text fontSize="lg" color={Math.abs(completionTime - correctSolution.completionTime) <= 0.1 ? "green.600" : "red.600"}>
-                                        Your: {completionTime}
+
+                        {/* Memory Summary */}
+                        <Box mt={6} p={4} bg={headerBg} borderRadius="md">
+                            <Flex gap={8} flexWrap="wrap" align="center">
+                                <Box>
+                                    <Text fontWeight="semibold">Total Page Faults:</Text>
+                                    <Text fontSize="lg" color="blue.600">
+                                        {memorySteps.filter(step => step.pageFault).length}
                                     </Text>
-                                    <Text fontSize="sm" color="gray.600">
-                                        Correct: {correctSolution.completionTime}
+                                </Box>
+                                <Box>
+                                    <Text fontWeight="semibold">Total References:</Text>
+                                    <Text fontSize="lg" color="blue.600">
+                                        {memorySteps.length}
                                     </Text>
-                                </VStack>
-                            ) : (
-                                <Text fontSize="lg" color="blue.600">{completionTime}</Text>
-                            )}
+                                </Box>
+                                <Box>
+                                    <Text fontWeight="semibold">Hit Rate:</Text>
+                                    <Text fontSize="lg" color="blue.600">
+                                        {memorySteps.length > 0 
+                                            ? ((memorySteps.length - memorySteps.filter(step => step.pageFault).length) / memorySteps.length * 100).toFixed(1)
+                                            : 0}%
+                                    </Text>
+                                </Box>
+                                {reviewMode && userScore !== undefined && (
+                                    <Box>
+                                        <Text fontWeight="semibold">Your Score:</Text>
+                                        <Text fontSize="lg" color={userScore >= 80 ? "green.600" : userScore >= 60 ? "yellow.600" : "red.600"}>
+                                            {userScore}/100
+                                        </Text>
+                                    </Box>
+                                )}
+                            </Flex>
                         </Box>
-                        {reviewMode && userScore !== undefined && (
-                            <Box>
-                                <Text fontWeight="semibold">Your Score:</Text>
-                                <Text fontSize="lg" color={userScore >= 80 ? "green.600" : userScore >= 60 ? "yellow.600" : "red.600"}>
-                                    {userScore}/100
-                                </Text>
-                            </Box>
-                        )}
-                    </Flex>
-                </Box>
+                    </>
+                )}
             </Box>
 
             {/* Navigation Buttons */}

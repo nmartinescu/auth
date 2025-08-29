@@ -1,11 +1,14 @@
 export interface TestQuestion {
     id: string;
+    type: 'scheduling' | 'memory';
     difficulty: 'easy' | 'medium' | 'hard';
-    algorithm: 'FCFS' | 'SJF' | 'RR';
+    algorithm: 'FCFS' | 'SJF' | 'RR' | 'FIFO' | 'LRU' | 'OPT';
     quantum?: number;
-    processes: TestProcess[];
+    processes?: TestProcess[];
+    frameCount?: number;
+    pageReferences?: number[];
     description: string;
-    expectedSolution?: TestSolution;
+    expectedSolution?: TestSolution | MemoryTestSolution;
 }
 
 export interface TestProcess {
@@ -28,6 +31,32 @@ export interface TestSolution {
     ganttChart: GanttEntry[];
 }
 
+export interface MemoryTestSolution {
+    algorithm: string;
+    frameCount: number;
+    pageReferences: number[];
+    totalPageFaults: number;
+    hitRate: number;
+    frames: number[][];
+    customData: MemoryStepData[];
+    stepResults: MemoryStepResult[];
+}
+
+export interface MemoryStepData {
+    page: number;
+    pageFault: boolean;
+    totalPageFaults: number;
+    hitRate: number;
+    dataStructure: number[];
+    explaination: string;
+}
+
+export interface MemoryStepResult {
+    pageReference: number;
+    frameState: (number | null)[];
+    pageFault: boolean;
+}
+
 export interface ProcessResult {
     pid: number;
     arrivalTime: number;
@@ -46,6 +75,7 @@ export interface GanttEntry {
 
 export interface TestConfig {
     includeScheduling: boolean;
+    includeMemory: boolean;
     numQuestions: number;
     difficulty: 'easy' | 'medium' | 'hard';
 }
@@ -63,20 +93,8 @@ export interface TestSession {
 
 export interface UserAnswer {
     questionId: string;
-    userSolution: {
-        processes: ProcessResult[];
-        avgWaitingTime: number;
-        avgTurnaroundTime: number;
-        completionTime: number;
-        ganttChart: GanttEntry[];
-    };
-    correctSolution: {
-        processes: ProcessResult[];
-        avgWaitingTime: number;
-        avgTurnaroundTime: number;
-        completionTime: number;
-        ganttChart: GanttEntry[];
-    };
+    userSolution: TestSolution | MemoryTestSolution;
+    correctSolution: TestSolution | MemoryTestSolution;
     isCorrect: boolean;
     score: number;
     maxScore: number;
@@ -84,3 +102,4 @@ export interface UserAnswer {
 
 export type DifficultyLevel = 'easy' | 'medium' | 'hard';
 export type AlgorithmType = 'FCFS' | 'SJF' | 'RR';
+export type MemoryAlgorithmType = 'FIFO' | 'LRU' | 'OPT';

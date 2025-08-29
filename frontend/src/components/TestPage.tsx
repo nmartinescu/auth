@@ -18,6 +18,7 @@ interface TestPageProps {
 
 const TestPage: React.FC<TestPageProps> = ({ onTestStart }) => {
     const [includeScheduling, setIncludeScheduling] = useState(true);
+    const [includeMemory, setIncludeMemory] = useState(false);
     const [numQuestions, setNumQuestions] = useState("5");
     const [difficulty, setDifficulty] = useState("easy");
     const [touched, setTouched] = useState(false);
@@ -25,11 +26,11 @@ const TestPage: React.FC<TestPageProps> = ({ onTestStart }) => {
     const [error, setError] = useState<string | null>(null);
 
     const questionsError =
-        includeScheduling && touched && (!numQuestions || parseInt(numQuestions, 10) < 1);
+        (includeScheduling || includeMemory) && touched && (!numQuestions || parseInt(numQuestions, 10) < 1);
     
     const handleStartTest = async () => {
-        if (!includeScheduling) {
-            setError("Currently only scheduling tests are supported.");
+        if (!includeScheduling && !includeMemory) {
+            setError("Please select at least one test type (scheduling or memory).");
             return;
         }
 
@@ -44,6 +45,7 @@ const TestPage: React.FC<TestPageProps> = ({ onTestStart }) => {
         try {
             const config: TestConfig = {
                 includeScheduling,
+                includeMemory,
                 numQuestions: parseInt(numQuestions, 10),
                 difficulty: difficulty as 'easy' | 'medium' | 'hard'
             };
@@ -109,7 +111,21 @@ const TestPage: React.FC<TestPageProps> = ({ onTestStart }) => {
                         </label>
                     </Box>
 
-                    {includeScheduling && (
+                    <Box>
+                        <label>
+                            <Flex alignItems="center" gap={2}>
+                                <input 
+                                    type="checkbox" 
+                                    checked={includeMemory} 
+                                    onChange={(e: ChangeEvent<HTMLInputElement>) => setIncludeMemory(e.target.checked)}
+                                    style={{ marginRight: '8px' }}
+                                />
+                                <Text>Include memory management questions</Text>
+                            </Flex>
+                        </label>
+                    </Box>
+
+                    {(includeScheduling || includeMemory) && (
                         <Box>
                             <Text fontSize="sm" fontWeight="medium" color={labelColor} mb={2}>
                                 Number of questions
@@ -158,7 +174,7 @@ const TestPage: React.FC<TestPageProps> = ({ onTestStart }) => {
                     <Button 
                         colorScheme="blue" 
                         onClick={handleStartTest}
-                        disabled={(!includeScheduling) || (includeScheduling && questionsError) || isStarting}
+                        disabled={(!includeScheduling && !includeMemory) || ((includeScheduling || includeMemory) && questionsError) || isStarting}
                         mt={4}
                     >
                         {isStarting ? "Generating questions..." : "Start Test"}

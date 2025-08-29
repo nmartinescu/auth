@@ -4,6 +4,7 @@ import type {
     IOOperation, 
     DifficultyLevel,
     AlgorithmType,
+    MemoryAlgorithmType,
     TestConfig
 } from '../types/Test';
 
@@ -20,20 +21,38 @@ class TestQuestionGenerator {
     generateQuestions(config: TestConfig): TestQuestion[] {
         const questions: TestQuestion[] = [];
         
+        // Determine question types to generate
+        const questionTypes: ('scheduling' | 'memory')[] = [];
+        if (config.includeScheduling) questionTypes.push('scheduling');
+        if (config.includeMemory) questionTypes.push('memory');
+        
         for (let i = 0; i < config.numQuestions; i++) {
-            const algorithm = this.getRandomAlgorithm();
-            const question = this.generateQuestion(
-                `test-${Date.now()}-${i}`,
-                config.difficulty,
-                algorithm
-            );
+            const questionType = questionTypes[Math.floor(Math.random() * questionTypes.length)];
+            
+            let question: TestQuestion;
+            if (questionType === 'scheduling') {
+                const algorithm = this.getRandomAlgorithm();
+                question = this.generateSchedulingQuestion(
+                    `test-${Date.now()}-${i}`,
+                    config.difficulty,
+                    algorithm
+                );
+            } else {
+                const algorithm = this.getRandomMemoryAlgorithm();
+                question = this.generateMemoryQuestion(
+                    `test-${Date.now()}-${i}`,
+                    config.difficulty,
+                    algorithm
+                );
+            }
+            
             questions.push(question);
         }
         
         return questions;
     }
 
-    private generateQuestion(
+    private generateSchedulingQuestion(
         id: string,
         difficulty: DifficultyLevel,
         algorithm: AlgorithmType
@@ -44,11 +63,31 @@ class TestQuestionGenerator {
         
         return {
             id,
+            type: 'scheduling',
             difficulty,
             algorithm,
             quantum,
             processes,
-            description: this.generateDescription(algorithm, processes, quantum)
+            description: this.generateSchedulingDescription(algorithm, processes, quantum)
+        };
+    }
+
+    private generateMemoryQuestion(
+        id: string,
+        difficulty: DifficultyLevel,
+        algorithm: MemoryAlgorithmType
+    ): TestQuestion {
+        const { frameCount, pageCount } = this.getMemoryDifficultyParams(difficulty);
+        const pageReferences = this.generatePageReferences(pageCount, frameCount, difficulty);
+        
+        return {
+            id,
+            type: 'memory',
+            difficulty,
+            algorithm,
+            frameCount,
+            pageReferences,
+            description: this.generateMemoryDescription(algorithm, frameCount, pageReferences)
         };
     }
 
@@ -148,7 +187,7 @@ class TestQuestionGenerator {
         }
     }
 
-    private generateDescription(
+    private generateSchedulingDescription(
         algorithm: AlgorithmType,
         processes: TestProcess[],
         quantum?: number
@@ -167,6 +206,27 @@ class TestQuestionGenerator {
         - Completion Time: When the process finishes execution`;
     }
 
+    private generateMemoryDescription(
+        algorithm: MemoryAlgorithmType,
+        frameCount: number,
+        pageReferences: number[]
+    ): string {
+        const algorithmName = this.getMemoryAlgorithmFullName(algorithm);
+        
+        return `Apply ${algorithmName} page replacement algorithm to the following page reference sequence.
+        
+        Memory Configuration:
+        - Frame Count: ${frameCount}
+        - Page Reference Sequence: ${pageReferences.join(', ')}
+        
+        Calculate the total number of page faults and hit rate for this sequence.
+        
+        Remember:
+        - Page Fault: When a referenced page is not in memory
+        - Hit: When a referenced page is already in memory
+        - Hit Rate: (Total Hits / Total References) × 100%`;
+    }
+
     private getAlgorithmFullName(algorithm: AlgorithmType): string {
         switch (algorithm) {
             case 'FCFS':
@@ -180,9 +240,63 @@ class TestQuestionGenerator {
         }
     }
 
+    private getMemoryDifficultyParams(difficulty: DifficultyLevel): { frameCount: number; pageCount: number } {
+        switch (difficulty) {
+            case 'easy':
+                return { frameCount: this.randomBetween(3, 4), pageCount: this.randomBetween(8, 12) };
+            case 'medium':
+                return { frameCount: this.randomBetween(3, 5), pageCount: this.randomBetween(12, 16) };
+            case 'hard':
+                return { frameCount: this.randomBetween(4, 6), pageCount: this.randomBetween(16, 20) };
+            default:
+                return { frameCount: 3, pageCount: 10 };
+        }
+    }
+
+    private generatePageReferences(pageCount: number, frameCount: number, difficulty: DifficultyLevel): number[] {
+        const references: number[] = [];
+        const maxPageNumber = frameCount + this.randomBetween(2, 5); // Ensure some page faults
+        
+        for (let i = 0; i < pageCount; i++) {
+            // Generate realistic page reference patterns
+            if (i === 0) {
+                // First reference is random
+                references.push(this.randomBetween(1, maxPageNumber));
+            } else {
+                // 30% chance to repeat recent page (locality of reference)
+                if (Math.random() < 0.3 && i > 0) {
+                    const recentIndex = Math.max(0, i - this.randomBetween(1, 3));
+                    references.push(references[recentIndex]);
+                } else {
+                    references.push(this.randomBetween(1, maxPageNumber));
+                }
+            }
+        }
+        
+        return references;
+    }
+
     private getRandomAlgorithm(): AlgorithmType {
         const algorithms: AlgorithmType[] = ['FCFS', 'SJF', 'RR'];
         return algorithms[Math.floor(Math.random() * algorithms.length)];
+    }
+
+    private getRandomMemoryAlgorithm(): MemoryAlgorithmType {
+        const algorithms: MemoryAlgorithmType[] = ['FIFO', 'LRU', 'OPT'];
+        return algorithms[Math.floor(Math.random() * algorithms.length)];
+    }
+
+    private getMemoryAlgorithmFullName(algorithm: MemoryAlgorithmType): string {
+        switch (algorithm) {
+            case 'FIFO':
+                return 'First In First Out (FIFO)';
+            case 'LRU':
+                return 'Least Recently Used (LRU)';
+            case 'OPT':
+                return 'Optimal (OPT)';
+            default:
+                return algorithm;
+        }
     }
 
     private randomBetween(min: number, max: number): number {
