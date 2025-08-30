@@ -9,6 +9,7 @@ import {
 } from "react-icons/lu";
 import { useColorModeValue } from "../../ui/color-mode";
 import type { ProcessSolutionProps } from "./ProcessSolution.types";
+import GanttChart from "./GanttChart";
 
 export default function ProcessSolution({
     solution,
@@ -48,6 +49,7 @@ export default function ProcessSolution({
 
     const timerInfo = solution.data.solution[stepIndex].timer;
     const readyQueue = solution.data.solution[stepIndex].readyQueues;
+    const waitQueue = solution.data.solution[stepIndex].waitQueue;
     const newQueue = solution.data.solution[stepIndex].newProcesses;
 
     const btnStyle = {
@@ -93,6 +95,10 @@ export default function ProcessSolution({
             >
                 {/* Process Chart */}
                 <Box flex="1" maxW="900px">
+                    {/* Gantt Chart Visualization */}
+                    <GanttChart solution={solution} stepIndex={stepIndex} />
+
+                    {/* Process Table */}
                     <Box
                         p="4"
                         bg={cardBg}
@@ -101,7 +107,7 @@ export default function ProcessSolution({
                         mb="4"
                     >
                         <Text fontSize="lg" fontWeight="bold" color={textColor} mb="4" textAlign="center">
-                            Process Scheduling Visualization
+                            Process Scheduling Table
                         </Text>
                         
                         <Table.ScrollArea borderWidth="1px" maxW="xl" rounded="md" height="406px" mx="auto">
@@ -265,6 +271,13 @@ export default function ProcessSolution({
                             ) : (
                                 " No ready queue information available."
                             )}
+                        </Text>
+
+                        <Text color={textColor} mb="2">
+                            <strong>Wait Queue:</strong>
+                            {Array.isArray(waitQueue) && waitQueue.length > 0
+                                ? ` ${waitQueue.join(", ")}`
+                                : " (empty)"}
                         </Text>
                         
                         <Text color={textColor}>

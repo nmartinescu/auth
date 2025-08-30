@@ -67,6 +67,10 @@ class ProcessControlBlockManager {
         executionInfo.nextStep();
     }
 
+    setProcessStateWithoutStep(pid, state) {
+        this.PCB[pid].state = state;
+    }
+
     tickCpuTime(pid) {
         if (this.PCB[pid].burstTime <= 0) {
             return 0;
@@ -117,10 +121,6 @@ class ProcessControlBlockManager {
                 this.PCB[i].ioTime--;
 
                 if (this.PCB[i].ioTime === 0) {
-                    const time = timer.getTimer();
-                    executionInfo.addExplanation(
-                        `Process ${i} finished io at time ${time + 1}.`
-                    );
                     toBeAdded.push(i);
                 }
             }

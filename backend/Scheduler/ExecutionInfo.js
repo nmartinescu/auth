@@ -23,12 +23,30 @@ class ExecutioInfo {
             this.solution[this.step].readyQueues.push(queueCopy);
         }
 
+        // add wait queue
+        this.solution[this.step].waitQueue = [];
+        for (let i = 1; i < this.PCB.length; i++) {
+            if (this.PCB[i].state === "WAIT") {
+                this.solution[this.step].waitQueue.push(this.PCB[i].pid);
+            }
+        }
+
         // add new processes
         this.solution[this.step].newProcesses = [];
         for (let i = 1; i < this.PCB.length; i++) {
             if (this.PCB[i].state === "NEW") {
                 this.solution[this.step].newProcesses.push(this.PCB[i].pid);
             }
+        }
+
+        // add process states for visualization
+        this.solution[this.step].processStates = {};
+        for (let i = 1; i < this.PCB.length; i++) {
+            const process = this.PCB[i];
+            this.solution[this.step].processStates[process.pid] = {
+                state: process.state,
+                pid: process.pid
+            };
         }
 
         // add graphic table
@@ -87,7 +105,9 @@ class ExecutioInfo {
                 explaination: [],
                 graphicTable: [],
                 readyQueues: [],
+                waitQueue: [],
                 newProcesses: [],
+                processStates: {},
                 graphic: [],
                 timer: 0,
             };

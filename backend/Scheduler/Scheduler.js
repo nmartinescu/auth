@@ -168,13 +168,21 @@ class Scheduler {
     handleIo() {
         const toBeAdded = this.pcb.handleIo();
 
+        // Handle I/O completion - create a step for each process that finishes I/O
         for (let i = 0; i < toBeAdded.length; i++) {
-            this.readyQueues.addToReadyQueue(0, toBeAdded[i]);
+            const pid = toBeAdded[i];
+            const time = timer.getTimer();
+            
+            executionInfo.addExplanation(`Process ${pid} finished I/O at time ${time + 1}.`);
+            executionInfo.addTimer(true);
+            
+            this.readyQueues.addToReadyQueue(0, pid);
+            this.pcb.setProcessState(pid, PROCESSES.STATES.READY);
         }
 
         if (toBeAdded.length > 0 && this.cpu !== -1 && this.shouldDescheduleOnNewProcess()) {
             executionInfo.addExplanation(
-                `Process ${this.cpu} descheduled due to IO.`
+                `Process ${this.cpu} descheduled due to I/O completion.`
             );
             executionInfo.addPoint(this.cpu, true);
             executionInfo.addTimer(true);
