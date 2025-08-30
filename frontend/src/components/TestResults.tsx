@@ -70,6 +70,7 @@ const TestResults: React.FC<TestResultsProps> = ({
             flexDirection="column"
             gap="6"
             mt="6"
+            mb="10"
         >
             {/* Header */}
             <Box textAlign="center">

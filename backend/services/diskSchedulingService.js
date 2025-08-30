@@ -310,13 +310,13 @@ function cscan(requests, initialHeadPosition, maxDiskSize, direction = "right") 
             });
         }
 
-        // Go to end and jump to beginning
+        // Go to end and jump to beginning (but don't add boundaries to sequence)
         if (rightRequests.length > 0 || leftRequests.length > 0) {
             stepCount++;
             const seekTime = Math.abs(maxDiskSize - 1 - currentPosition);
             totalSeekTime += seekTime;
             currentPosition = maxDiskSize - 1;
-            sequence.push(maxDiskSize - 1);
+            // Don't add boundary to sequence: sequence.push(maxDiskSize - 1);
 
             steps.push({
                 step: stepCount,
@@ -325,7 +325,7 @@ function cscan(requests, initialHeadPosition, maxDiskSize, direction = "right") 
                 seekDistance: seekTime,
                 totalSeekTime: totalSeekTime,
                 explanation: `Step ${stepCount}: Reached end of disk at position ${maxDiskSize - 1}. Seek distance: ${seekTime}.`,
-                remainingRequests: requests.filter(r => !sequence.includes(r))
+                remainingRequests: requests.filter(r => !sequence.slice(1).includes(r)) // Exclude initial position
             });
 
             // Jump to beginning
@@ -333,7 +333,7 @@ function cscan(requests, initialHeadPosition, maxDiskSize, direction = "right") 
             const jumpTime = Math.abs(0 - currentPosition);
             totalSeekTime += jumpTime;
             currentPosition = 0;
-            sequence.push(0);
+            // Don't add boundary to sequence: sequence.push(0);
 
             steps.push({
                 step: stepCount,
@@ -342,7 +342,7 @@ function cscan(requests, initialHeadPosition, maxDiskSize, direction = "right") 
                 seekDistance: jumpTime,
                 totalSeekTime: totalSeekTime,
                 explanation: `Step ${stepCount}: C-SCAN jump to beginning at position 0. Seek distance: ${jumpTime}. Total seek time: ${totalSeekTime}.`,
-                remainingRequests: requests.filter(r => !sequence.includes(r))
+                remainingRequests: requests.filter(r => !sequence.slice(1).includes(r)) // Exclude initial position
             });
         }
 
@@ -384,13 +384,13 @@ function cscan(requests, initialHeadPosition, maxDiskSize, direction = "right") 
             });
         }
 
-        // Go to beginning and jump to end
+        // Go to beginning and jump to end (but don't add boundaries to sequence)
         if (leftRequests.length > 0 || rightRequests.length > 0) {
             stepCount++;
             const seekTime = Math.abs(0 - currentPosition);
             totalSeekTime += seekTime;
             currentPosition = 0;
-            sequence.push(0);
+            // Don't add boundary to sequence: sequence.push(0);
 
             steps.push({
                 step: stepCount,
@@ -399,7 +399,7 @@ function cscan(requests, initialHeadPosition, maxDiskSize, direction = "right") 
                 seekDistance: seekTime,
                 totalSeekTime: totalSeekTime,
                 explanation: `Step ${stepCount}: Reached beginning of disk at position 0. Seek distance: ${seekTime}.`,
-                remainingRequests: requests.filter(r => !sequence.includes(r))
+                remainingRequests: requests.filter(r => !sequence.slice(1).includes(r)) // Exclude initial position
             });
 
             // Jump to end
@@ -407,7 +407,7 @@ function cscan(requests, initialHeadPosition, maxDiskSize, direction = "right") 
             const jumpTime = Math.abs(maxDiskSize - 1 - currentPosition);
             totalSeekTime += jumpTime;
             currentPosition = maxDiskSize - 1;
-            sequence.push(maxDiskSize - 1);
+            // Don't add boundary to sequence: sequence.push(maxDiskSize - 1);
 
             steps.push({
                 step: stepCount,
@@ -416,7 +416,7 @@ function cscan(requests, initialHeadPosition, maxDiskSize, direction = "right") 
                 seekDistance: jumpTime,
                 totalSeekTime: totalSeekTime,
                 explanation: `Step ${stepCount}: C-SCAN jump to end at position ${maxDiskSize - 1}. Seek distance: ${jumpTime}. Total seek time: ${totalSeekTime}.`,
-                remainingRequests: requests.filter(r => !sequence.includes(r))
+                remainingRequests: requests.filter(r => !sequence.slice(1).includes(r)) // Exclude initial position
             });
         }
 
@@ -564,6 +564,15 @@ function look(requests, initialHeadPosition, maxDiskSize, direction = "right") {
  * C-LOOK (Circular LOOK) Algorithm
  */
 function clook(requests, initialHeadPosition, maxDiskSize, direction = "right") {
+    // Validate inputs
+    if (!requests || requests.length === 0) {
+        throw new Error("C-LOOK: No requests to process");
+    }
+    
+    if (initialHeadPosition < 0 || initialHeadPosition >= maxDiskSize) {
+        throw new Error("C-LOOK: Invalid initial head position");
+    }
+
     const sequence = [initialHeadPosition];
     const steps = [];
     let currentPosition = initialHeadPosition;
@@ -574,6 +583,31 @@ function clook(requests, initialHeadPosition, maxDiskSize, direction = "right") 
     // Split requests into left and right of current position
     const leftRequests = sortedRequests.filter(req => req < currentPosition);
     const rightRequests = sortedRequests.filter(req => req > currentPosition);
+    
+    // Handle edge case where all requests are at the same position as head
+    const samePositionRequests = sortedRequests.filter(req => req === currentPosition);
+    if (samePositionRequests.length === requests.length) {
+        // All requests are at the current position, no movement needed
+        for (const request of samePositionRequests) {
+            stepCount++;
+            sequence.push(request);
+            steps.push({
+                step: stepCount,
+                currentPosition: request,
+                targetRequest: request,
+                seekDistance: 0,
+                totalSeekTime: 0,
+                explanation: `Step ${stepCount}: Request ${request} is at current position. No seek needed.`,
+                remainingRequests: []
+            });
+        }
+        return {
+            sequence,
+            totalSeekTime: 0,
+            averageSeekTime: 0,
+            steps
+        };
+    }
 
     // Initial step
     steps.push({
@@ -587,7 +621,7 @@ function clook(requests, initialHeadPosition, maxDiskSize, direction = "right") 
     });
 
     if (direction === "right") {
-        // Service right requests first
+        // Service right requests first (in ascending order)
         for (const request of rightRequests) {
             stepCount++;
             const seekTime = Math.abs(request - currentPosition);
@@ -595,6 +629,8 @@ function clook(requests, initialHeadPosition, maxDiskSize, direction = "right") 
             currentPosition = request;
             sequence.push(request);
 
+            const processedRequests = sequence.slice(1); // Exclude initial position
+            const remainingRequests = requests.filter(r => !processedRequests.includes(r));
             steps.push({
                 step: stepCount,
                 currentPosition: request,
@@ -602,12 +638,13 @@ function clook(requests, initialHeadPosition, maxDiskSize, direction = "right") 
                 seekDistance: seekTime,
                 totalSeekTime: totalSeekTime,
                 explanation: `Step ${stepCount}: Moving right to service request ${request}. Seek distance: ${seekTime}. Total seek time: ${totalSeekTime}.`,
-                remainingRequests: requests.filter(r => !sequence.includes(r))
+                remainingRequests: remainingRequests
             });
         }
 
-        // Jump to leftmost request if there are left requests
+        // Jump to leftmost request and service left requests (in ascending order)
         if (leftRequests.length > 0) {
+            // Jump to leftmost request
             stepCount++;
             const leftmostRequest = leftRequests[0];
             const jumpTime = Math.abs(leftmostRequest - currentPosition);
@@ -615,6 +652,7 @@ function clook(requests, initialHeadPosition, maxDiskSize, direction = "right") 
             currentPosition = leftmostRequest;
             sequence.push(leftmostRequest);
 
+            const remainingAfterJump = requests.filter(r => !sequence.slice(1).includes(r));
             steps.push({
                 step: stepCount,
                 currentPosition: leftmostRequest,
@@ -622,10 +660,10 @@ function clook(requests, initialHeadPosition, maxDiskSize, direction = "right") 
                 seekDistance: jumpTime,
                 totalSeekTime: totalSeekTime,
                 explanation: `Step ${stepCount}: C-LOOK jump to leftmost request ${leftmostRequest}. Seek distance: ${jumpTime}. Total seek time: ${totalSeekTime}.`,
-                remainingRequests: requests.filter(r => !sequence.includes(r))
+                remainingRequests: remainingAfterJump
             });
 
-            // Service remaining left requests
+            // Service remaining left requests (in ascending order)
             for (let i = 1; i < leftRequests.length; i++) {
                 stepCount++;
                 const request = leftRequests[i];
@@ -634,6 +672,7 @@ function clook(requests, initialHeadPosition, maxDiskSize, direction = "right") 
                 currentPosition = request;
                 sequence.push(request);
 
+                const remainingRequests = requests.filter(r => !sequence.slice(1).includes(r));
                 steps.push({
                     step: stepCount,
                     currentPosition: request,
@@ -641,12 +680,12 @@ function clook(requests, initialHeadPosition, maxDiskSize, direction = "right") 
                     seekDistance: seekTime,
                     totalSeekTime: totalSeekTime,
                     explanation: `Step ${stepCount}: Moving right to service request ${request}. Seek distance: ${seekTime}. Total seek time: ${totalSeekTime}.`,
-                    remainingRequests: requests.filter(r => !sequence.includes(r))
+                    remainingRequests: remainingRequests
                 });
             }
         }
     } else {
-        // Service left requests first (in reverse order)
+        // Service left requests first (in descending order)
         for (const request of leftRequests.reverse()) {
             stepCount++;
             const seekTime = Math.abs(request - currentPosition);
@@ -654,6 +693,7 @@ function clook(requests, initialHeadPosition, maxDiskSize, direction = "right") 
             currentPosition = request;
             sequence.push(request);
 
+            const remainingRequests = requests.filter(r => !sequence.slice(1).includes(r));
             steps.push({
                 step: stepCount,
                 currentPosition: request,
@@ -661,12 +701,13 @@ function clook(requests, initialHeadPosition, maxDiskSize, direction = "right") 
                 seekDistance: seekTime,
                 totalSeekTime: totalSeekTime,
                 explanation: `Step ${stepCount}: Moving left to service request ${request}. Seek distance: ${seekTime}. Total seek time: ${totalSeekTime}.`,
-                remainingRequests: requests.filter(r => !sequence.includes(r))
+                remainingRequests: remainingRequests
             });
         }
 
-        // Jump to rightmost request if there are right requests
+        // Jump to rightmost request and service right requests (in descending order)
         if (rightRequests.length > 0) {
+            // Jump to rightmost request
             stepCount++;
             const rightmostRequest = rightRequests[rightRequests.length - 1];
             const jumpTime = Math.abs(rightmostRequest - currentPosition);
@@ -674,6 +715,7 @@ function clook(requests, initialHeadPosition, maxDiskSize, direction = "right") 
             currentPosition = rightmostRequest;
             sequence.push(rightmostRequest);
 
+            const remainingAfterJump = requests.filter(r => !sequence.slice(1).includes(r));
             steps.push({
                 step: stepCount,
                 currentPosition: rightmostRequest,
@@ -681,10 +723,10 @@ function clook(requests, initialHeadPosition, maxDiskSize, direction = "right") 
                 seekDistance: jumpTime,
                 totalSeekTime: totalSeekTime,
                 explanation: `Step ${stepCount}: C-LOOK jump to rightmost request ${rightmostRequest}. Seek distance: ${jumpTime}. Total seek time: ${totalSeekTime}.`,
-                remainingRequests: requests.filter(r => !sequence.includes(r))
+                remainingRequests: remainingAfterJump
             });
 
-            // Service remaining right requests (in reverse order)
+            // Service remaining right requests (in descending order)
             for (let i = rightRequests.length - 2; i >= 0; i--) {
                 stepCount++;
                 const request = rightRequests[i];
@@ -693,6 +735,7 @@ function clook(requests, initialHeadPosition, maxDiskSize, direction = "right") 
                 currentPosition = request;
                 sequence.push(request);
 
+                const remainingRequests = requests.filter(r => !sequence.slice(1).includes(r));
                 steps.push({
                     step: stepCount,
                     currentPosition: request,
@@ -700,7 +743,7 @@ function clook(requests, initialHeadPosition, maxDiskSize, direction = "right") 
                     seekDistance: seekTime,
                     totalSeekTime: totalSeekTime,
                     explanation: `Step ${stepCount}: Moving left to service request ${request}. Seek distance: ${seekTime}. Total seek time: ${totalSeekTime}.`,
-                    remainingRequests: requests.filter(r => !sequence.includes(r))
+                    remainingRequests: remainingRequests
                 });
             }
         }
@@ -736,27 +779,37 @@ export function simulateDiskScheduling(algorithm, requests, initialHeadPosition,
 
     let result;
 
-    switch (algorithm.toLowerCase()) {
-        case "fcfs":
-            result = fcfs(validRequests, initialHeadPosition);
-            break;
-        case "sstf":
-            result = sstf(validRequests, initialHeadPosition);
-            break;
-        case "scan":
-            result = scan(validRequests, initialHeadPosition, maxDiskSize, headDirection);
-            break;
-        case "cscan":
-            result = cscan(validRequests, initialHeadPosition, maxDiskSize, headDirection);
-            break;
-        case "look":
-            result = look(validRequests, initialHeadPosition, maxDiskSize, headDirection);
-            break;
-        case "clook":
-            result = clook(validRequests, initialHeadPosition, maxDiskSize, headDirection);
-            break;
-        default:
-            throw new Error(`Unknown algorithm: ${algorithm}`);
+    try {
+        switch (algorithm.toLowerCase()) {
+            case "fcfs":
+                result = fcfs(validRequests, initialHeadPosition);
+                break;
+            case "sstf":
+                result = sstf(validRequests, initialHeadPosition);
+                break;
+            case "scan":
+                result = scan(validRequests, initialHeadPosition, maxDiskSize, headDirection);
+                break;
+            case "cscan":
+                console.log(`🔄 Running C-SCAN with requests: [${validRequests.join(', ')}], head: ${initialHeadPosition}, direction: ${headDirection}`);
+                result = cscan(validRequests, initialHeadPosition, maxDiskSize, headDirection);
+                console.log(`✅ C-SCAN completed. Sequence: [${result.sequence.join(' → ')}], Total seek: ${result.totalSeekTime}`);
+                break;
+            case "clook":
+                console.log(`🔄 Running C-LOOK with requests: [${validRequests.join(', ')}], head: ${initialHeadPosition}, direction: ${headDirection}`);
+                result = clook(validRequests, initialHeadPosition, maxDiskSize, headDirection);
+                console.log(`✅ C-LOOK completed. Sequence: [${result.sequence.join(' → ')}], Total seek: ${result.totalSeekTime}`);
+                break;
+            case "look":
+                result = look(validRequests, initialHeadPosition, maxDiskSize, headDirection);
+                break;
+            default:
+                throw new Error(`Unknown algorithm: ${algorithm}`);
+        }
+    } catch (error) {
+        console.error(`❌ Error in ${algorithm.toUpperCase()} algorithm:`, error.message);
+        console.error('Stack trace:', error.stack);
+        throw new Error(`${algorithm.toUpperCase()} algorithm failed: ${error.message}`);
     }
 
     return {

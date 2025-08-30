@@ -84,6 +84,7 @@ const TestPage: React.FC<TestPageProps> = ({ onTestStart }) => {
             flexDirection="column"
             gap="10"
             mt="10"
+            mb="10"
         >
             <Heading size="lg" mb={6} color={primaryTextColor}>Test Configuration</Heading>
             

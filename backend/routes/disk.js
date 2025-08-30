@@ -1,7 +1,11 @@
 import express from "express";
 import { simulateDiskScheduling } from "../services/diskSchedulingService.js";
+import diskTestRoutes from "./diskTest.js";
 
 const router = express.Router();
+
+// Mount test routes
+router.use("/test", diskTestRoutes);
 
 // POST /api/disk - Simulate disk scheduling
 router.post("/", async (req, res) => {

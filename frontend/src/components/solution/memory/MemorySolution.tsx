@@ -76,6 +76,7 @@ export default function MemorySolution({ solution, onBack }: MemorySolutionProps
             flexDirection="column"
             gap="6"
             mt="6"
+            mb="10"
         >
             {/* Header */}
             <Box textAlign="center">

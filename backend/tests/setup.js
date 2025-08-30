@@ -36,7 +36,41 @@ global.testUtils = {
     arrivalTime: 0,
     burstTime: 10,
     io: ioOperations
-  })
+  }),
+
+  // Disk scheduling test utilities
+  createDiskRequest: (overrides = {}) => ({
+    maxDiskSize: 200,
+    initialHeadPosition: 50,
+    headDirection: 'right',
+    algorithm: 'fcfs',
+    requests: [98, 183, 37, 122, 14, 124, 65, 67],
+    ...overrides
+  }),
+
+  createRandomRequests: (count = 10, maxDisk = 200) => {
+    return Array.from({ length: count }, () => Math.floor(Math.random() * maxDisk));
+  },
+
+  createSequentialRequests: (start = 50, count = 10) => {
+    return Array.from({ length: count }, (_, i) => start + i);
+  },
+
+  createAlternatingRequests: (low = 10, high = 190, count = 6) => {
+    return Array.from({ length: count }, (_, i) => i % 2 === 0 ? low : high);
+  },
+
+  validateDiskResult: (result, expectedAlgorithm, expectedRequestCount) => {
+    expect(result).toHaveProperty('sequence');
+    expect(result).toHaveProperty('totalSeekTime');
+    expect(result).toHaveProperty('averageSeekTime');
+    expect(result).toHaveProperty('steps');
+    expect(result).toHaveProperty('algorithm', expectedAlgorithm);
+    expect(result.sequence).toHaveLength(expectedRequestCount + 1); // +1 for initial position
+    expect(result.steps).toHaveLength(expectedRequestCount + 1);
+    expect(result.totalSeekTime).toBeGreaterThanOrEqual(0);
+    expect(result.averageSeekTime).toBeGreaterThanOrEqual(0);
+  }
 };
 
 // Setup and teardown

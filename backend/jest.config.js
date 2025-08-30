@@ -21,6 +21,7 @@ export default {
     collectCoverageFrom: [
         "Scheduler/**/*.js",
         "routes/**/*.js",
+        "services/**/*.js",
         "!**/node_modules/**",
         "!**/tests/**",
         "!coverage/**",

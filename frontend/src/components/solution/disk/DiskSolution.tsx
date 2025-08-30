@@ -172,6 +172,7 @@ export default function DiskSolution({ solution, onBack }: DiskSolutionProps) {
             flexDirection="column"
             gap="6"
             mt="6"
+            mb="10"
         >
             {/* Header */}
             <Box textAlign="center">

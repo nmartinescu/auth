@@ -165,6 +165,7 @@ export function Disk() {
             flexDirection="column"
             gap="10"
             mt="10"
+            mb="10"
         >
             {/* Header */}
             <Box textAlign="center">
