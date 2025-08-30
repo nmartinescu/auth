@@ -10,7 +10,7 @@ interface ProcessBlock {
     pid: number;
     startTime: number;
     endTime: number;
-    state: 'RUNNING' | 'READY' | 'WAIT' | 'NEW' | 'DONE';
+    state: "RUNNING" | "READY" | "WAIT" | "NEW" | "DONE";
 }
 
 export default function GanttChart({ solution, stepIndex }: GanttChartProps) {
@@ -20,19 +20,19 @@ export default function GanttChart({ solution, stepIndex }: GanttChartProps) {
 
     // Color mapping for different process states
     const stateColors = {
-        RUNNING: '#4CAF50',    // Green
-        READY: '#FF9800',      // Orange  
-        WAIT: '#F44336',       // Red
-        NEW: '#9E9E9E',        // Gray
-        DONE: '#2196F3'        // Blue
+        RUNNING: "#4CAF50", // Green
+        READY: "#FF9800", // Orange
+        WAIT: "#F44336", // Red
+        NEW: "#9E9E9E", // Gray
+        DONE: "#2196F3", // Blue
     };
 
     const stateLabels = {
-        RUNNING: 'Running',
-        READY: 'Ready Queue',
-        WAIT: 'Wait Queue', 
-        NEW: 'New',
-        DONE: 'Done'
+        RUNNING: "Running",
+        READY: "Ready Queue",
+        WAIT: "Wait Queue",
+        NEW: "New",
+        DONE: "Done",
     };
 
     if (!solution?.data?.solution) {
@@ -42,19 +42,21 @@ export default function GanttChart({ solution, stepIndex }: GanttChartProps) {
     // Get all unique process IDs
     const allProcesses = new Set<number>();
     solution.data.solution.forEach((step: any) => {
-        Object.keys(step.processStates || {}).forEach(pid => {
+        Object.keys(step.processStates || {}).forEach((pid) => {
             allProcesses.add(parseInt(pid));
         });
     });
 
     const processIds = Array.from(allProcesses).sort((a, b) => a - b);
-    const maxTime = Math.max(...solution.data.solution.map((step: any) => step.timer || 0));
+    const maxTime = Math.max(
+        ...solution.data.solution.map((step: any) => step.timer || 0)
+    );
     const currentTime = solution.data.solution[stepIndex]?.timer || 0;
 
     // Build timeline data for each process
     const buildProcessTimeline = (pid: number) => {
         const timeline: ProcessBlock[] = [];
-        let currentState = 'NEW';
+        let currentState = "NEW";
         let stateStartTime = 0;
 
         for (let i = 0; i <= stepIndex; i++) {
@@ -69,7 +71,7 @@ export default function GanttChart({ solution, stepIndex }: GanttChartProps) {
                         pid,
                         startTime: stateStartTime,
                         endTime: stepTime,
-                        state: currentState as any
+                        state: currentState as any,
                     });
                 }
                 currentState = processState;
@@ -83,24 +85,27 @@ export default function GanttChart({ solution, stepIndex }: GanttChartProps) {
                 pid,
                 startTime: stateStartTime,
                 endTime: currentTime,
-                state: currentState as any
+                state: currentState as any,
             });
         }
 
-        return timeline.filter(block => block.startTime < block.endTime);
+        return timeline.filter((block) => block.startTime < block.endTime);
     };
 
     const timelineWidth = 600;
     const processHeight = 40;
     const labelWidth = 60;
-    
+
     // Calculate time scale, ensuring minimum width per time unit for readability
     const minTimeUnitWidth = 20;
     const calculatedScale = maxTime > 0 ? timelineWidth / maxTime : 1;
     const timeScale = Math.max(calculatedScale, minTimeUnitWidth);
-    
+
     // Adjust timeline width if needed to accommodate minimum scale
-    const actualTimelineWidth = Math.max(timelineWidth, maxTime * minTimeUnitWidth);
+    const actualTimelineWidth = Math.max(
+        timelineWidth,
+        maxTime * minTimeUnitWidth
+    );
 
     return (
         <Box
@@ -110,12 +115,24 @@ export default function GanttChart({ solution, stepIndex }: GanttChartProps) {
             border={`2px solid ${borderColor}`}
             mb="4"
         >
-            <Text fontSize="lg" fontWeight="bold" color={textColor} mb="4" textAlign="center">
+            <Text
+                fontSize="lg"
+                fontWeight="bold"
+                color={textColor}
+                mb="4"
+                textAlign="center"
+            >
                 Process Gantt Chart - Timeline Visualization
             </Text>
 
             {/* Legend */}
-            <Box mb="4" display="flex" flexWrap="wrap" gap="4" justifyContent="center">
+            <Box
+                mb="4"
+                display="flex"
+                flexWrap="wrap"
+                gap="4"
+                justifyContent="center"
+            >
                 {Object.entries(stateColors).map(([state, color]) => (
                     <Box key={state} display="flex" alignItems="center" gap="2">
                         <Box
@@ -136,18 +153,22 @@ export default function GanttChart({ solution, stepIndex }: GanttChartProps) {
                 {/* Main timeline axis line */}
                 <Box
                     position="absolute"
-                    left={`${labelWidth}px`}
+                    left={`${labelWidth - 10}px`}
                     width={`${actualTimelineWidth}px`}
                     height="1px"
                     bg={borderColor}
                     top="20px"
                 />
-                
+
                 {/* Time markers and labels */}
                 {Array.from({ length: Math.min(maxTime + 1, 31) }, (_, i) => {
-                    const leftPosition = labelWidth + (i * timeScale);
+                    const leftPosition = labelWidth - 10 + i * timeScale;
                     return (
-                        <Box key={i} position="absolute" left={`${leftPosition}px`}>
+                        <Box
+                            key={i}
+                            position="absolute"
+                            left={`${leftPosition}px`}
+                        >
                             {/* Vertical tick mark */}
                             <Box
                                 position="absolute"
@@ -179,9 +200,14 @@ export default function GanttChart({ solution, stepIndex }: GanttChartProps) {
                 <Box minWidth={`${labelWidth + actualTimelineWidth + 20}px`}>
                     {processIds.map((pid) => {
                         const timeline = buildProcessTimeline(pid);
-                        
+
                         return (
-                            <Box key={pid} display="flex" alignItems="center" mb="2">
+                            <Box
+                                key={pid}
+                                display="flex"
+                                alignItems="center"
+                                mb="2"
+                            >
                                 {/* Process label */}
                                 <Box
                                     width={`${labelWidth - 10}px`}
@@ -200,30 +226,44 @@ export default function GanttChart({ solution, stepIndex }: GanttChartProps) {
                                     position="relative"
                                     width={`${actualTimelineWidth}px`}
                                     height={`${processHeight}px`}
-                                    bg={useColorModeValue("gray.100", "gray.700")}
+                                    bg={useColorModeValue(
+                                        "gray.100",
+                                        "gray.700"
+                                    )}
                                     borderRadius="4px"
                                     border={`1px solid ${borderColor}`}
                                     overflow="hidden"
                                     flexShrink="0"
                                 >
                                     {/* Vertical grid lines */}
-                                    {Array.from({ length: Math.min(maxTime + 1, 31) }, (_, i) => (
-                                        <Box
-                                            key={`grid-${i}`}
-                                            position="absolute"
-                                            left={`${i * timeScale}px`}
-                                            width="1px"
-                                            height="100%"
-                                            bg={useColorModeValue("gray.200", "gray.600")}
-                                            opacity="0.5"
-                                        />
-                                    ))}
+                                    {Array.from(
+                                        { length: Math.min(maxTime + 1, 31) },
+                                        (_, i) => (
+                                            <Box
+                                                key={`grid-${i}`}
+                                                position="absolute"
+                                                left={`${i * timeScale}px`}
+                                                width="1px"
+                                                height="100%"
+                                                bg={useColorModeValue(
+                                                    "gray.200",
+                                                    "gray.600"
+                                                )}
+                                                opacity="0.5"
+                                            />
+                                        )
+                                    )}
 
                                     {/* Process state blocks */}
                                     {timeline.map((block, index) => {
-                                        const blockWidth = Math.max(2, (block.endTime - block.startTime) * timeScale);
-                                        const blockLeft = block.startTime * timeScale;
-                                        
+                                        const blockWidth = Math.max(
+                                            2,
+                                            (block.endTime - block.startTime) *
+                                                timeScale
+                                        );
+                                        const blockLeft =
+                                            block.startTime * timeScale;
+
                                         return (
                                             <Box
                                                 key={index}
@@ -242,7 +282,8 @@ export default function GanttChart({ solution, stepIndex }: GanttChartProps) {
                                                 title={`${block.state}: ${block.startTime}-${block.endTime}`}
                                                 zIndex="5"
                                             >
-                                                {blockWidth > 15 && block.state.charAt(0)}
+                                                {blockWidth > 15 &&
+                                                    block.state.charAt(0)}
                                             </Box>
                                         );
                                     })}
@@ -267,7 +308,8 @@ export default function GanttChart({ solution, stepIndex }: GanttChartProps) {
             {/* Current step info */}
             <Box mt="4" textAlign="center">
                 <Text fontSize="sm" color={textColor}>
-                    Current Time: {currentTime} | Step: {stepIndex + 1} / {solution.data.solution.length}
+                    Current Time: {currentTime} | Step: {stepIndex + 1} /{" "}
+                    {solution.data.solution.length}
                 </Text>
             </Box>
         </Box>
