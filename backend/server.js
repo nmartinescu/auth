@@ -6,6 +6,7 @@ import authRoutes from "./routes/auth/index.js";
 import logsRoutes from "./routes/logs.js";
 import cpuRoutes from "./routes/cpu.js";
 import memoryRoutes from "./routes/memory.js";
+import diskRoutes from "./routes/disk.js";
 import { connectDB } from "./config/db.js";
 import { generalLimiter } from "./middleware/rateLimiter.js";
 import { loggers, requestTimer, requestId, cleanupOldLogs } from "./middleware/logger.js";
@@ -95,6 +96,9 @@ app.use("/api/cpu", cpuRoutes);
 
 // Memory management routes
 app.use("/api/memory", memoryRoutes);
+
+// Disk scheduling routes
+app.use("/api/disk", diskRoutes);
 
 // Import simulation routes
 import simulationRoutes from "./routes/simulations/index.js";
