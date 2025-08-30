@@ -10,6 +10,13 @@ export function useColorModeValue(lightValue: string, darkValue: string): string
         const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         const shouldBeDark = savedTheme === 'dark' || (!savedTheme && systemPrefersDark);
         setIsDark(shouldBeDark);
+        
+        // Apply initial theme to document
+        document.documentElement.setAttribute('data-theme', shouldBeDark ? 'dark' : 'light');
+        document.documentElement.style.backgroundColor = shouldBeDark ? '#1A202C' : '#FFFFFF';
+        document.body.style.backgroundColor = shouldBeDark ? '#1A202C' : '#FFFFFF';
+        document.body.style.margin = '0';
+        document.body.style.padding = '0';
 
         // Listen for theme changes
         const handleThemeChange = (event: CustomEvent) => {
@@ -34,7 +41,15 @@ export function useColorMode() {
         const savedTheme = localStorage.getItem('chakra-ui-color-mode');
         const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         const shouldBeDark = savedTheme === 'dark' || (!savedTheme && systemPrefersDark);
-        setColorMode(shouldBeDark ? 'dark' : 'light');
+        const newMode = shouldBeDark ? 'dark' : 'light';
+        setColorMode(newMode);
+        
+        // Apply initial theme to document
+        document.documentElement.setAttribute('data-theme', newMode);
+        document.documentElement.style.backgroundColor = shouldBeDark ? '#1A202C' : '#FFFFFF';
+        document.body.style.backgroundColor = shouldBeDark ? '#1A202C' : '#FFFFFF';
+        document.body.style.margin = '0';
+        document.body.style.padding = '0';
 
         const handleThemeChange = (event: CustomEvent) => {
             setColorMode(event.detail.isDark ? 'dark' : 'light');
@@ -56,7 +71,10 @@ export function useColorMode() {
         
         // Apply theme to document
         document.documentElement.setAttribute('data-theme', newMode);
+        document.documentElement.style.backgroundColor = isDark ? '#1A202C' : '#FFFFFF';
         document.body.style.backgroundColor = isDark ? '#1A202C' : '#FFFFFF';
+        document.body.style.margin = '0';
+        document.body.style.padding = '0';
         
         // Trigger custom event
         window.dispatchEvent(new CustomEvent('themeChange', { detail: { isDark } }));

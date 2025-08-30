@@ -154,7 +154,7 @@ export function Memory() {
             flexDirection="column"
             gap="10"
             mt="10"
-            mb="10"
+            pb="10"
         >
             {/* Header */}
             <Box textAlign="center">

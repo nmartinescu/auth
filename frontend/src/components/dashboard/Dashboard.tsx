@@ -1,7 +1,7 @@
 import { Box, Flex, Text, Button, VStack, HStack, Grid, Spinner } from "@chakra-ui/react";
 import { useColorModeValue } from "../ui/color-mode";
 import { useState, useEffect } from "react";
-import { LuUser, LuTrash2, LuPlay, LuCalendar, LuCpu, LuHardDrive, LuMemoryStick } from "react-icons/lu";
+import { LuUser, LuTrash2, LuPlay, LuCalendar, LuCpu, LuHardDrive, LuMemoryStick, LuRefreshCw } from "react-icons/lu";
 import type { User } from "../../types/user";
 import { simulationService, type Simulation } from "../../services/simulationService";
 
@@ -20,7 +20,14 @@ export function Dashboard() {
     const borderColor = useColorModeValue("gray.200", "gray.600");
     const iconBg = useColorModeValue("green.50", "green.900");
     const iconColor = useColorModeValue("#38A169", "#68D391");
-    const buttonTextColor = useColorModeValue("inherit", "white");
+    const buttonTextColor = useColorModeValue("gray.800", "white");
+    
+    // Additional color values for buttons
+    const refreshButtonHoverBg = useColorModeValue("gray.50", "gray.700");
+    const deleteButtonColor = useColorModeValue("red.600", "red.300");
+    const blueButtonColor = useColorModeValue("blue.600", "blue.300");
+    const greenButtonColor = useColorModeValue("green.600", "green.300");
+    const purpleButtonColor = useColorModeValue("purple.600", "purple.300");
 
     useEffect(() => {
         // Check if user is logged in
@@ -121,6 +128,19 @@ export function Dashboard() {
         }
     };
 
+    const getSimulationButtonColor = (type: string) => {
+        switch (type) {
+            case 'process':
+                return blueButtonColor;
+            case 'memory':
+                return greenButtonColor;
+            case 'disk':
+                return purpleButtonColor;
+            default:
+                return textColor;
+        }
+    };
+
     const handleLogout = () => {
         localStorage.removeItem("authToken");
         localStorage.removeItem("user");
@@ -130,9 +150,12 @@ export function Dashboard() {
     if (isLoading) {
         return (
             <Flex minH="100vh" align="center" justify="center" bg={bgColor}>
-                <Text fontSize="lg" color={textColor}>
-                    Loading...
-                </Text>
+                <VStack gap={4}>
+                    <Spinner size="lg" color="blue.500" />
+                    <Text fontSize="lg" color={textColor}>
+                        Loading...
+                    </Text>
+                </VStack>
             </Flex>
         );
     }
@@ -142,9 +165,9 @@ export function Dashboard() {
     }
 
     return (
-        <Box minH="100vh" bg={bgColor}>
+        <Box minH="100vh" bg={bgColor} pb={6}>
             {/* Main Content */}
-            <Box p={6}>
+            <Box pt={6} px={6}>
                 <VStack gap={6} align="stretch" maxW="6xl" mx="auto">
                     {/* Welcome Card */}
                     <Box
@@ -204,8 +227,24 @@ export function Dashboard() {
                                     variant="outline"
                                     onClick={loadSimulations}
                                     disabled={simulationsLoading}
+                                    color={textColor}
+                                    borderColor={borderColor}
+                                    bg="transparent"
+                                    _hover={{
+                                        bg: refreshButtonHoverBg,
+                                        color: textColor
+                                    }}
+                                    _dark={{
+                                        color: "white !important",
+                                        borderColor: "gray.600",
+                                        bg: "transparent"
+                                    }}
+                                    sx={{
+                                        color: textColor + " !important"
+                                    }}
                                 >
-                                    🔄 Refresh
+                                    <LuRefreshCw size={16} />
+                                    Refresh
                                 </Button>
                             </HStack>
 
@@ -280,6 +319,8 @@ export function Dashboard() {
                                                         colorScheme="red"
                                                         onClick={() => handleDeleteSimulation(simulation.id!)}
                                                         p={1}
+                                                        color="red.500"
+                                                        _dark={{ color: "red.300" }}
                                                     >
                                                         <LuTrash2 size={16} />
                                                     </Button>
@@ -298,10 +339,23 @@ export function Dashboard() {
                                                     variant="outline"
                                                     onClick={() => handleLoadSimulation(simulation.id!, simulation.type)}
                                                     w="100%"
+                                                    bg="transparent"
+                                                    color={getSimulationButtonColor(simulation.type)}
+                                                    _dark={{
+                                                        color: `${getSimulationTypeColor(simulation.type)}.300 !important`,
+                                                        borderColor: `${getSimulationTypeColor(simulation.type)}.300`,
+                                                        bg: "transparent"
+                                                    }}
+                                                    sx={{
+                                                        color: getSimulationButtonColor(simulation.type) + " !important",
+                                                        "& *": {
+                                                            color: "inherit !important"
+                                                        }
+                                                    }}
                                                 >
-                                                    <Flex align="center" gap={2}>
+                                                    <Flex align="center" gap={2} color="inherit">
                                                         <LuPlay size={14} />
-                                                        Open Simulation
+                                                        <Text color="inherit">Open Simulation</Text>
                                                     </Flex>
                                                 </Button>
                                             </VStack>
@@ -372,7 +426,25 @@ export function Dashboard() {
                                         size="sm"
                                         variant="outline"
                                         colorScheme="red"
-                                        color={buttonTextColor}
+                                        color="red.600"
+                                        borderColor="red.300"
+                                        bg="transparent"
+                                        _hover={{
+                                            bg: "red.50",
+                                            color: "red.700"
+                                        }}
+                                        _dark={{ 
+                                            color: "red.300 !important",
+                                            borderColor: "red.300",
+                                            bg: "transparent",
+                                            _hover: {
+                                                bg: "red.900",
+                                                color: "red.200 !important"
+                                            }
+                                        }}
+                                        sx={{
+                                            color: deleteButtonColor + " !important"
+                                        }}
                                         onClick={() =>
                                             (window.location.href =
                                                 "/delete-account")

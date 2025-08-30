@@ -38,6 +38,7 @@ const TestResults: React.FC<TestResultsProps> = ({
     const boxBg = useColorModeValue("white", "gray.800");
     const borderColor = useColorModeValue("gray.200", "gray.600");
     const textColor = useColorModeValue("gray.600", "gray.300");
+    const primaryTextColor = useColorModeValue("gray.900", "white");
 
     const getScoreColor = (percentage: number) => {
         if (percentage >= 80) return "green";
@@ -70,11 +71,11 @@ const TestResults: React.FC<TestResultsProps> = ({
             flexDirection="column"
             gap="6"
             mt="6"
-            mb="10"
+            pb="10"
         >
             {/* Header */}
             <Box textAlign="center">
-                <Heading size="xl" mb={2}>Test Completed!</Heading>
+                <Heading size="xl" mb={2} color={primaryTextColor}>Test Completed!</Heading>
                 <Text fontSize="lg" color={textColor}>
                     Here are your results
                 </Text>
@@ -103,7 +104,7 @@ const TestResults: React.FC<TestResultsProps> = ({
                     <Grid templateColumns="repeat(auto-fit, minmax(150px, 1fr))" gap={6} w="100%">
                         <GridItem textAlign="center">
                             <Text fontSize="sm" color={textColor}>Questions Answered</Text>
-                            <Text fontSize="xl" fontWeight="bold">
+                            <Text fontSize="xl" fontWeight="bold" color={primaryTextColor}>
                                 {summary.answeredQuestions} / {summary.totalQuestions}
                             </Text>
                         </GridItem>
@@ -115,13 +116,13 @@ const TestResults: React.FC<TestResultsProps> = ({
                         </GridItem>
                         <GridItem textAlign="center">
                             <Text fontSize="sm" color={textColor}>Total Score</Text>
-                            <Text fontSize="xl" fontWeight="bold">
+                            <Text fontSize="xl" fontWeight="bold" color={primaryTextColor}>
                                 {summary.totalScore} / {summary.answeredQuestions * 100}
                             </Text>
                         </GridItem>
                         <GridItem textAlign="center">
                             <Text fontSize="sm" color={textColor}>Duration</Text>
-                            <Text fontSize="xl" fontWeight="bold">
+                            <Text fontSize="xl" fontWeight="bold" color={primaryTextColor}>
                                 {formatDuration(summary.duration)}
                             </Text>
                         </GridItem>
@@ -138,7 +139,7 @@ const TestResults: React.FC<TestResultsProps> = ({
                 bg={boxBg} 
                 borderColor={borderColor}
             >
-                <Heading size="md" mb={4}>Question Details</Heading>
+                <Heading size="md" mb={4} color={primaryTextColor}>Question Details</Heading>
                 
                 <VStack gap={4} align="stretch">
                     {session.questions.map((question, index) => {
@@ -151,14 +152,14 @@ const TestResults: React.FC<TestResultsProps> = ({
                             <Box 
                                 key={question.id}
                                 p={4} 
-                                border="1px" 
-                                borderColor={borderColor} 
+                                border="2px" 
+                                borderColor={isAnswered ? (isCorrect ? useColorModeValue("green.200", "green.600") : useColorModeValue("red.200", "red.600")) : borderColor} 
                                 borderRadius="md"
-                                bg={isAnswered ? (isCorrect ? "green.50" : "red.50") : "gray.50"}
+                                bg={useColorModeValue("gray.50", "gray.700")}
                             >
                                 <Flex justifyContent="space-between" alignItems="center">
                                     <HStack>
-                                        <Text fontWeight="semibold">
+                                        <Text fontWeight="semibold" color={primaryTextColor}>
                                             Question {index + 1}
                                         </Text>
                                         <Badge colorScheme={getDifficultyColor(question.difficulty)}>
@@ -180,6 +181,9 @@ const TestResults: React.FC<TestResultsProps> = ({
                                                     size="sm" 
                                                     variant="outline"
                                                     onClick={() => onViewQuestion(index)}
+                                                    color={primaryTextColor}
+                                                    borderColor={borderColor}
+                                                    _hover={{ bg: useColorModeValue("gray.50", "gray.600") }}
                                                 >
                                                     Review
                                                 </Button>
@@ -206,7 +210,7 @@ const TestResults: React.FC<TestResultsProps> = ({
                 bg={boxBg} 
                 borderColor={borderColor}
             >
-                <Heading size="md" mb={4}>Test Configuration</Heading>
+                <Heading size="md" mb={4} color={primaryTextColor}>Test Configuration</Heading>
                 
                 <Grid templateColumns="repeat(auto-fit, minmax(200px, 1fr))" gap={4}>
                     <GridItem>
@@ -217,15 +221,15 @@ const TestResults: React.FC<TestResultsProps> = ({
                     </GridItem>
                     <GridItem>
                         <Text fontSize="sm" color={textColor}>Total Questions</Text>
-                        <Text fontSize="lg" fontWeight="semibold">{session.config.numQuestions}</Text>
+                        <Text fontSize="lg" fontWeight="semibold" color={primaryTextColor}>{session.config.numQuestions}</Text>
                     </GridItem>
                     <GridItem>
                         <Text fontSize="sm" color={textColor}>Test Type</Text>
-                        <Text fontSize="lg" fontWeight="semibold">CPU Scheduling</Text>
+                        <Text fontSize="lg" fontWeight="semibold" color={primaryTextColor}>CPU Scheduling</Text>
                     </GridItem>
                     <GridItem>
                         <Text fontSize="sm" color={textColor}>Started</Text>
-                        <Text fontSize="lg" fontWeight="semibold">
+                        <Text fontSize="lg" fontWeight="semibold" color={primaryTextColor}>
                             {session.startTime.toLocaleString()}
                         </Text>
                     </GridItem>

@@ -151,14 +151,14 @@ export default function DiskSolution({ solution, onBack }: DiskSolutionProps) {
     };
 
     const btnStyle = {
-        bg: "white",
-        color: "blue.500",
+        bg: useColorModeValue("white", "gray.700"),
+        color: useColorModeValue("blue.500", "blue.300"),
         border: "1px solid",
-        borderColor: "blue.300",
+        borderColor: useColorModeValue("blue.300", "blue.500"),
         boxShadow: "3px 3px 2px rgba(0, 0, 0, 0.3)",
-        _hover: { bg: "blue.50" },
+        _hover: { bg: useColorModeValue("blue.50", "gray.600") },
         _active: {
-            bg: "blue.100",
+            bg: useColorModeValue("blue.100", "gray.500"),
             transform: "scale(0.95)",
             boxShadow: "2px 2px 1px rgba(0, 0, 0, 0.3)",
         },
@@ -172,7 +172,7 @@ export default function DiskSolution({ solution, onBack }: DiskSolutionProps) {
             flexDirection="column"
             gap="6"
             mt="6"
-            mb="10"
+            pb="10"
         >
             {/* Header */}
             <Box textAlign="center">
