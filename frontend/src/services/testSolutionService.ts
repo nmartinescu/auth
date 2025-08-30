@@ -1,4 +1,4 @@
-import type { TestQuestion, TestSolution, MemoryTestSolution, ProcessResult, GanttEntry } from '../types/Test';
+import type { TestQuestion, TestSolution, MemoryTestSolution, DiskTestSolution, ProcessResult, GanttEntry } from '../types/Test';
 
 class TestSolutionService {
     private static instance: TestSolutionService;
@@ -10,10 +10,12 @@ class TestSolutionService {
         return TestSolutionService.instance;
     }
 
-    async calculateSolution(question: TestQuestion): Promise<TestSolution | MemoryTestSolution> {
+    async calculateSolution(question: TestQuestion): Promise<TestSolution | MemoryTestSolution | DiskTestSolution> {
         try {
             if (question.type === 'memory') {
                 return this.calculateMemorySolution(question);
+            } else if (question.type === 'disk') {
+                return this.calculateDiskSolution(question);
             } else {
                 return this.calculateSchedulingSolution(question);
             }
@@ -85,6 +87,56 @@ class TestSolutionService {
         
         // Convert backend response to memory test solution format
         return this.convertMemoryBackendResponseToSolution(result);
+    }
+
+    private async calculateDiskSolution(question: TestQuestion): Promise<DiskTestSolution> {
+        // Map algorithm names to backend format
+        const algorithmMapping: { [key: string]: string } = {
+            'FCFS': 'fcfs',
+            'SSTF': 'sstf', 
+            'SCAN': 'scan',
+            'C-SCAN': 'cscan',  // Map C-SCAN to cscan
+            'LOOK': 'look',
+            'C-LOOK': 'clook'   // Map C-LOOK to clook
+        };
+
+        const backendAlgorithm = algorithmMapping[question.algorithm] || question.algorithm.toLowerCase();
+
+        // Prepare request data for disk scheduling
+        const requestData = {
+            algorithm: backendAlgorithm,
+            requests: question.requests!,
+            initialHeadPosition: question.initialHeadPosition!,
+            maxDiskSize: question.maxDiskSize!,
+            headDirection: question.headDirection!
+        };
+
+        console.log('=== DISK SOLUTION CALCULATION DEBUG ===');
+        console.log('Original question algorithm:', question.algorithm);
+        console.log('Mapped backend algorithm:', backendAlgorithm);
+        console.log('Request data being sent:', JSON.stringify(requestData, null, 2));
+
+        // Call backend disk scheduling API
+        const response = await fetch('/api/disk', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData)
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Backend response error:', response.status, response.statusText, errorText);
+            throw new Error(`Failed to calculate disk solution: ${response.statusText} - ${errorText}`);
+        }
+
+        const result = await response.json();
+        console.log('Backend response received:', JSON.stringify(result, null, 2));
+        console.log('=== END DISK SOLUTION CALCULATION DEBUG ===');
+        
+        // Convert backend response to disk test solution format
+        return this.convertDiskBackendResponseToSolution(result);
     }
 
     private convertBackendResponseToSolution(
@@ -239,6 +291,41 @@ class TestSolutionService {
         return solution;
     }
 
+    private convertDiskBackendResponseToSolution(backendResponse: any): DiskTestSolution {
+        console.log('=== DISK BACKEND RESPONSE CONVERSION DEBUG ===');
+        console.log('Backend Response:', JSON.stringify(backendResponse, null, 2));
+        
+        const data = backendResponse.data || backendResponse;
+        
+        // Map backend algorithm names back to frontend format
+        const backendToFrontendAlgorithm: { [key: string]: string } = {
+            'fcfs': 'FCFS',
+            'sstf': 'SSTF',
+            'scan': 'SCAN',
+            'cscan': 'C-SCAN',  // Map cscan back to C-SCAN
+            'look': 'LOOK',
+            'clook': 'C-LOOK'   // Map clook back to C-LOOK
+        };
+
+        const frontendAlgorithm = backendToFrontendAlgorithm[data.algorithm] || data.algorithm?.toUpperCase() || 'FCFS';
+        
+        const solution: DiskTestSolution = {
+            algorithm: frontendAlgorithm,
+            maxDiskSize: data.maxDiskSize || 0,
+            initialHeadPosition: data.initialHeadPosition || 0,
+            headDirection: data.headDirection || 'right',
+            requests: data.requests || [],
+            sequence: data.sequence || [],
+            totalSeekTime: data.totalSeekTime || 0,
+            averageSeekTime: data.averageSeekTime || 0
+        };
+        
+        console.log('Final Disk Solution:', JSON.stringify(solution, null, 2));
+        console.log('=== END DISK BACKEND RESPONSE CONVERSION DEBUG ===');
+        
+        return solution;
+    }
+
     private convertFramesToStepResults(frames: number[][], customData: any[], pageReferences: number[]): any[] {
         const stepResults = [];
         
@@ -270,7 +357,7 @@ class TestSolutionService {
         return stepResults;
     }
 
-    compareAnswers(userSolution: TestSolution | MemoryTestSolution, correctSolution: TestSolution | MemoryTestSolution): {
+    compareAnswers(userSolution: TestSolution | MemoryTestSolution | DiskTestSolution, correctSolution: TestSolution | MemoryTestSolution | DiskTestSolution): {
         isCorrect: boolean;
         score: number;
         maxScore: number;
@@ -283,6 +370,8 @@ class TestSolutionService {
         // Check if this is a memory question
         if ('totalPageFaults' in userSolution && 'totalPageFaults' in correctSolution) {
             return this.compareMemoryAnswers(userSolution, correctSolution);
+        } else if ('sequence' in userSolution && 'sequence' in correctSolution) {
+            return this.compareDiskAnswers(userSolution, correctSolution);
         } else {
             return this.compareSchedulingAnswers(userSolution as TestSolution, correctSolution as TestSolution);
         }
@@ -459,6 +548,94 @@ class TestSolutionService {
             details: {
                 stepResultsCorrect: correctSteps === totalSteps,
                 pageFaultsCorrect: correctPageFaults === totalSteps
+            }
+        };
+    }
+
+    private compareDiskAnswers(userSolution: DiskTestSolution, correctSolution: DiskTestSolution): {
+        isCorrect: boolean;
+        score: number;
+        maxScore: number;
+        details: {
+            sequenceCorrect: boolean;
+            totalSeekTimeCorrect: boolean;
+            averageSeekTimeCorrect: boolean;
+        };
+    } {
+        const maxScore = 100;
+        let score = 0;
+        const tolerance = 0.01; // Allow small rounding differences
+
+        console.log('=== DISK COMPARISON DEBUG ===');
+        console.log('User Disk Solution:', JSON.stringify(userSolution, null, 2));
+        console.log('Correct Disk Solution:', JSON.stringify(correctSolution, null, 2));
+
+        // Check sequence (50% of score) - give partial credit
+        let sequenceScore = 0;
+        const sequenceCorrect = JSON.stringify(userSolution.sequence) === JSON.stringify(correctSolution.sequence);
+        if (sequenceCorrect) {
+            sequenceScore = 50;
+        } else {
+            // Give partial credit for correct positions
+            const minLength = Math.min(userSolution.sequence.length, correctSolution.sequence.length);
+            let correctPositions = 0;
+            for (let i = 0; i < minLength; i++) {
+                if (userSolution.sequence[i] === correctSolution.sequence[i]) {
+                    correctPositions++;
+                }
+            }
+            // Partial credit: (correct positions / total positions) * 50
+            if (correctSolution.sequence.length > 0) {
+                sequenceScore = (correctPositions / correctSolution.sequence.length) * 50;
+            }
+        }
+        score += sequenceScore;
+        console.log('Sequence - User:', userSolution.sequence, 'Correct:', correctSolution.sequence, 'Partial Score:', sequenceScore);
+
+        // Check total seek time (30% of score) - give partial credit for close answers
+        const totalSeekTimeDiff = Math.abs(userSolution.totalSeekTime - correctSolution.totalSeekTime);
+        const totalSeekTimeCorrect = totalSeekTimeDiff <= tolerance;
+        let seekTimeScore = 0;
+        if (totalSeekTimeCorrect) {
+            seekTimeScore = 30;
+        } else if (correctSolution.totalSeekTime > 0) {
+            // Give partial credit based on how close the answer is (within 20% gets some points)
+            const percentError = totalSeekTimeDiff / correctSolution.totalSeekTime;
+            if (percentError <= 0.2) { // Within 20%
+                seekTimeScore = 30 * (1 - percentError / 0.2) * 0.5; // Up to 15 points for close answers
+            }
+        }
+        score += seekTimeScore;
+        console.log('Total Seek Time - User:', userSolution.totalSeekTime, 'Correct:', correctSolution.totalSeekTime, 'Diff:', totalSeekTimeDiff, 'Partial Score:', seekTimeScore);
+
+        // Check average seek time (20% of score) - give partial credit
+        const averageSeekTimeDiff = Math.abs(userSolution.averageSeekTime - correctSolution.averageSeekTime);
+        const averageSeekTimeCorrect = averageSeekTimeDiff <= tolerance;
+        let avgSeekTimeScore = 0;
+        if (averageSeekTimeCorrect) {
+            avgSeekTimeScore = 20;
+        } else if (correctSolution.averageSeekTime > 0) {
+            // Give partial credit based on how close the answer is
+            const percentError = averageSeekTimeDiff / correctSolution.averageSeekTime;
+            if (percentError <= 0.2) { // Within 20%
+                avgSeekTimeScore = 20 * (1 - percentError / 0.2) * 0.5; // Up to 10 points for close answers
+            }
+        }
+        score += avgSeekTimeScore;
+        console.log('Average Seek Time - User:', userSolution.averageSeekTime, 'Correct:', correctSolution.averageSeekTime, 'Diff:', averageSeekTimeDiff, 'Partial Score:', avgSeekTimeScore);
+
+        const isCorrect = score >= 80; // 80% threshold for correct answer
+        console.log('Final Disk Score:', score, 'Is Correct:', isCorrect);
+        console.log('=== END DISK COMPARISON DEBUG ===');
+
+        return {
+            isCorrect,
+            score: Math.round(score),
+            maxScore,
+            details: {
+                sequenceCorrect,
+                totalSeekTimeCorrect: totalSeekTimeCorrect,
+                averageSeekTimeCorrect: averageSeekTimeCorrect
             }
         };
     }

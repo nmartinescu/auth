@@ -3,7 +3,9 @@ import type {
     TestConfig, 
     TestQuestion, 
     UserAnswer, 
-    TestSolution 
+    TestSolution,
+    MemoryTestSolution,
+    DiskTestSolution
 } from '../types/Test';
 import { testQuestionGenerator } from './testQuestionGenerator';
 import { testSolutionService } from './testSolutionService';
@@ -84,7 +86,7 @@ class TestSessionManager {
         return this.getCurrentQuestion();
     }
 
-    submitAnswer(questionId: string, userSolution: TestSolution): UserAnswer | null {
+    submitAnswer(questionId: string, userSolution: TestSolution | MemoryTestSolution | DiskTestSolution): UserAnswer | null {
         if (!this.currentSession) return null;
 
         const question = this.currentSession.questions.find(q => q.id === questionId);

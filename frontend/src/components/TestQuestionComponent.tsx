@@ -13,21 +13,21 @@ import {
     GridItem
 } from "@chakra-ui/react";
 import { useColorModeValue } from "./ui/color-mode";
-import type { TestQuestion, TestSolution, MemoryTestSolution, ProcessResult, MemoryStepResult } from "../types/Test";
+import type { TestQuestion, TestSolution, MemoryTestSolution, DiskTestSolution, ProcessResult, MemoryStepResult } from "../types/Test";
 
 interface TestQuestionComponentProps {
     question: TestQuestion;
     questionNumber: number;
     totalQuestions: number;
-    onSubmitAnswer: (solution: TestSolution | MemoryTestSolution) => void;
+    onSubmitAnswer: (solution: TestSolution | MemoryTestSolution | DiskTestSolution) => void;
     onNextQuestion: () => void;
     onPreviousQuestion: () => void;
     onFinishTest: () => void;
     hasNext: boolean;
     hasPrevious: boolean;
-    initialAnswer?: TestSolution | MemoryTestSolution;
+    initialAnswer?: TestSolution | MemoryTestSolution | DiskTestSolution;
     reviewMode?: boolean;
-    correctSolution?: TestSolution | MemoryTestSolution;
+    correctSolution?: TestSolution | MemoryTestSolution | DiskTestSolution;
     userScore?: number;
 }
 
@@ -101,6 +101,41 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
         return [];
     });
 
+    // Disk-specific state
+    const [diskSequence, setDiskSequence] = useState<number[]>(() => {
+        if (initialAnswer && 'sequence' in initialAnswer) {
+            console.log('Initializing disk sequence from initial answer:', initialAnswer.sequence);
+            return initialAnswer.sequence;
+        }
+        if (question.type === 'disk' && question.initialHeadPosition !== undefined) {
+            console.log('Initializing disk sequence with initial head position:', question.initialHeadPosition);
+            // Initialize with initial head position + placeholders for all requests
+            const initialSequence = [question.initialHeadPosition];
+            if (question.requests) {
+                for (let i = 0; i < question.requests.length; i++) {
+                    initialSequence.push(0);
+                }
+            }
+            return initialSequence;
+        }
+        console.log('Initializing empty disk sequence');
+        return [];
+    });
+
+    const [totalSeekTime, setTotalSeekTime] = useState(() => {
+        if (initialAnswer && 'totalSeekTime' in initialAnswer) {
+            return initialAnswer.totalSeekTime;
+        }
+        return 0;
+    });
+
+    const [averageSeekTime, setAverageSeekTime] = useState(() => {
+        if (initialAnswer && 'averageSeekTime' in initialAnswer) {
+            return initialAnswer.averageSeekTime;
+        }
+        return 0;
+    });
+
     // UI Colors
     const boxBg = useColorModeValue("white", "gray.800");
     const borderColor = useColorModeValue("gray.200", "gray.600");
@@ -136,6 +171,25 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                     frameState: new Array(question.frameCount).fill(null),
                     pageFault: false
                 })));
+            }
+        } else if (question.type === 'disk' && question.initialHeadPosition !== undefined) {
+            // Reset disk data for new question
+            if (initialAnswer && 'sequence' in initialAnswer) {
+                setDiskSequence(initialAnswer.sequence);
+                setTotalSeekTime(initialAnswer.totalSeekTime);
+                setAverageSeekTime(initialAnswer.averageSeekTime);
+            } else {
+                // Initialize with initial head position + placeholders for all requests
+                const initialSequence = [question.initialHeadPosition || 0];
+                // Add placeholders for each request (user needs to fill these in)
+                if (question.requests) {
+                    for (let i = 0; i < question.requests.length; i++) {
+                        initialSequence.push(0);
+                    }
+                }
+                setDiskSequence(initialSequence);
+                setTotalSeekTime(0);
+                setAverageSeekTime(0);
             }
         } else if (question.type === 'scheduling' && question.processes) {
             // Reset scheduling data for new question
@@ -195,8 +249,39 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
         ));
     };
 
+    const handleSequenceChange = (index: number, value: string) => {
+        const numValue = parseInt(value) || 0;
+        setDiskSequence(prev => {
+            const newSequence = prev.map((pos, idx) => 
+                idx === index ? numValue : pos
+            );
+            // Auto-calculate seek times when sequence changes
+            calculateSeekTimes(newSequence);
+            return newSequence;
+        });
+    };
+
+    const calculateSeekTimes = (sequence: number[]) => {
+        if (sequence.length < 2) {
+            setTotalSeekTime(0);
+            setAverageSeekTime(0);
+            return;
+        }
+
+        let total = 0;
+        for (let i = 1; i < sequence.length; i++) {
+            total += Math.abs(sequence[i] - sequence[i - 1]);
+        }
+
+        const requestCount = sequence.length - 1; // Exclude initial position
+        const average = requestCount > 0 ? total / requestCount : 0;
+
+        setTotalSeekTime(total);
+        setAverageSeekTime(Math.round(average * 100) / 100);
+    };
+
     const handleSubmit = () => {
-        let solution: TestSolution | MemoryTestSolution;
+        let solution: TestSolution | MemoryTestSolution | DiskTestSolution;
         
         if (question.type === 'memory') {
             // Calculate total page faults from user's step results
@@ -221,6 +306,42 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
             });
             console.log('Total Page Faults:', totalPageFaults);
             console.log('=== END USER MEMORY SUBMISSION DEBUG ===');
+        } else if (question.type === 'disk') {
+            // Validate disk sequence before submission
+            const expectedSequenceLength = 1 + (question.requests?.length || 0); // Initial position + all requests
+            if (diskSequence.length < expectedSequenceLength) {
+                alert(`Please complete the sequence. You need ${expectedSequenceLength} positions total (initial position + ${question.requests?.length || 0} requests).`);
+                return;
+            }
+
+            // Check if sequence contains any zeros (except potentially valid track 0)
+            const hasIncompleteEntries = diskSequence.some((pos, index) => {
+                if (index === 0) return false; // Skip initial position
+                return pos === 0 && !question.requests?.includes(0);
+            });
+
+            if (hasIncompleteEntries) {
+                const proceed = confirm('Your sequence contains some zero values that may not be valid track positions. Do you want to submit anyway?');
+                if (!proceed) return;
+            }
+
+            solution = {
+                algorithm: question.algorithm,
+                maxDiskSize: question.maxDiskSize || 0,
+                initialHeadPosition: question.initialHeadPosition || 0,
+                headDirection: question.headDirection || 'right',
+                requests: question.requests || [],
+                sequence: diskSequence,
+                totalSeekTime,
+                averageSeekTime
+            };
+
+            console.log('=== USER DISK SUBMISSION DEBUG ===');
+            console.log('User Disk Solution Being Submitted:', JSON.stringify(solution, null, 2));
+            console.log('Disk Sequence:', diskSequence);
+            console.log('Total Seek Time:', totalSeekTime, 'Average Seek Time:', averageSeekTime);
+            console.log('Expected sequence length:', expectedSequenceLength, 'Actual length:', diskSequence.length);
+            console.log('=== END USER DISK SUBMISSION DEBUG ===');
         } else {
             solution = {
                 processes: processResults,
@@ -358,6 +479,22 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                                 <VStack align="start" gap={3}>
                                     <Text color={primaryTextColor}><strong>Frame Count:</strong> {question.frameCount}</Text>
                                     <Text color={primaryTextColor}><strong>Page Reference Sequence:</strong> {question.pageReferences?.join(', ')}</Text>
+                                    <Text color={primaryTextColor}><strong>Algorithm:</strong> {question.algorithm}</Text>
+                                </VStack>
+                            </Box>
+                        </Box>
+                    )}
+
+                    {/* Disk Information - Only for disk questions */}
+                    {question.type === 'disk' && (
+                        <Box w="100%">
+                            <Text fontSize="md" fontWeight="semibold" mb={3} color={primaryTextColor}>Disk Configuration:</Text>
+                            <Box border="1px" borderColor={borderColor} borderRadius="md" p={4}>
+                                <VStack align="start" gap={3}>
+                                    <Text color={primaryTextColor}><strong>Maximum Disk Size:</strong> {question.maxDiskSize} tracks (0 to {(question.maxDiskSize || 1) - 1})</Text>
+                                    <Text color={primaryTextColor}><strong>Initial Head Position:</strong> {question.initialHeadPosition}</Text>
+                                    <Text color={primaryTextColor}><strong>Head Direction:</strong> {question.headDirection}</Text>
+                                    <Text color={primaryTextColor}><strong>Disk Requests:</strong> {question.requests?.join(', ')}</Text>
                                     <Text color={primaryTextColor}><strong>Algorithm:</strong> {question.algorithm}</Text>
                                 </VStack>
                             </Box>
@@ -599,6 +736,169 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                                 )}
                             </Flex>
                         </Box>
+                    </>
+                ) : question.type === 'disk' ? (
+                    <>
+                        {/* Disk Scheduling Answer Form */}
+                        <VStack align="start" gap={6} w="100%">
+                            {/* Sequence Input */}
+                            <Box w="100%">
+                                <Text fontWeight="semibold" color={primaryTextColor} mb={3}>
+                                    Service Sequence (including initial head position):
+                                </Text>
+                                <Box border="1px" borderColor={borderColor} borderRadius="md" p={4}>
+                                    <VStack align="start" gap={3}>
+                                        <VStack align="start" gap={2}>
+                                            <Text fontSize="sm" color={textColor}>
+                                                Enter the order in which disk requests are serviced. The first position is the initial head position ({question.initialHeadPosition}). 
+                                                You need to enter the remaining {question.requests?.length || 0} positions for the requests: [{question.requests?.join(', ') || ''}].
+                                                Seek times will be calculated automatically as you enter the sequence.
+                                            </Text>
+                                            <Text fontSize="xs" color={diskSequence.length === 1 + (question.requests?.length || 0) ? "green.600" : "orange.600"}>
+                                                Sequence progress: {diskSequence.length} / {1 + (question.requests?.length || 0)} positions
+                                                {diskSequence.length < 1 + (question.requests?.length || 0) && " (incomplete)"}
+                                            </Text>
+                                        </VStack>
+                                        <HStack wrap="wrap" gap={2}>
+                                            {diskSequence.map((position, index) => (
+                                                <HStack key={index} gap={1}>
+                                                    <Text fontSize="sm" color={textColor}>
+                                                        {index === 0 ? "Start:" : `${index}:`}
+                                                    </Text>
+                                                    {reviewMode ? (
+                                                        <Box>
+                                                            {correctSolution && 'sequence' in correctSolution ? (
+                                                                <VStack align="start" gap={1}>
+                                                                    <Text 
+                                                                        color={position === correctSolution.sequence[index] ? "green.600" : "red.600"}
+                                                                        fontWeight="semibold"
+                                                                    >
+                                                                        Your: {position}
+                                                                    </Text>
+                                                                    <Text color={textColor} fontSize="sm">
+                                                                        Correct: {correctSolution.sequence[index]}
+                                                                    </Text>
+                                                                </VStack>
+                                                            ) : (
+                                                                <Text color={primaryTextColor}>{position}</Text>
+                                                            )}
+                                                        </Box>
+                                                    ) : (
+                                                        <Input
+                                                            type="number"
+                                                            value={position}
+                                                            onChange={(e) => handleSequenceChange(index, e.target.value)}
+                                                            size="sm"
+                                                            w="80px"
+                                                            min={0}
+                                                            max={(question.maxDiskSize || 200) - 1}
+                                                            color={primaryTextColor}
+                                                            isDisabled={index === 0} // First position is initial head position
+                                                        />
+                                                    )}
+
+                                                </HStack>
+                                            ))}
+
+                                        </HStack>
+                                    </VStack>
+                                </Box>
+                            </Box>
+
+                            {/* Seek Time Calculations */}
+                            <Box w="100%">
+                                <Text fontWeight="semibold" color={primaryTextColor} mb={3}>
+                                    Seek Time Calculations:
+                                </Text>
+                                <Box border="1px" borderColor={borderColor} borderRadius="md" p={4}>
+                                    <VStack align="start" gap={4}>
+                                        <HStack gap={8} wrap="wrap">
+                                            <Box>
+                                                <Text fontWeight="semibold" color={primaryTextColor}>Total Seek Time:</Text>
+                                                {reviewMode && correctSolution && 'totalSeekTime' in correctSolution ? (
+                                                    <VStack align="start" gap={1}>
+                                                        <Text 
+                                                            fontSize="lg" 
+                                                            color={Math.abs(totalSeekTime - correctSolution.totalSeekTime) <= 0.01 ? "green.600" : "red.600"}
+                                                            fontWeight="semibold"
+                                                        >
+                                                            Your: {totalSeekTime}
+                                                        </Text>
+                                                        <Text fontSize="sm" color={textColor}>
+                                                            Correct: {correctSolution.totalSeekTime}
+                                                        </Text>
+                                                    </VStack>
+                                                ) : reviewMode ? (
+                                                    <Text fontSize="lg" color={primaryTextColor}>{totalSeekTime}</Text>
+                                                ) : (
+                                                    <Input
+                                                        type="number"
+                                                        value={totalSeekTime}
+                                                        onChange={(e) => setTotalSeekTime(parseFloat(e.target.value) || 0)}
+                                                        size="sm"
+                                                        w="120px"
+                                                        min={0}
+                                                        step={0.01}
+                                                        color={primaryTextColor}
+                                                    />
+                                                )}
+                                            </Box>
+                                            <Box>
+                                                <Text fontWeight="semibold" color={primaryTextColor}>Average Seek Time:</Text>
+                                                {reviewMode && correctSolution && 'averageSeekTime' in correctSolution ? (
+                                                    <VStack align="start" gap={1}>
+                                                        <Text 
+                                                            fontSize="lg" 
+                                                            color={Math.abs(averageSeekTime - correctSolution.averageSeekTime) <= 0.01 ? "green.600" : "red.600"}
+                                                            fontWeight="semibold"
+                                                        >
+                                                            Your: {averageSeekTime.toFixed(2)}
+                                                        </Text>
+                                                        <Text fontSize="sm" color={textColor}>
+                                                            Correct: {correctSolution.averageSeekTime.toFixed(2)}
+                                                        </Text>
+                                                    </VStack>
+                                                ) : reviewMode ? (
+                                                    <Text fontSize="lg" color={primaryTextColor}>{averageSeekTime.toFixed(2)}</Text>
+                                                ) : (
+                                                    <Input
+                                                        type="number"
+                                                        value={averageSeekTime}
+                                                        onChange={(e) => setAverageSeekTime(parseFloat(e.target.value) || 0)}
+                                                        size="sm"
+                                                        w="120px"
+                                                        min={0}
+                                                        step={0.01}
+                                                        color={primaryTextColor}
+                                                    />
+                                                )}
+                                            </Box>
+                                        </HStack>
+                                        
+
+                                        
+                                        {!reviewMode && (
+                                            <Box>
+                                                <Text fontSize="sm" color={textColor} fontStyle="italic">
+                                                    Tip: Total Seek Time = Sum of |current_position - next_position| for each movement
+                                                    <br />
+                                                    Average Seek Time = Total Seek Time ÷ Number of Requests
+                                                </Text>
+                                            </Box>
+                                        )}
+
+                                        {reviewMode && userScore !== undefined && (
+                                            <Box>
+                                                <Text fontWeight="semibold" color={primaryTextColor}>Your Score:</Text>
+                                                <Text fontSize="lg" color={userScore >= 80 ? "green.600" : userScore >= 60 ? "yellow.600" : "red.600"}>
+                                                    {userScore}/100
+                                                </Text>
+                                            </Box>
+                                        )}
+                                    </VStack>
+                                </Box>
+                            </Box>
+                        </VStack>
                     </>
                 ) : (
                     <>

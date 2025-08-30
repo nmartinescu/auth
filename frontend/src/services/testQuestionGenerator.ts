@@ -5,6 +5,7 @@ import type {
     DifficultyLevel,
     AlgorithmType,
     MemoryAlgorithmType,
+    DiskAlgorithmType,
     TestConfig
 } from '../types/Test';
 
@@ -22,9 +23,10 @@ class TestQuestionGenerator {
         const questions: TestQuestion[] = [];
         
         // Determine question types to generate
-        const questionTypes: ('scheduling' | 'memory')[] = [];
+        const questionTypes: ('scheduling' | 'memory' | 'disk')[] = [];
         if (config.includeScheduling) questionTypes.push('scheduling');
         if (config.includeMemory) questionTypes.push('memory');
+        if (config.includeDisk) questionTypes.push('disk');
         
         for (let i = 0; i < config.numQuestions; i++) {
             const questionType = questionTypes[Math.floor(Math.random() * questionTypes.length)];
@@ -37,9 +39,16 @@ class TestQuestionGenerator {
                     config.difficulty,
                     algorithm
                 );
-            } else {
+            } else if (questionType === 'memory') {
                 const algorithm = this.getRandomMemoryAlgorithm();
                 question = this.generateMemoryQuestion(
+                    `test-${Date.now()}-${i}`,
+                    config.difficulty,
+                    algorithm
+                );
+            } else {
+                const algorithm = this.getRandomDiskAlgorithm();
+                question = this.generateDiskQuestion(
                     `test-${Date.now()}-${i}`,
                     config.difficulty,
                     algorithm
@@ -88,6 +97,28 @@ class TestQuestionGenerator {
             frameCount,
             pageReferences,
             description: this.generateMemoryDescription(algorithm, frameCount, pageReferences)
+        };
+    }
+
+    private generateDiskQuestion(
+        id: string,
+        difficulty: DifficultyLevel,
+        algorithm: DiskAlgorithmType
+    ): TestQuestion {
+        const { maxDiskSize, requestCount, initialHeadPosition } = this.getDiskDifficultyParams(difficulty);
+        const requests = this.generateDiskRequests(requestCount, maxDiskSize, initialHeadPosition);
+        const headDirection = Math.random() > 0.5 ? 'right' : 'left';
+        
+        return {
+            id,
+            type: 'disk',
+            difficulty,
+            algorithm,
+            maxDiskSize,
+            initialHeadPosition,
+            headDirection,
+            requests,
+            description: this.generateDiskDescription(algorithm, maxDiskSize, initialHeadPosition, headDirection, requests)
         };
     }
 
@@ -294,6 +325,105 @@ class TestQuestionGenerator {
                 return 'Least Recently Used (LRU)';
             case 'OPT':
                 return 'Optimal (OPT)';
+            default:
+                return algorithm;
+        }
+    }
+
+    private getDiskDifficultyParams(difficulty: DifficultyLevel): { 
+        maxDiskSize: number; 
+        requestCount: number; 
+        initialHeadPosition: number;
+    } {
+        switch (difficulty) {
+            case 'easy':
+                const easyDiskSize = 100;
+                return { 
+                    maxDiskSize: easyDiskSize, 
+                    requestCount: this.randomBetween(4, 6),
+                    initialHeadPosition: this.randomBetween(20, 80)
+                };
+            case 'medium':
+                const mediumDiskSize = 200;
+                return { 
+                    maxDiskSize: mediumDiskSize, 
+                    requestCount: this.randomBetween(6, 8),
+                    initialHeadPosition: this.randomBetween(30, 170)
+                };
+            case 'hard':
+                const hardDiskSize = 500;
+                return { 
+                    maxDiskSize: hardDiskSize, 
+                    requestCount: this.randomBetween(8, 12),
+                    initialHeadPosition: this.randomBetween(50, 450)
+                };
+            default:
+                return { maxDiskSize: 200, requestCount: 6, initialHeadPosition: 50 };
+        }
+    }
+
+    private generateDiskRequests(requestCount: number, maxDiskSize: number, initialHeadPosition: number): number[] {
+        const requests: number[] = [];
+        
+        for (let i = 0; i < requestCount; i++) {
+            let request: number;
+            do {
+                request = this.randomBetween(0, maxDiskSize - 1);
+            } while (requests.includes(request) || request === initialHeadPosition);
+            
+            requests.push(request);
+        }
+        
+        return requests;
+    }
+
+    private generateDiskDescription(
+        algorithm: DiskAlgorithmType,
+        maxDiskSize: number,
+        initialHeadPosition: number,
+        headDirection: 'left' | 'right',
+        requests: number[]
+    ): string {
+        const algorithmName = this.getDiskAlgorithmFullName(algorithm);
+        const needsDirection = ['SCAN', 'C-SCAN', 'LOOK', 'C-LOOK'].includes(algorithm);
+        const directionText = needsDirection ? ` The disk head is initially moving ${headDirection}.` : '';
+        
+        return `Apply ${algorithmName} disk scheduling algorithm to the following disk requests.
+        
+        Disk Configuration:
+        - Maximum Disk Size: ${maxDiskSize} tracks (0 to ${maxDiskSize - 1})
+        - Initial Head Position: ${initialHeadPosition}
+        - Disk Requests: ${requests.join(', ')}${directionText}
+        
+        Calculate:
+        1. The sequence in which requests are serviced
+        2. Total seek time (sum of all head movements)
+        3. Average seek time (total seek time ÷ number of requests)
+        
+        Remember:
+        - Seek Time = |Current Position - Target Position|
+        - Head movement is the distance between consecutive positions`;
+    }
+
+    private getRandomDiskAlgorithm(): DiskAlgorithmType {
+        const algorithms: DiskAlgorithmType[] = ['FCFS', 'SSTF', 'SCAN', 'C-SCAN', 'LOOK', 'C-LOOK'];
+        return algorithms[Math.floor(Math.random() * algorithms.length)];
+    }
+
+    private getDiskAlgorithmFullName(algorithm: DiskAlgorithmType): string {
+        switch (algorithm) {
+            case 'FCFS':
+                return 'First Come First Served (FCFS)';
+            case 'SSTF':
+                return 'Shortest Seek Time First (SSTF)';
+            case 'SCAN':
+                return 'SCAN (Elevator Algorithm)';
+            case 'C-SCAN':
+                return 'Circular SCAN (C-SCAN)';
+            case 'LOOK':
+                return 'LOOK Algorithm';
+            case 'C-LOOK':
+                return 'Circular LOOK (C-LOOK)';
             default:
                 return algorithm;
         }

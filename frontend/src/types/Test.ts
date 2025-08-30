@@ -1,14 +1,19 @@
 export interface TestQuestion {
     id: string;
-    type: 'scheduling' | 'memory';
+    type: 'scheduling' | 'memory' | 'disk';
     difficulty: 'easy' | 'medium' | 'hard';
-    algorithm: 'FCFS' | 'SJF' | 'RR' | 'FIFO' | 'LRU' | 'OPT';
+    algorithm: 'FCFS' | 'SJF' | 'RR' | 'FIFO' | 'LRU' | 'OPT' | 'SSTF' | 'SCAN' | 'C-SCAN' | 'LOOK' | 'C-LOOK';
     quantum?: number;
     processes?: TestProcess[];
     frameCount?: number;
     pageReferences?: number[];
+    // Disk scheduling properties
+    maxDiskSize?: number;
+    initialHeadPosition?: number;
+    headDirection?: 'left' | 'right';
+    requests?: number[];
     description: string;
-    expectedSolution?: TestSolution | MemoryTestSolution;
+    expectedSolution?: TestSolution | MemoryTestSolution | DiskTestSolution;
 }
 
 export interface TestProcess {
@@ -57,6 +62,17 @@ export interface MemoryStepResult {
     pageFault: boolean;
 }
 
+export interface DiskTestSolution {
+    algorithm: string;
+    maxDiskSize: number;
+    initialHeadPosition: number;
+    headDirection: string;
+    requests: number[];
+    sequence: number[];
+    totalSeekTime: number;
+    averageSeekTime: number;
+}
+
 export interface ProcessResult {
     pid: number;
     arrivalTime: number;
@@ -76,6 +92,7 @@ export interface GanttEntry {
 export interface TestConfig {
     includeScheduling: boolean;
     includeMemory: boolean;
+    includeDisk: boolean;
     numQuestions: number;
     difficulty: 'easy' | 'medium' | 'hard';
 }
@@ -93,8 +110,8 @@ export interface TestSession {
 
 export interface UserAnswer {
     questionId: string;
-    userSolution: TestSolution | MemoryTestSolution;
-    correctSolution: TestSolution | MemoryTestSolution;
+    userSolution: TestSolution | MemoryTestSolution | DiskTestSolution;
+    correctSolution: TestSolution | MemoryTestSolution | DiskTestSolution;
     isCorrect: boolean;
     score: number;
     maxScore: number;
@@ -103,3 +120,4 @@ export interface UserAnswer {
 export type DifficultyLevel = 'easy' | 'medium' | 'hard';
 export type AlgorithmType = 'FCFS' | 'SJF' | 'RR';
 export type MemoryAlgorithmType = 'FIFO' | 'LRU' | 'OPT';
+export type DiskAlgorithmType = 'FCFS' | 'SSTF' | 'SCAN' | 'C-SCAN' | 'LOOK' | 'C-LOOK';
