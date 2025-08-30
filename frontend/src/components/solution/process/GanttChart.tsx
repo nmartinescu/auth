@@ -92,7 +92,15 @@ export default function GanttChart({ solution, stepIndex }: GanttChartProps) {
 
     const timelineWidth = 600;
     const processHeight = 40;
-    const timeScale = maxTime > 0 ? timelineWidth / maxTime : 1;
+    const labelWidth = 60;
+    
+    // Calculate time scale, ensuring minimum width per time unit for readability
+    const minTimeUnitWidth = 20;
+    const calculatedScale = maxTime > 0 ? timelineWidth / maxTime : 1;
+    const timeScale = Math.max(calculatedScale, minTimeUnitWidth);
+    
+    // Adjust timeline width if needed to accommodate minimum scale
+    const actualTimelineWidth = Math.max(timelineWidth, maxTime * minTimeUnitWidth);
 
     return (
         <Box
@@ -124,97 +132,136 @@ export default function GanttChart({ solution, stepIndex }: GanttChartProps) {
             </Box>
 
             {/* Time axis */}
-            <Box mb="2" position="relative" height="20px">
+            <Box mb="2" position="relative" height="30px">
+                {/* Main timeline axis line */}
                 <Box
                     position="absolute"
-                    left="60px"
-                    right="0"
+                    left={`${labelWidth}px`}
+                    width={`${actualTimelineWidth}px`}
                     height="1px"
                     bg={borderColor}
-                    top="10px"
+                    top="20px"
                 />
-                {Array.from({ length: Math.min(maxTime + 1, 21) }, (_, i) => (
-                    <Box
-                        key={i}
-                        position="absolute"
-                        left={`${60 + (i * timeScale)}px`}
-                        top="0"
-                        fontSize="xs"
-                        color={textColor}
-                    >
-                        {i}
-                    </Box>
-                ))}
-            </Box>
-
-            {/* Process rows */}
-            <Box>
-                {processIds.map((pid) => {
-                    const timeline = buildProcessTimeline(pid);
-                    
+                
+                {/* Time markers and labels */}
+                {Array.from({ length: Math.min(maxTime + 1, 31) }, (_, i) => {
+                    const leftPosition = labelWidth + (i * timeScale);
                     return (
-                        <Box key={pid} display="flex" alignItems="center" mb="2">
-                            {/* Process label */}
+                        <Box key={i} position="absolute" left={`${leftPosition}px`}>
+                            {/* Vertical tick mark */}
                             <Box
-                                width="50px"
-                                textAlign="right"
-                                pr="2"
-                                fontSize="sm"
+                                position="absolute"
+                                width="1px"
+                                height="6px"
+                                bg={borderColor}
+                                top="17px"
+                                left="-0.5px"
+                            />
+                            {/* Time label */}
+                            <Box
+                                position="absolute"
+                                top="0"
+                                left="-8px"
+                                width="16px"
+                                textAlign="center"
+                                fontSize="xs"
                                 color={textColor}
-                                fontWeight="medium"
                             >
-                                P{pid}
-                            </Box>
-
-                            {/* Timeline bar */}
-                            <Box
-                                position="relative"
-                                width={`${timelineWidth}px`}
-                                height={`${processHeight}px`}
-                                bg={useColorModeValue("gray.100", "gray.700")}
-                                borderRadius="4px"
-                                border={`1px solid ${borderColor}`}
-                            >
-                                {timeline.map((block, index) => {
-                                    const blockWidth = Math.max(2, (block.endTime - block.startTime) * timeScale);
-                                    const blockLeft = block.startTime * timeScale;
-                                    
-                                    return (
-                                        <Box
-                                            key={index}
-                                            position="absolute"
-                                            left={`${blockLeft}px`}
-                                            width={`${blockWidth}px`}
-                                            height="100%"
-                                            bg={stateColors[block.state]}
-                                            borderRadius="2px"
-                                            display="flex"
-                                            alignItems="center"
-                                            justifyContent="center"
-                                            fontSize="xs"
-                                            color="white"
-                                            fontWeight="bold"
-                                            border="1px solid rgba(255,255,255,0.3)"
-                                            title={`${block.state}: ${block.startTime}-${block.endTime}`}
-                                        >
-                                            {blockWidth > 15 && block.state.charAt(0)}
-                                        </Box>
-                                    );
-                                })}
-
-                                {/* Current time indicator */}
-                                <Box
-                                    position="absolute"
-                                    left={`${currentTime * timeScale}px`}
-                                    width="2px"
-                                    height="100%"
-                                    bg="black"
-                                    zIndex="10"
-                                />
+                                {i}
                             </Box>
                         </Box>
                     );
                 })}
+            </Box>
+
+            {/* Process rows - with horizontal scroll if needed */}
+            <Box overflowX="auto" maxWidth="100%">
+                <Box minWidth={`${labelWidth + actualTimelineWidth + 20}px`}>
+                    {processIds.map((pid) => {
+                        const timeline = buildProcessTimeline(pid);
+                        
+                        return (
+                            <Box key={pid} display="flex" alignItems="center" mb="2">
+                                {/* Process label */}
+                                <Box
+                                    width={`${labelWidth - 10}px`}
+                                    textAlign="right"
+                                    pr="2"
+                                    fontSize="sm"
+                                    color={textColor}
+                                    fontWeight="medium"
+                                    flexShrink="0"
+                                >
+                                    P{pid}
+                                </Box>
+
+                                {/* Timeline bar */}
+                                <Box
+                                    position="relative"
+                                    width={`${actualTimelineWidth}px`}
+                                    height={`${processHeight}px`}
+                                    bg={useColorModeValue("gray.100", "gray.700")}
+                                    borderRadius="4px"
+                                    border={`1px solid ${borderColor}`}
+                                    overflow="hidden"
+                                    flexShrink="0"
+                                >
+                                    {/* Vertical grid lines */}
+                                    {Array.from({ length: Math.min(maxTime + 1, 31) }, (_, i) => (
+                                        <Box
+                                            key={`grid-${i}`}
+                                            position="absolute"
+                                            left={`${i * timeScale}px`}
+                                            width="1px"
+                                            height="100%"
+                                            bg={useColorModeValue("gray.200", "gray.600")}
+                                            opacity="0.5"
+                                        />
+                                    ))}
+
+                                    {/* Process state blocks */}
+                                    {timeline.map((block, index) => {
+                                        const blockWidth = Math.max(2, (block.endTime - block.startTime) * timeScale);
+                                        const blockLeft = block.startTime * timeScale;
+                                        
+                                        return (
+                                            <Box
+                                                key={index}
+                                                position="absolute"
+                                                left={`${blockLeft}px`}
+                                                width={`${blockWidth}px`}
+                                                height="100%"
+                                                bg={stateColors[block.state]}
+                                                display="flex"
+                                                alignItems="center"
+                                                justifyContent="center"
+                                                fontSize="xs"
+                                                color="white"
+                                                fontWeight="bold"
+                                                border="1px solid rgba(255,255,255,0.3)"
+                                                title={`${block.state}: ${block.startTime}-${block.endTime}`}
+                                                zIndex="5"
+                                            >
+                                                {blockWidth > 15 && block.state.charAt(0)}
+                                            </Box>
+                                        );
+                                    })}
+
+                                    {/* Current time indicator */}
+                                    <Box
+                                        position="absolute"
+                                        left={`${currentTime * timeScale}px`}
+                                        width="3px"
+                                        height="100%"
+                                        bg="red"
+                                        zIndex="10"
+                                        borderRadius="1px"
+                                    />
+                                </Box>
+                            </Box>
+                        );
+                    })}
+                </Box>
             </Box>
 
             {/* Current step info */}
