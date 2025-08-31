@@ -148,56 +148,56 @@ export default function GanttChart({ solution, stepIndex }: GanttChartProps) {
                 ))}
             </Box>
 
-            {/* Time axis */}
-            <Box mb="2" position="relative" height="30px">
-                {/* Main timeline axis line */}
-                <Box
-                    position="absolute"
-                    left={`${labelWidth - 10}px`}
-                    width={`${actualTimelineWidth}px`}
-                    height="1px"
-                    bg={borderColor}
-                    top="20px"
-                />
-
-                {/* Time markers and labels */}
-                {Array.from({ length: Math.min(maxTime + 1, 31) }, (_, i) => {
-                    const leftPosition = labelWidth - 10 + i * timeScale;
-                    return (
-                        <Box
-                            key={i}
-                            position="absolute"
-                            left={`${leftPosition}px`}
-                        >
-                            {/* Vertical tick mark */}
-                            <Box
-                                position="absolute"
-                                width="1px"
-                                height="6px"
-                                bg={borderColor}
-                                top="17px"
-                                left="-0.5px"
-                            />
-                            {/* Time label */}
-                            <Box
-                                position="absolute"
-                                top="0"
-                                left="-8px"
-                                width="16px"
-                                textAlign="center"
-                                fontSize="xs"
-                                color={textColor}
-                            >
-                                {i}
-                            </Box>
-                        </Box>
-                    );
-                })}
-            </Box>
-
             {/* Process rows - with horizontal scroll if needed */}
             <Box overflowX="auto" maxWidth="100%">
                 <Box minWidth={`${labelWidth + actualTimelineWidth + 20}px`}>
+                    {/* Time axis */}
+                    <Box mb="2" position="relative" height="30px">
+                        {/* Main timeline axis line */}
+                        <Box
+                            position="absolute"
+                            left={`${labelWidth - 10}px`}
+                            width={`${actualTimelineWidth}px`}
+                            height="1px"
+                            bg={borderColor}
+                            top="20px"
+                        />
+
+                        {/* Time markers and labels */}
+                        {Array.from({ length: maxTime + 1 }, (_, i) => {
+                            const leftPosition = labelWidth - 10 + i * timeScale;
+                            return (
+                                <Box
+                                    key={i}
+                                    position="absolute"
+                                    left={`${leftPosition}px`}
+                                >
+                                    {/* Vertical tick mark */}
+                                    <Box
+                                        position="absolute"
+                                        width="1px"
+                                        height="6px"
+                                        bg={borderColor}
+                                        top="17px"
+                                        left="-0.5px"
+                                    />
+                                    {/* Time label */}
+                                    <Box
+                                        position="absolute"
+                                        top="0"
+                                        left="-8px"
+                                        width="16px"
+                                        textAlign="center"
+                                        fontSize="xs"
+                                        color={textColor}
+                                    >
+                                        {i}
+                                    </Box>
+                                </Box>
+                            );
+                        })}
+                    </Box>
+
                     {processIds.map((pid) => {
                         const timeline = buildProcessTimeline(pid);
 
@@ -237,7 +237,7 @@ export default function GanttChart({ solution, stepIndex }: GanttChartProps) {
                                 >
                                     {/* Vertical grid lines */}
                                     {Array.from(
-                                        { length: Math.min(maxTime + 1, 31) },
+                                        { length: maxTime + 1 },
                                         (_, i) => (
                                             <Box
                                                 key={`grid-${i}`}
