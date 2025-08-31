@@ -6,5 +6,5 @@ export const PROCESSES = {
         WAIT: "WAIT",
         DONE: "DONE"
     },
-    BREAK_TIMER: 20 // Safety limit to prevent infinite loops
+    BREAK_TIMER: 1000 // Safety limit to prevent infinite loops
 };
