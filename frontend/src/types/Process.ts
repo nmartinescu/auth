@@ -25,4 +25,7 @@ export interface ProcessSimulationData {
     processes: ProcessData[];
     selectedAlgorithm: string;
     quantum?: number;
+    mlfqQueues?: number;
+    mlfqQuantums?: string;
+    mlfqAllotment?: number;
 }

@@ -60,6 +60,11 @@ const CPU_ALGORITHMS = [
         value: "STCF",
         description: "Shortest Time to Completion First - Preemptive scheduling based on shortest remaining time",
     },
+    {
+        label: "MLFQ",
+        value: "MLFQ",
+        description: "Multi-Level Feedback Queue - Multiple priority queues with different quantums",
+    },
 ];
 
 const algorithmOptions = createListCollection({ items: CPU_ALGORITHMS });
@@ -76,6 +81,9 @@ export function Process() {
     const [processCount, setProcessCount] = useState(1);
     const [selectedAlgorithm, setSelectedAlgorithm] = useState("FCFS");
     const [quantum, setQuantum] = useState(2);
+    const [mlfqQueues, setMlfqQueues] = useState(3);
+    const [mlfqQuantums, setMlfqQuantums] = useState("2,4,8");
+    const [mlfqAllotment, setMlfqAllotment] = useState(20);
     const [solution, setSolution] = useState(null);
 
     // Color mode values - MUST be called before any conditional returns
@@ -108,6 +116,15 @@ export function Process() {
                 }
                 if (simulationData.quantum !== undefined) {
                     setQuantum(simulationData.quantum);
+                }
+                if (simulationData.mlfqQueues !== undefined) {
+                    setMlfqQueues(simulationData.mlfqQueues);
+                }
+                if (simulationData.mlfqQuantums !== undefined) {
+                    setMlfqQuantums(simulationData.mlfqQuantums);
+                }
+                if (simulationData.mlfqAllotment !== undefined) {
+                    setMlfqAllotment(simulationData.mlfqAllotment);
                 }
                 
                 // Clear the URL parameter after loading
@@ -163,10 +180,15 @@ export function Process() {
             const apiData = {
                 algorithm: selectedAlgorithm,
                 ...(selectedAlgorithm === "RR" && { quantum }), // Add quantum only for Round Robin
+                ...(selectedAlgorithm === "MLFQ" && { 
+                    queues: mlfqQueues,
+                    quantums: mlfqQuantums.split(",").map(q => parseInt(q.trim())),
+                    allotment: mlfqAllotment 
+                }), // Add MLFQ parameters
                 processes: processes.map((process) => ({
                     arrivalTime: process.arrivalTime,
                     burstTime: process.burstTime,
-                    io: process.io
+                    io: process.io && process.io.trim() !== ""
                         ? typeof process.io === "string"
                             ? // Parse IO string if it's a string (simple format like "2:1,4:2")
                               process.io
@@ -342,6 +364,83 @@ export function Process() {
                         </Box>
                     )}
 
+                    {/* MLFQ Configuration (only for MLFQ) */}
+                    {selectedAlgorithm === "MLFQ" && (
+                        <Box
+                            p="4"
+                            borderRadius="md"
+                            bg={quantumBoxBg}
+                        >
+                            <Text fontWeight="medium" color={subtextColor} mb="3">
+                                MLFQ Configuration:
+                            </Text>
+                            {isEditMode ? (
+                                <Stack gap="3">
+                                    <Box>
+                                        <Text fontSize="sm" color={subtextColor} mb="1">
+                                            Number of Queues:
+                                        </Text>
+                                        <NumberInput.Root
+                                            value={mlfqQueues.toString()}
+                                            min={2}
+                                            max={5}
+                                            onValueChange={(e) => {
+                                                const newQueues = Number(e.value) || 3;
+                                                setMlfqQueues(newQueues);
+                                                // Update quantums to match queue count
+                                                const currentQuantums = mlfqQuantums.split(',').map(q => q.trim());
+                                                if (currentQuantums.length !== newQueues) {
+                                                    const defaultQuantums = Array.from({length: newQueues}, (_, i) => Math.pow(2, i + 1));
+                                                    setMlfqQuantums(defaultQuantums.join(','));
+                                                }
+                                            }}
+                                        >
+                                            <NumberInput.Control />
+                                            <NumberInput.Input />
+                                        </NumberInput.Root>
+                                    </Box>
+                                    <Box>
+                                        <Text fontSize="sm" color={subtextColor} mb="1">
+                                            Quantums (comma-separated):
+                                        </Text>
+                                        <Input
+                                            value={mlfqQuantums}
+                                            onChange={(e) => setMlfqQuantums(e.target.value)}
+                                            placeholder="2,4,8"
+                                            size="sm"
+                                        />
+                                    </Box>
+                                    <Box>
+                                        <Text fontSize="sm" color={subtextColor} mb="1">
+                                            Allotment Time:
+                                        </Text>
+                                        <NumberInput.Root
+                                            value={mlfqAllotment.toString()}
+                                            min={5}
+                                            max={100}
+                                            onValueChange={(e) => setMlfqAllotment(Number(e.value) || 20)}
+                                        >
+                                            <NumberInput.Control />
+                                            <NumberInput.Input />
+                                        </NumberInput.Root>
+                                    </Box>
+                                </Stack>
+                            ) : (
+                                <Stack gap="1">
+                                    <Text color={textColor} fontSize="sm">
+                                        Queues: {mlfqQueues}
+                                    </Text>
+                                    <Text color={textColor} fontSize="sm">
+                                        Quantums: [{mlfqQuantums}]
+                                    </Text>
+                                    <Text color={textColor} fontSize="sm">
+                                        Allotment: {mlfqAllotment} time units
+                                    </Text>
+                                </Stack>
+                            )}
+                        </Box>
+                    )}
+
                     {/* Stats Display */}
                     <Box
                         p="4"
@@ -367,12 +466,20 @@ export function Process() {
                                 processes,
                                 selectedAlgorithm,
                                 ...(selectedAlgorithm === "RR" && { quantum }),
+                                ...(selectedAlgorithm === "MLFQ" && { 
+                                    mlfqQueues, 
+                                    mlfqQuantums, 
+                                    mlfqAllotment 
+                                }),
                             })}
                             importDataCallback={(data) => {
                                 setProcesses(data.processes);
                                 setProcessCount(data.processes.length);
                                 setSelectedAlgorithm(data.selectedAlgorithm);
                                 if (data.quantum) setQuantum(data.quantum);
+                                if (data.mlfqQueues !== undefined) setMlfqQueues(data.mlfqQueues);
+                                if (data.mlfqQuantums) setMlfqQuantums(data.mlfqQuantums);
+                                if (data.mlfqAllotment !== undefined) setMlfqAllotment(data.mlfqAllotment);
                             }}
                             // Check real authentication status
                             isLoggedIn={isAuthenticated()} 

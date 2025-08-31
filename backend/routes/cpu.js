@@ -3,6 +3,7 @@ import SchedulerFCFS from "../scheduler/algorithms/SchedulerFCFS.js";
 import SchedulerSJF from "../scheduler/algorithms/SchedulerSJF.js";
 import SchedulerRR from "../scheduler/algorithms/SchedulerRR.js";
 import SchedulerSTCF from "../scheduler/algorithms/SchedulerSTCF.js";
+import SchedulerMLFQ from "../scheduler/algorithms/SchedulerMLFQ.js";
 
 const router = express.Router();
 
@@ -12,8 +13,11 @@ const router = express.Router();
  * 
  * Expected request body:
  * {
- *   "algorithm": "FCFS", // Supported: FCFS, SJF, RR
+ *   "algorithm": "FCFS", // Supported: FCFS, SJF, RR, STCF, MLFQ
  *   "quantum": 2, // Required for RR algorithm
+ *   "queues": 3, // Required for MLFQ - number of priority queues
+ *   "quantums": [2, 4, 8], // Required for MLFQ - quantum for each queue
+ *   "allotment": 20, // Required for MLFQ - allotment time before reset
  *   "processes": [
  *     {
  *       "arrivalTime": 0,
@@ -28,7 +32,7 @@ const router = express.Router();
  */
 router.post("/", async (req, res) => {
     try {
-        const { algorithm = "FCFS", quantum, processes } = req.body;
+        const { algorithm = "FCFS", quantum, queues, quantums, allotment, processes } = req.body;
 
         // Validate input
         if (!processes || !Array.isArray(processes) || processes.length === 0) {
@@ -109,6 +113,39 @@ router.post("/", async (req, res) => {
             }
         }
 
+        // Validate MLFQ parameters
+        if (algorithm.toUpperCase() === "MLFQ") {
+            if (typeof queues !== 'number' || queues <= 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: "MLFQ algorithm requires a positive number of queues"
+                });
+            }
+            
+            if (!Array.isArray(quantums) || quantums.length !== queues) {
+                return res.status(400).json({
+                    success: false,
+                    message: "MLFQ algorithm requires quantums array with length equal to number of queues"
+                });
+            }
+            
+            for (let i = 0; i < quantums.length; i++) {
+                if (typeof quantums[i] !== 'number' || quantums[i] <= 0) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `MLFQ quantum at index ${i} must be a positive number`
+                    });
+                }
+            }
+            
+            if (typeof allotment !== 'number' || allotment <= 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: "MLFQ algorithm requires a positive allotment value"
+                });
+            }
+        }
+
         // Create scheduler based on algorithm
         let scheduler;
         switch (algorithm.toUpperCase()) {
@@ -124,15 +161,27 @@ router.post("/", async (req, res) => {
             case "STCF":
                 scheduler = new SchedulerSTCF(processes);
                 break;
+            case "MLFQ":
+                scheduler = new SchedulerMLFQ(processes, { queues, quantums, allotment });
+                break;
             default:
                 return res.status(400).json({
                     success: false,
-                    message: `Unsupported algorithm: ${algorithm}. Supported algorithms: FCFS, SJF, RR, STCF`
+                    message: `Unsupported algorithm: ${algorithm}. Supported algorithms: FCFS, SJF, RR, STCF, MLFQ`
                 });
         }
 
         // Run the simulation
-        scheduler.start();
+        try {
+            scheduler.start();
+        } catch (simulationError) {
+            console.error("Simulation error:", simulationError);
+            console.error("Error stack:", simulationError.stack);
+            return res.status(500).json({
+                success: false,
+                message: `Simulation failed: ${simulationError.message}`
+            });
+        }
         
         // Get the results
         const solution = scheduler.getSolution();
