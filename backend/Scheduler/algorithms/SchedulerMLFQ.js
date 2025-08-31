@@ -308,7 +308,11 @@ class SchedulerMLFQ extends Scheduler {
         );
         executionInfo.addTimer();
 
-        // First, handle the currently running process - preempt it
+        // Collect all processes that need to be moved to queue 0, in priority order
+        const processesToMove = [];
+        let preemptedProcess = null;
+        
+        // Handle the currently running process - preempt it and save for later (goes to back)
         if (this.cpu !== -1) {
             const process = this.pcb.getRecord(this.cpu);
 
@@ -318,39 +322,55 @@ class SchedulerMLFQ extends Scheduler {
                 );
                 executionInfo.addPoint(this.cpu);
 
-                // Reset priority and move to the highest priority queue
+                // Reset priority and prepare to move to queue 0 (but at the back)
                 process.priority = 0;
                 this.pcb.setProcessState(this.cpu, PROCESSES.STATES.READY);
-                this.readyQueues.addToReadyQueue(0, this.cpu);
+                preemptedProcess = this.cpu;
             }
             this.cpu = -1;
         }
 
-        // Move all processes from lower priority queues to the highest priority queue
+        // Collect processes from higher priority queues (queue 1, then queue 2, etc.)
         for (
             let queueIndex = 1;
             queueIndex < this.config.queues;
             queueIndex++
         ) {
             const queue = this.readyQueues.getQueue(queueIndex);
-            const processesToMove = [...queue]; // Create a copy
+            const processesFromThisQueue = [...queue]; // Create a copy
 
             // Clear the queue
             queue.length = 0;
 
-            // Move processes to queue 0
-            for (const pid of processesToMove) {
+            // Add processes from this queue to our collection
+            for (const pid of processesFromThisQueue) {
                 if (pid !== undefined && pid !== null) {
                     const process = this.pcb.getRecord(pid);
                     if (process && !this.pcb.isProcessFinished(pid)) {
                         process.priority = 0;
-                        this.readyQueues.addToReadyQueue(0, pid);
+                        processesToMove.push({
+                            pid: pid,
+                            fromQueue: queueIndex
+                        });
                         executionInfo.addExplanation(
                             `Process ${pid} moved from queue ${queueIndex} to queue 0.`
                         );
                     }
                 }
             }
+        }
+
+        // Sort processes by their original queue (lower queue numbers = higher priority)
+        processesToMove.sort((a, b) => a.fromQueue - b.fromQueue);
+
+        // Add all processes from ready queues to queue 0 first
+        for (const processInfo of processesToMove) {
+            this.readyQueues.addToReadyQueue(0, processInfo.pid);
+        }
+
+        // Add the preempted process to the back of queue 0 (no advantage)
+        if (preemptedProcess !== null) {
+            this.readyQueues.addToReadyQueue(0, preemptedProcess);
         }
     }
 
