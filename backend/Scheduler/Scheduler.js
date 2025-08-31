@@ -163,6 +163,9 @@ class Scheduler {
         this.pcb.setProcessState(pid, PROCESSES.STATES.WAIT);
         this.pcb.addToWaitQueue(pid);
         this.cpu = -1;
+        
+        // Immediately schedule a new process since CPU is now available
+        this.schedule();
     }
 
     handleIo() {

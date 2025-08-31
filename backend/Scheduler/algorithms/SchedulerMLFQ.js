@@ -95,7 +95,7 @@ class SchedulerMLFQ extends Scheduler {
         }
 
         // Check if process has finished before timing it out
-        if (this.pcb.isProcessFinished(this.cpu)) {
+        if (this.cpu !== -1 && this.pcb.isProcessFinished(this.cpu)) {
             return; // Don't timeout a finished process
         }
 
@@ -148,7 +148,7 @@ class SchedulerMLFQ extends Scheduler {
             timer.clock();
 
             // check if process finished
-            if (this.pcb.isProcessFinished(this.cpu)) {
+            if (this.cpu !== -1 && this.pcb.isProcessFinished(this.cpu)) {
                 this.finishProcess();
             }
         }
