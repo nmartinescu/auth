@@ -67,8 +67,25 @@ class TestQuestionGenerator {
         algorithm: AlgorithmType
     ): TestQuestion {
         const { processCount, ioCount } = this.getDifficultyParams(difficulty);
-        const processes = this.generateProcesses(processCount, ioCount, difficulty);
+        
+        // Use specialized process generation for MLFQ hard tests
+        const processes = (algorithm === 'MLFQ' && difficulty === 'hard') 
+            ? this.generateMLFQHardScenarioProcesses(processCount)
+            : this.generateProcesses(processCount, ioCount, difficulty);
+            
         const quantum = algorithm === 'RR' ? this.generateQuantum(difficulty) : undefined;
+        
+        // MLFQ specific configuration
+        let queues: number | undefined;
+        let quantums: number[] | undefined;
+        let allotment: number | undefined;
+        
+        if (algorithm === 'MLFQ') {
+            const mlfqConfig = this.generateMLFQConfig(difficulty);
+            queues = mlfqConfig.queues;
+            quantums = mlfqConfig.quantums;
+            allotment = mlfqConfig.allotment;
+        }
         
         return {
             id,
@@ -76,8 +93,11 @@ class TestQuestionGenerator {
             difficulty,
             algorithm,
             quantum,
+            queues,
+            quantums,
+            allotment,
             processes,
-            description: this.generateSchedulingDescription(algorithm, processes, quantum)
+            description: this.generateSchedulingDescription(algorithm, processes, quantum, { queues, quantums, allotment })
         };
     }
 
@@ -129,7 +149,7 @@ class TestQuestionGenerator {
             case 'medium':
                 return { processCount: this.randomBetween(4, 6), ioCount: 1 };
             case 'hard':
-                return { processCount: this.randomBetween(7, 8), ioCount: this.randomBetween(2, 3) };
+                return { processCount: this.randomBetween(6, 10), ioCount: this.randomBetween(2, 4) };
             default:
                 return { processCount: 3, ioCount: 0 };
         }
@@ -154,6 +174,48 @@ class TestQuestionGenerator {
         return processes.sort((a, b) => a.arrivalTime - b.arrivalTime);
     }
 
+    private generateMLFQHardScenarioProcesses(processCount: number): TestProcess[] {
+        const processes: TestProcess[] = [];
+        
+        // Create a mix of process types for challenging MLFQ scenarios
+        for (let i = 0; i < processCount; i++) {
+            let burstTime: number;
+            let ioOperations: IOOperation[] = [];
+            
+            if (i < 2) {
+                // CPU-intensive processes (will get demoted quickly)
+                burstTime = this.randomBetween(20, 30);
+                ioOperations = []; // No I/O
+            } else if (i < 4) {
+                // I/O-intensive processes (will get priority boosts)
+                burstTime = this.randomBetween(15, 25);
+                ioOperations = [
+                    { start: this.randomBetween(3, 8), duration: this.randomBetween(2, 4) },
+                    { start: this.randomBetween(12, 18), duration: this.randomBetween(1, 3) }
+                ];
+            } else {
+                // Mixed workload processes
+                burstTime = this.randomBetween(12, 20);
+                if (Math.random() > 0.5) {
+                    ioOperations = [
+                        { start: this.randomBetween(5, 10), duration: this.randomBetween(1, 2) }
+                    ];
+                }
+            }
+            
+            const arrivalTime = i === 0 ? 0 : this.randomBetween(0, 6);
+            
+            processes.push({
+                id: i + 1,
+                arrivalTime,
+                burstTime,
+                io: ioOperations
+            });
+        }
+        
+        return processes.sort((a, b) => a.arrivalTime - b.arrivalTime);
+    }
+
     private generateBurstTime(difficulty: DifficultyLevel): number {
         switch (difficulty) {
             case 'easy':
@@ -161,7 +223,8 @@ class TestQuestionGenerator {
             case 'medium':
                 return this.randomBetween(5, 12);
             case 'hard':
-                return this.randomBetween(8, 15);
+                // Longer burst times for MLFQ to create more queue demotions
+                return this.randomBetween(10, 25);
             default:
                 return 5;
         }
@@ -218,12 +281,73 @@ class TestQuestionGenerator {
         }
     }
 
+    private generateMLFQConfig(difficulty: DifficultyLevel): { queues: number; quantums: number[]; allotment: number } {
+        switch (difficulty) {
+            case 'easy':
+                // Simple 2-queue MLFQ with clear quantum differences
+                return {
+                    queues: 2,
+                    quantums: [2, 4],
+                    allotment: 15
+                };
+            case 'medium':
+                // 3-queue MLFQ with moderate complexity
+                return {
+                    queues: 3,
+                    quantums: [2, 4, 8],
+                    allotment: this.randomBetween(12, 18)
+                };
+            case 'hard':
+                // Complex 4-queue MLFQ with challenging scenarios
+                const queues = this.randomBetween(3, 4);
+                const quantums = queues === 3 
+                    ? [1, 3, 6] 
+                    : [1, 2, 4, 8];
+                return {
+                    queues,
+                    quantums,
+                    allotment: this.randomBetween(8, 15) // Shorter allotment for more complexity
+                };
+            default:
+                return { queues: 3, quantums: [2, 4, 8], allotment: 15 };
+        }
+    }
+
     private generateSchedulingDescription(
         algorithm: AlgorithmType,
         processes: TestProcess[],
-        quantum?: number
+        quantum?: number,
+        mlfqConfig?: { queues?: number; quantums?: number[]; allotment?: number }
     ): string {
         const algorithmName = this.getAlgorithmFullName(algorithm);
+        
+        if (algorithm === 'MLFQ' && mlfqConfig) {
+            const { queues, quantums, allotment } = mlfqConfig;
+            return `Apply ${algorithmName} scheduling algorithm to the following ${processes.length} processes.
+            
+            MLFQ Configuration:
+            - Number of Queues: ${queues} (Queue 0 = Highest Priority, Queue ${queues! - 1} = Lowest Priority)
+            - Quantum Times: ${quantums!.map((q, i) => `Queue ${i}: ${q}`).join(', ')}
+            - Allotment Time: ${allotment} (All processes reset to Queue 0 every ${allotment} time units)
+            
+            Complete the table with the correct scheduled time, waiting time, turnaround time, and completion time for each process.
+            ${processes.some(p => p.io.length > 0) ? 'Note: Some processes have I/O operations that boost priority back to Queue 0.' : ''}
+            
+            MLFQ Rules:
+            - New processes start in Queue 0 (highest priority)
+            - When quantum expires, process moves to next lower priority queue
+            - Processes cannot move below the lowest priority queue
+            - I/O completion boosts process back to Queue 0
+            - Every ${allotment} time units, ALL processes reset to Queue 0
+            - Higher priority queues always preempt lower priority queues
+            
+            Remember:
+            - Scheduled Time: When the process first gets the CPU
+            - Waiting Time: Total time spent waiting in ready queues
+            - Turnaround Time: Total time from arrival to completion
+            - Completion Time: When the process finishes execution`;
+        }
+        
         const quantumText = quantum ? ` with quantum = ${quantum}` : '';
         
         return `Apply ${algorithmName}${quantumText} scheduling algorithm to the following ${processes.length} processes. 
@@ -266,6 +390,8 @@ class TestQuestionGenerator {
                 return 'Shortest Job First (SJF)';
             case 'RR':
                 return 'Round Robin (RR)';
+            case 'MLFQ':
+                return 'Multi-Level Feedback Queue (MLFQ)';
             default:
                 return algorithm;
         }
@@ -308,7 +434,7 @@ class TestQuestionGenerator {
     }
 
     private getRandomAlgorithm(): AlgorithmType {
-        const algorithms: AlgorithmType[] = ['FCFS', 'SJF', 'RR'];
+        const algorithms: AlgorithmType[] = ['FCFS', 'SJF', 'RR', 'MLFQ'];
         return algorithms[Math.floor(Math.random() * algorithms.length)];
     }
 

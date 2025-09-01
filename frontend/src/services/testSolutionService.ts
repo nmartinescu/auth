@@ -43,6 +43,23 @@ class TestSolutionService {
             requestData.quantum = question.quantum;
         }
 
+        // Add MLFQ-specific parameters
+        if (question.algorithm === 'MLFQ') {
+            if (question.queues) {
+                requestData.queues = question.queues;
+            }
+            if (question.quantums) {
+                requestData.quantums = question.quantums;
+            }
+            if (question.allotment) {
+                requestData.allotment = question.allotment;
+            }
+        }
+
+        console.log('=== SCHEDULING SOLUTION REQUEST DEBUG ===');
+        console.log('Algorithm:', question.algorithm);
+        console.log('Request Data:', JSON.stringify(requestData, null, 2));
+
         // Call backend scheduler
         const response = await fetch('/api/cpu', {
             method: 'POST',
@@ -53,10 +70,14 @@ class TestSolutionService {
         });
 
         if (!response.ok) {
-            throw new Error(`Failed to calculate solution: ${response.statusText}`);
+            const errorText = await response.text();
+            console.error('Backend response error:', response.status, response.statusText, errorText);
+            throw new Error(`Failed to calculate solution: ${response.statusText} - ${errorText}`);
         }
 
         const result = await response.json();
+        console.log('Backend response received:', JSON.stringify(result, null, 2));
+        console.log('=== END SCHEDULING SOLUTION REQUEST DEBUG ===');
         
         // Convert backend response to test solution format
         return this.convertBackendResponseToSolution(result, question);

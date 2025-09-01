@@ -2,9 +2,13 @@ export interface TestQuestion {
     id: string;
     type: 'scheduling' | 'memory' | 'disk';
     difficulty: 'easy' | 'medium' | 'hard';
-    algorithm: 'FCFS' | 'SJF' | 'RR' | 'FIFO' | 'LRU' | 'OPT' | 'SSTF' | 'SCAN' | 'C-SCAN' | 'LOOK' | 'C-LOOK';
+    algorithm: 'FCFS' | 'SJF' | 'RR' | 'MLFQ' | 'FIFO' | 'LRU' | 'OPT' | 'SSTF' | 'SCAN' | 'C-SCAN' | 'LOOK' | 'C-LOOK';
     quantum?: number;
     processes?: TestProcess[];
+    // MLFQ specific properties
+    queues?: number;
+    quantums?: number[];
+    allotment?: number;
     frameCount?: number;
     pageReferences?: number[];
     // Disk scheduling properties
@@ -118,6 +122,6 @@ export interface UserAnswer {
 }
 
 export type DifficultyLevel = 'easy' | 'medium' | 'hard';
-export type AlgorithmType = 'FCFS' | 'SJF' | 'RR';
+export type AlgorithmType = 'FCFS' | 'SJF' | 'RR' | 'MLFQ';
 export type MemoryAlgorithmType = 'FIFO' | 'LRU' | 'OPT';
 export type DiskAlgorithmType = 'FCFS' | 'SSTF' | 'SCAN' | 'C-SCAN' | 'LOOK' | 'C-LOOK';
