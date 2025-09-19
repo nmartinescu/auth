@@ -1,4 +1,5 @@
 import { Flex, Heading, Button } from "@chakra-ui/react";
+import { Link as RouterLink } from "react-router-dom";
 import { NavButton } from "../ui/NavButton";
 import { useColorModeValue } from "../ui/color-mode";
 import { LuCpu, LuMemoryStick, LuHardDrive, LuLogOut, LuLogIn, LuLayoutDashboard, LuFileText } from "react-icons/lu";
@@ -52,9 +53,13 @@ export function Navbar() {
             bg={navBg}
         >
             <Heading
+                as={RouterLink}
+                to="/"
                 size={{ base: "md", md: "lg" }}
                 fontWeight="semibold"
                 color={titleColor}
+                _hover={{ textDecoration: "none", opacity: 0.8 }}
+                transition="opacity 0.2s"
             >
                 OS Sim
             </Heading>

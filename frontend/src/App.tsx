@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { Navbar } from "./components/layout/Navbar";
+import { Home } from "./components/pages/Home";
 import { Process } from "./components/features/Process";
 import { Memory } from "./components/features/Memory";
 import { Disk } from "./components/features/Disk";
@@ -19,6 +20,9 @@ function App() {
         <Box minH="100vh">
             <Navbar />
             <Routes>
+                {/* Home route */}
+                <Route path="/" element={<Home />} />
+                
                 {/* Public routes */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
@@ -46,9 +50,6 @@ function App() {
                         </ProtectedRoute>
                     }
                 />
-
-                {/* Default redirect */}
-                <Route path="/" element={<Navigate to="/process" replace />} />
             </Routes>
             
             {/* Theme Toggle - Fixed position in bottom right */}
