@@ -173,7 +173,7 @@ export function Process() {
 
     const onSubmit = async () => {
         try {
-            console.log("🚀 Starting CPU scheduling simulation...");
+            console.log("Starting CPU scheduling simulation...");
             console.log("Input processes:", processes);
 
             // Prepare the data for the API
@@ -228,14 +228,14 @@ export function Process() {
 
             if (response.ok && result.success) {
                 setSolution(result);
-                console.log("✅ CPU Scheduling Result:", result);
-                console.log("📊 Algorithm:", result.data.algorithm);
-                console.log("🔢 Total Processes:", result.data.processes);
-                console.log("📈 Performance Metrics:", result.data.metrics);
-                console.log("🎯 Simulation Steps:", result.data.solution);
+                console.log("CPU Scheduling Result:", result);
+                console.log("Algorithm:", result.data.algorithm);
+                console.log("Total Processes:", result.data.processes);
+                console.log("Performance Metrics:", result.data.metrics);
+                console.log("Simulation Steps:", result.data.solution);
 
                 // Show a brief summary in the console
-                console.log("\n📋 SIMULATION SUMMARY:");
+                console.log("\nSIMULATION SUMMARY:");
                 console.log(`Algorithm: ${result.data.algorithm}`);
                 console.log(`Processes: ${result.data.processes}`);
                 console.log(
@@ -250,13 +250,13 @@ export function Process() {
                 console.log(`Throughput: ${result.data.metrics.throughput}`);
             } else {
                 console.error(
-                    "❌ API Error:",
+                    "API Error:",
                     result.message || "Unknown error"
                 );
                 console.error("Full response:", result);
             }
         } catch (error) {
-            console.error("❌ Network Error:", error);
+            console.error("Network Error:", error);
             console.error("Failed to connect to the CPU scheduling API");
         }
     };

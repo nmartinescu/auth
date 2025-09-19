@@ -10,8 +10,8 @@ const router = express.Router();
 
 // POST /api/disk/test/generate - Generate a single test question
 router.post("/generate", async (req, res) => {
-    console.log("🔄 POST /api/disk/test/generate called");
-    console.log("📋 Request body:", req.body);
+    console.log("POST /api/disk/test/generate called");
+    console.log("Request body:", req.body);
 
     try {
         const { difficulty = 'medium' } = req.body;
@@ -25,11 +25,11 @@ router.post("/generate", async (req, res) => {
             });
         }
 
-        console.log(`🚀 Generating disk scheduling test question with difficulty: ${difficulty}`);
+        console.log(`Generating disk scheduling test question with difficulty: ${difficulty}`);
 
         const testQuestion = generateDiskSchedulingQuestion(difficulty);
 
-        console.log("✅ Test question generated successfully");
+        console.log("Test question generated successfully");
 
         res.status(200).json({
             success: true,
@@ -44,7 +44,7 @@ router.post("/generate", async (req, res) => {
         });
 
     } catch (error) {
-        console.error("❌ Error generating test question:", error);
+        console.error("Error generating test question:", error);
         
         res.status(500).json({
             success: false,
@@ -56,8 +56,8 @@ router.post("/generate", async (req, res) => {
 
 // POST /api/disk/test/generate-multiple - Generate multiple test questions
 router.post("/generate-multiple", async (req, res) => {
-    console.log("🔄 POST /api/disk/test/generate-multiple called");
-    console.log("📋 Request body:", req.body);
+    console.log("POST /api/disk/test/generate-multiple called");
+    console.log("Request body:", req.body);
 
     try {
         const { count = 5, difficulty = 'medium' } = req.body;
@@ -78,11 +78,11 @@ router.post("/generate-multiple", async (req, res) => {
             });
         }
 
-        console.log(`🚀 Generating ${count} disk scheduling test questions with difficulty: ${difficulty}`);
+        console.log(`Generating ${count} disk scheduling test questions with difficulty: ${difficulty}`);
 
         const testQuestions = generateMultipleQuestions(count, difficulty);
 
-        console.log("✅ Multiple test questions generated successfully");
+        console.log("Multiple test questions generated successfully");
 
         res.status(200).json({
             success: true,
@@ -99,7 +99,7 @@ router.post("/generate-multiple", async (req, res) => {
         });
 
     } catch (error) {
-        console.error("❌ Error generating multiple test questions:", error);
+        console.error("Error generating multiple test questions:", error);
         
         res.status(500).json({
             success: false,
@@ -111,8 +111,8 @@ router.post("/generate-multiple", async (req, res) => {
 
 // POST /api/disk/test/custom - Generate a custom test question
 router.post("/custom", async (req, res) => {
-    console.log("🔄 POST /api/disk/test/custom called");
-    console.log("📋 Request body:", req.body);
+    console.log("POST /api/disk/test/custom called");
+    console.log("Request body:", req.body);
 
     try {
         const {
@@ -145,12 +145,12 @@ router.post("/custom", async (req, res) => {
             });
         }
 
-        console.log(`🚀 Generating custom disk scheduling test question`);
-        console.log(`📊 Algorithm: ${algorithm}`);
-        console.log(`📍 Initial Head Position: ${initialHeadPosition}`);
-        console.log(`📏 Max Disk Size: ${maxDiskSize || 200}`);
-        console.log(`➡️ Head Direction: ${headDirection || 'right'}`);
-        console.log(`📋 Requests: [${requests.join(", ")}]`);
+        console.log(`Generating custom disk scheduling test question`);
+        console.log(`Algorithm: ${algorithm}`);
+        console.log(`Initial Head Position: ${initialHeadPosition}`);
+        console.log(`Max Disk Size: ${maxDiskSize || 200}`);
+        console.log(`Head Direction: ${headDirection || 'right'}`);
+        console.log(`Requests: [${requests.join(", ")}]`);
 
         const testQuestion = generateCustomTest({
             algorithm,
@@ -160,7 +160,7 @@ router.post("/custom", async (req, res) => {
             requests
         });
 
-        console.log("✅ Custom test question generated successfully");
+        console.log("Custom test question generated successfully");
 
         res.status(200).json({
             success: true,
@@ -173,7 +173,7 @@ router.post("/custom", async (req, res) => {
         });
 
     } catch (error) {
-        console.error("❌ Error generating custom test question:", error);
+        console.error("Error generating custom test question:", error);
         
         res.status(400).json({
             success: false,
@@ -185,8 +185,8 @@ router.post("/custom", async (req, res) => {
 
 // POST /api/disk/test/check - Check user's answer
 router.post("/check", async (req, res) => {
-    console.log("🔄 POST /api/disk/test/check called");
-    console.log("📋 Request body:", req.body);
+    console.log("POST /api/disk/test/check called");
+    console.log("Request body:", req.body);
 
     try {
         const { userAnswer, correctAnswer } = req.body;
@@ -206,11 +206,11 @@ router.post("/check", async (req, res) => {
             });
         }
 
-        console.log("🚀 Checking user's answer against correct solution");
+        console.log("Checking user's answer against correct solution");
 
         const feedback = checkAnswer(userAnswer, correctAnswer);
 
-        console.log(`✅ Answer checked. Score: ${feedback.score}/100`);
+        console.log(`Answer checked. Score: ${feedback.score}/100`);
 
         res.status(200).json({
             success: true,
@@ -219,7 +219,7 @@ router.post("/check", async (req, res) => {
         });
 
     } catch (error) {
-        console.error("❌ Error checking answer:", error);
+        console.error("Error checking answer:", error);
         
         res.status(500).json({
             success: false,

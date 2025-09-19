@@ -128,7 +128,7 @@ export function Disk() {
                 algorithm: selectedAlgorithm,
                 requests,
             };
-            console.log("🚀 Starting disk scheduling simulation...");
+            console.log("Starting disk scheduling simulation...");
             console.log("Input data:", body);
 
             const response = await fetch(`${API_BASE_URL}/api/disk`, {
@@ -143,15 +143,15 @@ export function Disk() {
 
             if (response.ok && result.success) {
                 setSolution(result);
-                console.log("✅ Disk Scheduling Result:", result);
+                console.log("Disk Scheduling Result:", result);
             } else {
                 console.error(
-                    "❌ API Error:",
+                    "API Error:",
                     result.message || "Unknown error"
                 );
             }
         } catch (error) {
-            console.error("❌ Network Error:", error);
+            console.error("Network Error:", error);
         }
     };
 

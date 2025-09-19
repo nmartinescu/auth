@@ -117,7 +117,7 @@ export function Memory() {
                 selectedAlgorithm: [selectedAlgorithm],
                 pageReferences,
             };
-            console.log("🚀 Starting memory management simulation...");
+            console.log("Starting memory management simulation...");
             console.log("Input data:", body);
 
             const response = await fetch(`${API_BASE_URL}/api/memory`, {
@@ -132,15 +132,15 @@ export function Memory() {
 
             if (response.ok && result.success) {
                 setSolution(result);
-                console.log("✅ Memory Management Result:", result);
+                console.log("Memory Management Result:", result);
             } else {
                 console.error(
-                    "❌ API Error:",
+                    "API Error:",
                     result.message || "Unknown error"
                 );
             }
         } catch (error) {
-            console.error("❌ Network Error:", error);
+            console.error("Network Error:", error);
         }
     };
 

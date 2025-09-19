@@ -20,7 +20,7 @@ export const simulationService = {
    * @returns Promise with the created simulation
    */
   saveSimulation: async (name: string, type: string, data: any): Promise<Simulation> => {
-    console.log("🚀 simulationService.saveSimulation called with:", { name, type, data });
+    console.log("simulationService.saveSimulation called with:", { name, type, data });
     
     const payload = { name, type, data };
     console.log("📤 Sending POST request to /api/simulations with payload:", payload);

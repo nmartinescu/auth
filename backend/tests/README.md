@@ -16,7 +16,7 @@ backend/tests/
 └── README.md                 # This file
 ```
 
-## 🚀 Running Tests
+## Running Tests
 
 ### Install Dependencies
 ```bash
@@ -48,76 +48,76 @@ npm run test:unit
 npm run test:verbose
 ```
 
-## 📋 Test Coverage
+## Test Coverage
 
 ### Scheduling Algorithms (`scheduler.test.js`)
-- ✅ **FCFS (First Come First Served)**
+- **FCFS (First Come First Served)**
   - Basic scheduler creation and initialization
   - Process execution without I/O
   - Process execution with different arrival times
   - Non-preemptive behavior verification
 
-- ✅ **SJF (Shortest Job First)**
+- **SJF (Shortest Job First)**
   - Shortest job selection logic
   - Equal burst time handling
   - Non-preemptive behavior verification
 
-- ✅ **RR (Round Robin)**
+- **RR (Round Robin)**
   - Quantum-based scheduling
   - Preemptive behavior verification
   - Different quantum value testing
 
-- ✅ **I/O Operations**
+- **I/O Operations**
   - All algorithms with I/O operations
   - Complex I/O timing scenarios
 
-- ✅ **Edge Cases**
+- **Edge Cases**
   - Single process scenarios
   - Zero arrival times
   - Large burst times
   - Empty I/O arrays
 
 ### Process Control Block (`pcb.test.js`)
-- ✅ **Initialization**
+- **Initialization**
   - PCB creation for all processes
   - PID assignment
   - State initialization
   - Property copying
 
-- ✅ **State Management**
+- **State Management**
   - Process state transitions
   - Completion detection
   - Running process detection
 
-- ✅ **CPU Time Management**
+- **CPU Time Management**
   - CPU time incrementation
   - Burst time decrementation
   - Process completion detection
 
-- ✅ **I/O Operations**
+- **I/O Operations**
   - I/O detection at specific CPU times
   - Wait queue management
   - I/O time handling
   - Multiple I/O operations per process
 
-- ✅ **Timing and Scheduling**
+- **Timing and Scheduling**
   - Scheduled time tracking
   - Waiting time calculation
   - Turnaround time calculation
 
-- ✅ **Quantum Management**
+- **Quantum Management**
   - Quantum assignment
   - Quantum decrementation
   - Zero quantum handling
 
 ### Queue Management (`queue.test.js`)
-- ✅ **QueueManager**
+- **QueueManager**
   - Basic queue operations (add, remove, get)
   - Element access by index
   - Queue replacement
   - Edge cases (empty queue, invalid indices)
 
-- ✅ **ReadyQueuesManager**
+- **ReadyQueuesManager**
   - Multiple queue initialization
   - Queue-specific operations
   - Quantum management per queue
@@ -125,40 +125,40 @@ npm run test:verbose
   - Process removal from all queues
 
 ### CPU API Endpoint (`cpu-api.test.js`)
-- ✅ **Successful Requests**
+- **Successful Requests**
   - All algorithm support (FCFS, SJF, RR)
   - Default algorithm handling
   - Case-insensitive algorithm names
 
-- ✅ **Input Validation**
+- **Input Validation**
   - Missing/empty processes validation
   - Invalid arrival/burst times
   - I/O operation validation
   - Quantum validation for RR
   - Unsupported algorithm rejection
 
-- ✅ **Data Processing**
+- **Data Processing**
   - Default I/O array assignment
   - I/O operation sorting
   - Process data transformation
 
-- ✅ **Response Format**
+- **Response Format**
   - Correct response structure
   - Performance metrics inclusion
   - Error response format
 
-- ✅ **Error Handling**
+- **Error Handling**
   - Scheduler error handling
   - Malformed JSON handling
 
 ### Timer Component (`timer.test.js`)
-- ✅ **Basic Operations**
+- **Basic Operations**
   - Timer initialization
   - Clock incrementation
   - Timer reset
   - Singleton pattern verification
 
-- ✅ **State Management**
+- **State Management**
   - Multiple clock cycles
   - Reset after operations
   - Large cycle handling
@@ -184,7 +184,7 @@ const processWithIO = testUtils.createProcessWithIO([
 ]);
 ```
 
-## 📊 Coverage Goals
+## Coverage Goals
 
 - **Statements**: > 90%
 - **Branches**: > 85%
@@ -241,7 +241,7 @@ Tests are configured via `jest.config.js`:
 - Verbose output
 - Mock clearing between tests
 
-## 📝 Writing New Tests
+## Writing New Tests
 
 When adding new tests:
 
@@ -272,7 +272,7 @@ npm test -- --testNamePattern="FCFS"
 node --inspect-brk node_modules/.bin/jest --runInBand
 ```
 
-## 📈 Continuous Integration
+## Continuous Integration
 
 Tests should be run in CI/CD pipeline:
 - On every pull request
@@ -280,7 +280,7 @@ Tests should be run in CI/CD pipeline:
 - With coverage reporting
 - Fail build if coverage drops below threshold
 
-## 🎯 Future Improvements
+## Future Improvements
 
 - [ ] Integration tests for full scheduler workflows
 - [ ] Performance benchmarking tests

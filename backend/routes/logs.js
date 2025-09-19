@@ -6,7 +6,7 @@ const router = express.Router();
 // Only enable in development mode for security
 if (process.env.NODE_ENV === 'development') {
     
-    // Get comprehensive log analysis
+
     router.get('/analysis', (req, res) => {
         try {
             const analysis = {

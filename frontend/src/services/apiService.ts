@@ -13,7 +13,7 @@ class ApiService {
             const accessToken = await tokenService.getValidAccessToken();
             
             if (!accessToken) {
-                // Token refresh failed, redirect to login
+
                 tokenService.logout();
                 throw new Error('Authentication required');
             }
@@ -44,7 +44,7 @@ class ApiService {
                     };
                     return fetch(url, fetchOptions);
                 } else {
-                    // Refresh failed, redirect to login
+
                     tokenService.logout();
                     throw new Error('Authentication expired');
                 }
@@ -54,7 +54,7 @@ class ApiService {
         return response;
     }
 
-    // Convenience methods
+
     async get(url: string, requiresAuth = false): Promise<Response> {
         return this.request(url, { method: 'GET', requiresAuth });
     }

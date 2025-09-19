@@ -144,9 +144,8 @@ export const getRateLimitEvents = () => {
     return events;
 };
 
-// Generate comprehensive report
 export const generateReport = () => {
-    console.log('\n📊 === APPLICATION LOG ANALYSIS REPORT ===\n');
+    console.log('\n=== APPLICATION LOG ANALYSIS REPORT ===\n');
     
     // Request Statistics
     const requestStats = getRequestStats();
@@ -170,7 +169,7 @@ export const generateReport = () => {
     // Error Analysis
     const errorAnalysis = getErrorAnalysis();
     if (errorAnalysis.totalErrors > 0) {
-        console.log('\n❌ ERROR ANALYSIS:');
+        console.log('\nERROR ANALYSIS:');
         console.log(`   Total Errors: ${errorAnalysis.totalErrors}`);
         console.log('   Errors by Status:', errorAnalysis.errorsByStatus);
         console.log('   Errors by Endpoint:', errorAnalysis.errorsByEndpoint);

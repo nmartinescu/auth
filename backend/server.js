@@ -19,17 +19,17 @@ const PORT = process.env.PORT || 5000;
 
 const __dirname = path.resolve();
 
-// Request tracking middleware - must be early
+
 app.use(requestId);
 app.use(requestTimer);
 
-// Logging middleware - choose based on environment
+
 const currentLoggers = loggers[process.env.NODE_ENV] || loggers.development;
 currentLoggers.forEach(logger => app.use(logger));
 
-// Security middleware - must be first
+
 app.use(helmet({
-    // Content Security Policy
+
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
@@ -44,25 +44,25 @@ app.use(helmet({
             manifestSrc: ["'self'"],
         },
     },
-    // HTTP Strict Transport Security
+
     hsts: {
-        maxAge: 31536000, // 1 year
+        maxAge: 31536000,
         includeSubDomains: true,
         preload: true
     },
-    // Prevent clickjacking
+
     frameguard: { action: 'deny' },
-    // Prevent MIME type sniffing
+
     noSniff: true,
-    // Prevent XSS attacks
+
     xssFilter: true,
-    // Hide X-Powered-By header
+
     hidePoweredBy: true,
-    // Referrer Policy
+
     referrerPolicy: { policy: "strict-origin-when-cross-origin" }
 }));
 
-// CORS configuration
+
 app.use(cors({
     origin: process.env.NODE_ENV === 'production' 
         ? process.env.FRONTEND_URL || false 
@@ -72,44 +72,41 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 
-// Body parsing middleware
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Apply rate limiting to all requests
 app.use(generalLimiter);
 
-// // Routes
-// app.get("/", (req, res) => {
-//     res.json({ message: "Server is running!" });
-// });
+
 
 app.get("/api/health", (req, res) => {
     res.json({ status: "OK", timestamp: new Date().toISOString() });
 });
 
-// Auth routes
+
 app.use("/api/auth", authRoutes);
 
-// CPU scheduling routes
+
 app.use("/api/cpu", cpuRoutes);
 
-// Memory management routes
+
 app.use("/api/memory", memoryRoutes);
 
-// Disk scheduling routes
+
 app.use("/api/disk", diskRoutes);
 
-// Import simulation routes
+
 import simulationRoutes from "./routes/simulations/index.js";
 
-// Simulation routes
+
 app.use("/api/simulations", simulationRoutes);
 
-// Logs routes (development only)
+
 app.use("/api/logs", logsRoutes);
 
-// Error handling middleware
+
 app.use((error, req, res, next) => {
     console.error("Unhandled error:", error);
     res.status(500).json({
@@ -125,19 +122,14 @@ if (process.env.NODE_ENV === "production") {
     });
 }
 
-// Start server
+
 app.listen(PORT, () => {
     connectDB();
     
-    // Log startup information
-    console.log(`🚀 Server is running on port ${PORT}`);
-    console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`📊 Logging: ${process.env.NODE_ENV === 'production' ? 'File-based' : 'Console'}`);
-    console.log(`🛡️  Security: Headers enabled, Rate limiting active`);
+    console.log(`Server running on port ${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
     
-    // Schedule log cleanup (run daily at midnight)
     if (process.env.NODE_ENV === 'production') {
-        setInterval(cleanupOldLogs, 24 * 60 * 60 * 1000); // 24 hours
-        console.log(`🧹 Log cleanup scheduled (30-day retention)`);
+        setInterval(cleanupOldLogs, 24 * 60 * 60 * 1000);
     }
 });

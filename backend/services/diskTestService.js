@@ -107,7 +107,7 @@ function checkAnswer(userAnswer, correctAnswer) {
         
         if (JSON.stringify(userSeq) === JSON.stringify(correctSeq)) {
             feedback.score += 50;
-            feedback.feedback.push("✅ Sequence is correct!");
+            feedback.feedback.push("Sequence is correct!");
         } else {
             feedback.feedback.push(`❌ Sequence is incorrect. Expected: [${correctSeq.join(' → ')}], Got: [${userSeq.join(' → ')}]`);
         }

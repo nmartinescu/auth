@@ -11,10 +11,10 @@ export default {
     // Module file extensions
     moduleFileExtensions: ["js", "json"],
 
-    // Test file patterns
+
     testMatch: ["**/tests/**/*.test.js", "**/?(*.)+(spec|test).js"],
 
-    // Coverage configuration
+
     collectCoverage: false, // Set to true when running coverage
     coverageDirectory: "coverage",
     coverageReporters: ["text", "lcov", "html"],

@@ -27,7 +27,7 @@ export const generateTokens = (userId) => {
     };
 };
 
-// Legacy function for backward compatibility
+
 export const generateToken = (userId) => {
     return generateAccessToken(userId);
 };
@@ -48,12 +48,12 @@ export const verifyAccessToken = (token) => {
         console.log("🔍 Token decoded successfully:", { userId: decoded.userId, type: decoded.type, exp: new Date(decoded.exp * 1000) });
         
         if (decoded.type !== "access") {
-            console.log("❌ Invalid token type:", decoded.type);
+            console.log("Invalid token type:", decoded.type);
             throw new Error("Invalid token type");
         }
         return { success: true, decoded };
     } catch (error) {
-        console.log("❌ Token verification error:", error.message);
+        console.log("Token verification error:", error.message);
         return { success: false, error: error.message };
     }
 };

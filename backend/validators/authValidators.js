@@ -19,7 +19,7 @@ export const validateRegistration = (data) => {
         errors.push("Name must be between 2 and 50 characters");
     }
 
-    // Basic email validation
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (email && !emailRegex.test(email)) {
         errors.push("Please provide a valid email address");

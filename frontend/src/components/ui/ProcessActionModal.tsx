@@ -14,10 +14,8 @@ export default function ProcessActionButtons({
 }: ProcessActionButtonsProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Simple notification function (can be replaced with a toast when available)
     const showNotification = (message: string, type: "success" | "error" = "success") => {
-        console.log(`${type === "success" ? "✅" : "❌"} ${message}`);
-        // You can implement a more sophisticated notification here when available
+        console.log(`${type === "success" ? "Success" : "Error"}: ${message}`);
     };
 
     const copyFormData = () => {
@@ -51,7 +49,7 @@ export default function ProcessActionButtons({
                 importDataCallback(data);
                 showNotification("File imported successfully");
                 
-                // Reset the input so the same file can be selected again
+
                 if (fileInputRef.current) {
                     fileInputRef.current.value = "";
                 }

@@ -9,8 +9,8 @@ router.use("/test", diskTestRoutes);
 
 // POST /api/disk - Simulate disk scheduling
 router.post("/", async (req, res) => {
-    console.log("🔄 POST /api/disk called");
-    console.log("📋 Request body:", req.body);
+    console.log("POST /api/disk called");
+    console.log("Request body:", req.body);
 
     try {
         const {
@@ -53,12 +53,12 @@ router.post("/", async (req, res) => {
         // Set default head direction if not provided
         const direction = headDirection || "right";
 
-        console.log("🚀 Starting disk scheduling simulation...");
-        console.log(`📊 Algorithm: ${algorithm}`);
-        console.log(`📍 Initial Head Position: ${initialHeadPosition}`);
-        console.log(`📏 Max Disk Size: ${maxDiskSize}`);
-        console.log(`➡️ Head Direction: ${direction}`);
-        console.log(`📋 Requests: [${requests.join(", ")}]`);
+        console.log("Starting disk scheduling simulation...");
+        console.log(`Algorithm: ${algorithm}`);
+        console.log(`Initial Head Position: ${initialHeadPosition}`);
+        console.log(`Max Disk Size: ${maxDiskSize}`);
+        console.log(`Head Direction: ${direction}`);
+        console.log(`Requests: [${requests.join(", ")}]`);
 
         // Run the simulation
         const result = simulateDiskScheduling(
@@ -69,10 +69,10 @@ router.post("/", async (req, res) => {
             direction
         );
 
-        console.log("✅ Disk scheduling simulation completed");
-        console.log(`📈 Total Seek Time: ${result.totalSeekTime}`);
-        console.log(`📊 Average Seek Time: ${result.averageSeekTime.toFixed(2)}`);
-        console.log(`🔄 Sequence: [${result.sequence.join(" → ")}]`);
+        console.log("Disk scheduling simulation completed");
+        console.log(`Total Seek Time: ${result.totalSeekTime}`);
+        console.log(`Average Seek Time: ${result.averageSeekTime.toFixed(2)}`);
+        console.log(`Sequence: [${result.sequence.join(" → ")}]`);
 
         res.status(200).json({
             success: true,
@@ -81,7 +81,7 @@ router.post("/", async (req, res) => {
         });
 
     } catch (error) {
-        console.error("❌ Error in disk scheduling simulation:", error);
+        console.error("Error in disk scheduling simulation:", error);
         
         res.status(400).json({
             success: false,

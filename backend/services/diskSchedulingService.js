@@ -791,14 +791,14 @@ export function simulateDiskScheduling(algorithm, requests, initialHeadPosition,
                 result = scan(validRequests, initialHeadPosition, maxDiskSize, headDirection);
                 break;
             case "cscan":
-                console.log(`🔄 Running C-SCAN with requests: [${validRequests.join(', ')}], head: ${initialHeadPosition}, direction: ${headDirection}`);
+                console.log(`Running C-SCAN with requests: [${validRequests.join(', ')}], head: ${initialHeadPosition}, direction: ${headDirection}`);
                 result = cscan(validRequests, initialHeadPosition, maxDiskSize, headDirection);
-                console.log(`✅ C-SCAN completed. Sequence: [${result.sequence.join(' → ')}], Total seek: ${result.totalSeekTime}`);
+                console.log(`C-SCAN completed. Sequence: [${result.sequence.join(' → ')}], Total seek: ${result.totalSeekTime}`);
                 break;
             case "clook":
-                console.log(`🔄 Running C-LOOK with requests: [${validRequests.join(', ')}], head: ${initialHeadPosition}, direction: ${headDirection}`);
+                console.log(`Running C-LOOK with requests: [${validRequests.join(', ')}], head: ${initialHeadPosition}, direction: ${headDirection}`);
                 result = clook(validRequests, initialHeadPosition, maxDiskSize, headDirection);
-                console.log(`✅ C-LOOK completed. Sequence: [${result.sequence.join(' → ')}], Total seek: ${result.totalSeekTime}`);
+                console.log(`C-LOOK completed. Sequence: [${result.sequence.join(' → ')}], Total seek: ${result.totalSeekTime}`);
                 break;
             case "look":
                 result = look(validRequests, initialHeadPosition, maxDiskSize, headDirection);
@@ -807,7 +807,7 @@ export function simulateDiskScheduling(algorithm, requests, initialHeadPosition,
                 throw new Error(`Unknown algorithm: ${algorithm}`);
         }
     } catch (error) {
-        console.error(`❌ Error in ${algorithm.toUpperCase()} algorithm:`, error.message);
+        console.error(`Error in ${algorithm.toUpperCase()} algorithm:`, error.message);
         console.error('Stack trace:', error.stack);
         throw new Error(`${algorithm.toUpperCase()} algorithm failed: ${error.message}`);
     }

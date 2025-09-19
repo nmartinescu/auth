@@ -156,7 +156,7 @@ export default function ActionModal<T>({
                 importDataCallback(data);
                 showNotification("File imported successfully");
                 
-                // Reset the input so the same file can be selected again
+
                 if (fileInputRef.current) {
                     fileInputRef.current.value = "";
                 }
@@ -196,21 +196,20 @@ export default function ActionModal<T>({
 
     // Handle save to account
     const handleSaveToAccount = async (name: string) => {
-        console.log("🔄 Starting save to account...", { name, simulationType });
+        console.log("Starting save to account...", { name, simulationType });
         try {
             const data = exportDataCallback();
-            console.log("📊 Data to save:", data);
+            console.log("Data to save:", data);
             
             const result = await simulationService.saveSimulation(name, simulationType, data);
-            console.log("✅ Save successful:", result);
+            console.log("Save successful:", result);
             
             showNotification("Simulation saved successfully");
             closeNameModal(); // Close the name modal
-            onClose(); // Close the main modal after saving
+            onClose();
         } catch (error) {
-            console.error("❌ Error saving to account:", error);
+            console.error("Error saving to account:", error);
             
-            // More detailed error logging
             if (error instanceof Error) {
                 console.error("Error message:", error.message);
                 console.error("Error stack:", error.stack);

@@ -176,7 +176,7 @@ class TestSolutionService {
             throw new Error('No solution steps found in backend response');
         }
         
-        // Get the last step which contains the final results
+
         const lastStep = solutionSteps[solutionSteps.length - 1];
         console.log('Last Step:', lastStep);
         
@@ -207,7 +207,7 @@ class TestSolutionService {
             return processResult;
         });
 
-        // Calculate averages from the backend metrics if available, otherwise calculate manually
+
         const backendMetrics = backendResponse.data?.metrics || {};
         
         const avgWaitingTime = backendMetrics.averageWaitingTime !== undefined 
@@ -421,7 +421,7 @@ class TestSolutionService {
         score += processScore * 60; // 60 points for process results
         console.log('Process Score:', processScore, 'Weighted:', processScore * 60);
 
-        // Check average waiting time (15% of score)
+
         const waitingTimeDiff = Math.abs(
             userSolution.avgWaitingTime - correctSolution.avgWaitingTime
         );
@@ -675,7 +675,7 @@ class TestSolutionService {
         }
 
         let correctCount = 0;
-        const totalFields = userProcesses.length * 4; // scheduledTime, waitingTime, turnaroundTime, completionTime
+        const totalFields = userProcesses.length * 4;
 
         for (const userProcess of userProcesses) {
             const correctProcess = correctProcesses.find(p => p.pid === userProcess.pid);

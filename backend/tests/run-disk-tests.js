@@ -49,10 +49,10 @@ async function runTests(testPattern, description) {
 
         jest.on('close', (code) => {
             if (code === 0) {
-                console.log(colorize(`✅ ${description} - PASSED`, 'green'));
+                console.log(colorize(`${description} - PASSED`, 'green'));
                 resolve(true);
             } else {
-                console.log(colorize(`❌ ${description} - FAILED`, 'red'));
+                console.log(colorize(`${description} - FAILED`, 'red'));
                 resolve(false);
             }
         });
@@ -75,10 +75,10 @@ async function runCoverage() {
 
         jest.on('close', (code) => {
             if (code === 0) {
-                console.log(colorize('✅ Coverage Analysis - COMPLETED', 'green'));
+                console.log(colorize('Coverage Analysis - COMPLETED', 'green'));
                 resolve(true);
             } else {
-                console.log(colorize('❌ Coverage Analysis - FAILED', 'red'));
+                console.log(colorize('Coverage Analysis - FAILED', 'red'));
                 resolve(false);
             }
         });
@@ -141,7 +141,7 @@ async function main() {
         
         console.log('\nDetailed Results:');
         results.forEach(result => {
-            const status = result.passed ? colorize('✅ PASSED', 'green') : colorize('❌ FAILED', 'red');
+            const status = result.passed ? colorize('PASSED', 'green') : colorize('FAILED', 'red');
             console.log(`  ${result.description}: ${status}`);
         });
 

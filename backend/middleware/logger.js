@@ -45,10 +45,10 @@ morgan.token('real-ip', (req) => {
     return req.ip || req.connection.remoteAddress || 'unknown';
 });
 
-// Development format - colorful and detailed
+
 const devFormat = morgan('dev');
 
-// Production format - structured and comprehensive
+
 const prodFormat = morgan(
     ':real-ip - :user-id [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" :response-time ms',
     {
@@ -107,7 +107,7 @@ export const requestTimer = (req, res, next) => {
             res.setHeader('X-Response-Time', duration);
         }
         
-        // Call original end method
+
         originalEnd.apply(this, args);
     };
     

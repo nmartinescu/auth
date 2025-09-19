@@ -57,7 +57,7 @@ class TokenService {
 
     // Refresh access token
     async refreshAccessToken(): Promise<TokenData | null> {
-        // If there's already a refresh in progress, wait for it
+    
         if (this.refreshPromise) {
             return this.refreshPromise;
         }

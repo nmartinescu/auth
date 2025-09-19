@@ -1,7 +1,7 @@
 import type { ButtonProps } from "@chakra-ui/react";
 import { useColorModeValue } from "./color-mode";
 
-// Base input styling function that supports dark mode
+
 export const getInputStyle = () => {
   const borderColor = useColorModeValue("#E5E7EB", "#4A5568");
   const hoverBorderColor = useColorModeValue("#9CA3AF", "#718096");
@@ -111,7 +111,7 @@ export const toggleButtonStyle: ButtonProps = {
   },
 };
 
-// Container styling
+
 export const authContainerStyle = {
   minH: "100vh",
   align: "center" as const,
@@ -119,7 +119,7 @@ export const authContainerStyle = {
   p: 4,
 };
 
-// Auth box styling function that supports dark mode
+
 export const getAuthBoxStyle = () => {
   const borderColor = useColorModeValue("#E5E7EB", "#4A5568");
   const shadow = useColorModeValue("lg", "dark-lg");

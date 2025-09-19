@@ -314,9 +314,9 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                 return;
             }
 
-            // Check if sequence contains any zeros (except potentially valid track 0)
+
             const hasIncompleteEntries = diskSequence.some((pos, index) => {
-                if (index === 0) return false; // Skip initial position
+                if (index === 0) return false;
                 return pos === 0 && !question.requests?.includes(0);
             });
 

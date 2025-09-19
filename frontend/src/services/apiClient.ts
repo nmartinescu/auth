@@ -21,14 +21,14 @@ apiClient.interceptors.request.use(
     
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log("📋 Added Authorization header to request");
+      console.log("Added Authorization header to request");
     }
     
     console.log("🌐 Making request to:", config.url, "with method:", config.method);
     return config;
   },
   (error) => {
-    console.error("❌ Request interceptor error:", error);
+    console.error("Request interceptor error:", error);
     return Promise.reject(error);
   }
 );
