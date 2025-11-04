@@ -91,10 +91,6 @@ export interface ActionModalProps<T> {
      */
     isLoggedIn?: boolean;
     /**
-     * Optional callback for loading simulation from user account
-     */
-    onLoadFromAccount?: () => void;
-    /**
      * Optional simulation type identifier
      */
     simulationType?: string;
@@ -107,7 +103,6 @@ export default function ActionModal<T>({
     buttonText = "Actions",
     modalTitle = "Simulation Actions",
     isLoggedIn = false,
-    onLoadFromAccount,
     simulationType = "process",
 }: ActionModalProps<T>) {
     const [isOpen, { on: onOpen, off: onClose }] = useBoolean(false);
@@ -346,19 +341,6 @@ export default function ActionModal<T>({
                                             <Flex align="center" gap={2}>
                                                 <LuSave />
                                                 <span>Save to Account</span>
-                                            </Flex>
-                                        </Button>
-                                        
-                                        <Button
-                                            {...actionButtonStyle}
-                                            onClick={onLoadFromAccount}
-                                            width="100%"
-                                            colorScheme="blue"
-                                            variant="outline"
-                                        >
-                                            <Flex align="center" gap={2}>
-                                                <LuFolderOpen />
-                                                <span>Load from Account</span>
                                             </Flex>
                                         </Button>
                                     </Box>

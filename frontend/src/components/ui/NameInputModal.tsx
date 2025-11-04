@@ -44,6 +44,7 @@ const NameInputModal = ({
         
         try {
             onSubmit(name);
+            setName(""); // Clear the text after successful save
             onClose();
         } catch (err) {
             console.error("Error submitting name:", err);
@@ -57,6 +58,12 @@ const NameInputModal = ({
         if (e.key === "Enter") {
             handleSubmit();
         }
+    };
+    
+    const handleClose = () => {
+        setName(""); // Clear the text when modal is closed
+        setError("");
+        onClose();
     };
     
     const handleContentClick = (e: React.MouseEvent) => {
@@ -75,7 +82,7 @@ const NameInputModal = ({
                 bottom="0"
                 bg="rgba(0, 0, 0, 0.4)"
                 zIndex="2000"
-                onClick={onClose}
+                onClick={handleClose}
                 cursor="pointer"
             />
             <Box
@@ -84,16 +91,19 @@ const NameInputModal = ({
                 left="50%"
                 transform="translate(-50%, -50%)"
                 zIndex="2001" 
-                width="90%"
-                maxWidth="320px"
-                bg="white"
-                borderRadius="md"
-                boxShadow="lg"
-                p={4}
+                width="85%"
+                maxWidth="280px"
+                bg="gray.50"
+                borderRadius="lg"
+                boxShadow="xl"
+                p={5}
                 onClick={handleContentClick}
+                border="1px solid"
+                borderColor="gray.200"
                 _dark={{
-                    bg: "gray.800",
-                    color: "white"
+                    bg: "gray.750",
+                    color: "white",
+                    borderColor: "gray.600"
                 }}
             >
                 <Box
@@ -127,7 +137,7 @@ const NameInputModal = ({
                 <Flex gap={3} justify="flex-end">
                     <Button
                         variant="outline"
-                        onClick={onClose}
+                        onClick={handleClose}
                         size="sm"
                         borderBottom={`3px solid ${borderColor}`}
                         borderRight={`3px solid ${borderColor}`}
