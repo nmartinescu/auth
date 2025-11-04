@@ -29,7 +29,7 @@ function lfu(pageReferences, frameCount) {
                 pageFault: false,
                 frames: [...frames],
                 dataStructure: Object.entries(frequency).map(([p, f]) => `${p}:${f}`),
-                explanation: `page ${page} found in frame ${pageIndex}. frequency increased to ${frequency[page]}.`,
+                explaination: `page ${page} found in frame ${pageIndex}. frequency increased to ${frequency[page]}.`,
                 totalPageFaults: pageFaults,
                 hitRate: i > 0 ? (i + 1 - pageFaults) / (i + 1) : 0,
             });
@@ -50,7 +50,7 @@ function lfu(pageReferences, frameCount) {
                     pageFault: true,
                     frames: [...frames],
                     dataStructure: Object.entries(frequency).map(([p, f]) => `${p}:${f}`),
-                    explanation: `page ${page} loaded into empty frame ${emptyIndex}. page fault occurred.`,
+                    explaination: `page ${page} loaded into empty frame ${emptyIndex}. page fault occurred.`,
                     totalPageFaults: pageFaults,
                     hitRate: (i + 1 - pageFaults) / (i + 1),
                 });
@@ -90,7 +90,7 @@ function lfu(pageReferences, frameCount) {
                     pageFault: true,
                     frames: [...frames],
                     dataStructure: Object.entries(frequency).map(([p, f]) => `${p}:${f}`),
-                    explanation: `page ${page} replaced least frequently used page ${lfuPage} (freq: ${minFreq}). page fault occurred.`,
+                    explaination: `page ${page} replaced least frequently used page ${lfuPage} (freq: ${minFreq}). page fault occurred.`,
                     totalPageFaults: pageFaults,
                     hitRate: (i + 1 - pageFaults) / (i + 1),
                 });

@@ -26,7 +26,7 @@ function fifo(pageReferences, frameCount) {
                 pageFault: false,
                 frames: [...frames],
                 dataStructure: [...frames],
-                explanation: `page ${page} found in frame ${pageIndex}. no page fault.`,
+                explaination: `page ${page} found in frame ${pageIndex}. no page fault.`,
                 totalPageFaults: pageFaults,
                 hitRate: i > 0 ? (i + 1 - pageFaults) / (i + 1) : 0,
             });
@@ -44,7 +44,7 @@ function fifo(pageReferences, frameCount) {
                     pageFault: true,
                     frames: [...frames],
                     dataStructure: [...frames],
-                    explanation: `page ${page} loaded into empty frame ${emptyIndex}. page fault occurred.`,
+                    explaination: `page ${page} loaded into empty frame ${emptyIndex}. page fault occurred.`,
                     totalPageFaults: pageFaults,
                     hitRate: (i + 1 - pageFaults) / (i + 1),
                 });
@@ -59,7 +59,7 @@ function fifo(pageReferences, frameCount) {
                     pageFault: true,
                     frames: [...frames],
                     dataStructure: [...frames],
-                    explanation: `page ${page} replaced page ${replacedPage} in frame ${fifoPointer} using fifo. page fault occurred.`,
+                    explaination: `page ${page} replaced page ${replacedPage} in frame ${fifoPointer} using fifo. page fault occurred.`,
                     totalPageFaults: pageFaults,
                     hitRate: (i + 1 - pageFaults) / (i + 1),
                 });
@@ -71,10 +71,13 @@ function fifo(pageReferences, frameCount) {
     }
 
     return {
-        frames: steps.map(step => step.frames),
+        frames: steps.map((step) => step.frames),
         customData: steps,
         totalPageFaults: pageFaults,
-        hitRate: pageReferences.length > 0 ? (pageReferences.length - pageFaults) / pageReferences.length : 0,
+        hitRate:
+            pageReferences.length > 0
+                ? (pageReferences.length - pageFaults) / pageReferences.length
+                : 0,
     };
 }
 

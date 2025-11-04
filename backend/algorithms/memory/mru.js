@@ -29,7 +29,7 @@ function mru(pageReferences, frameCount) {
                 pageFault: false,
                 frames: [...frames],
                 dataStructure: [...mruOrder],
-                explanation: `page ${page} found in frame ${pageIndex}. updated as most recently used.`,
+                explaination: `page ${page} found in frame ${pageIndex}. updated as most recently used.`,
                 totalPageFaults: pageFaults,
                 hitRate: i > 0 ? (i + 1 - pageFaults) / (i + 1) : 0,
             });
@@ -49,7 +49,7 @@ function mru(pageReferences, frameCount) {
                     pageFault: true,
                     frames: [...frames],
                     dataStructure: [...mruOrder],
-                    explanation: `page ${page} loaded into empty frame ${emptyIndex}. page fault occurred.`,
+                    explaination: `page ${page} loaded into empty frame ${emptyIndex}. page fault occurred.`,
                     totalPageFaults: pageFaults,
                     hitRate: (i + 1 - pageFaults) / (i + 1),
                 });
@@ -68,7 +68,7 @@ function mru(pageReferences, frameCount) {
                     pageFault: true,
                     frames: [...frames],
                     dataStructure: [...mruOrder],
-                    explanation: `page ${page} replaced most recently used page ${mruPage}. page fault occurred.`,
+                    explaination: `page ${page} replaced most recently used page ${mruPage}. page fault occurred.`,
                     totalPageFaults: pageFaults,
                     hitRate: (i + 1 - pageFaults) / (i + 1),
                 });

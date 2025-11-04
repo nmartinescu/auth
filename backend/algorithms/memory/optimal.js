@@ -25,7 +25,7 @@ function optimal(pageReferences, frameCount) {
                 pageFault: false,
                 frames: [...frames],
                 dataStructure: [...frames],
-                explanation: `page ${page} found in frame ${pageIndex}. no page fault.`,
+                explaination: `page ${page} found in frame ${pageIndex}. no page fault.`,
                 totalPageFaults: pageFaults,
                 hitRate: i > 0 ? (i + 1 - pageFaults) / (i + 1) : 0,
             });
@@ -44,7 +44,7 @@ function optimal(pageReferences, frameCount) {
                     pageFault: true,
                     frames: [...frames],
                     dataStructure: [...frames],
-                    explanation: `page ${page} loaded into empty frame ${emptyIndex}. page fault occurred.`,
+                    explaination: `page ${page} loaded into empty frame ${emptyIndex}. page fault occurred.`,
                     totalPageFaults: pageFaults,
                     hitRate: (i + 1 - pageFaults) / (i + 1),
                 });
@@ -73,7 +73,7 @@ function optimal(pageReferences, frameCount) {
                 const replaceIndex = frames.indexOf(farthestPage);
                 frames[replaceIndex] = page;
 
-                const explanation = farthestDistance === Infinity
+                const explaination = farthestDistance === Infinity
                     ? `page ${page} replaced page ${farthestPage} (never used again). page fault occurred.`
                     : `page ${page} replaced page ${farthestPage} (next use at step ${farthestDistance + 1}). page fault occurred.`;
 
@@ -83,7 +83,7 @@ function optimal(pageReferences, frameCount) {
                     pageFault: true,
                     frames: [...frames],
                     dataStructure: [...frames],
-                    explanation: explanation,
+                    explaination: explaination,
                     totalPageFaults: pageFaults,
                     hitRate: (i + 1 - pageFaults) / (i + 1),
                 });
