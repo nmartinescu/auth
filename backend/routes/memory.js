@@ -1,15 +1,15 @@
 import express from "express";
-import MemoryManager from "../memory/MemoryManager.js";
+import { simulateMemoryManagement } from "../services/memoryManagementService.js";
 
 const router = express.Router();
 
 /**
  * POST /api/memory
- * Memory Management Simulation Endpoint
+ * memory management simulation endpoint
  * 
- * Expected request body:
+ * expected request body:
  * {
- *   "selectedAlgorithm": ["fifo"], // Supported: fifo, lru, lfu, optimal, mru
+ *   "selectedAlgorithm": ["fifo"], // supported: fifo, lru, lfu, optimal, mru
  *   "frameCount": 3,
  *   "pageReferences": [1, 2, 3, 4, 1, 2, 5, 1, 2, 3, 4, 5]
  * }
@@ -18,7 +18,7 @@ router.post("/", async (req, res) => {
     try {
         const { selectedAlgorithm, frameCount, pageReferences } = req.body;
 
-        // Validate input
+        // validate input
         if (!selectedAlgorithm || !Array.isArray(selectedAlgorithm) || selectedAlgorithm.length === 0) {
             return res.status(400).json({
                 success: false,
@@ -32,7 +32,7 @@ router.post("/", async (req, res) => {
         if (!supportedAlgorithms.includes(algorithm.toLowerCase())) {
             return res.status(400).json({
                 success: false,
-                message: `Unsupported algorithm: ${algorithm}. Supported algorithms: ${supportedAlgorithms.join(', ')}`
+                message: `unsupported algorithm: ${algorithm}. supported algorithms: ${supportedAlgorithms.join(', ')}`
             });
         }
 
@@ -50,37 +50,36 @@ router.post("/", async (req, res) => {
             });
         }
 
-        // Validate page references
+        // validate page references
         for (let i = 0; i < pageReferences.length; i++) {
             const page = pageReferences[i];
             if (typeof page !== 'number' || page < 0 || page > 100) {
                 return res.status(400).json({
                     success: false,
-                    message: `Page reference ${i + 1}: must be a number between 0 and 100`
+                    message: `page reference ${i + 1}: must be a number between 0 and 100`
                 });
             }
         }
 
-        // Create memory manager and run simulation
-        const memoryManager = new MemoryManager(frameCount, pageReferences, algorithm);
-        const result = memoryManager.simulate();
+        // run memory management simulation
+        const result = simulateMemoryManagement(algorithm, pageReferences, frameCount);
 
         res.json({
             success: true,
-            algorithm: algorithm.toUpperCase(),
-            frameCount,
-            pageReferences,
+            algorithm: result.algorithm,
+            frameCount: result.frameCount,
+            pageReferences: result.pageReferences,
             frames: result.frames,
             customData: result.customData,
             totalPageFaults: result.totalPageFaults,
-            hitRate: Math.round(result.hitRate * 10000) / 100 // Convert to percentage with 2 decimal places
+            hitRate: Math.round(result.hitRate * 10000) / 100 // convert to percentage with 2 decimal places
         });
 
     } catch (error) {
-        console.error("Memory management error:", error);
+        console.error("memory management error:", error);
         res.status(500).json({
             success: false,
-            message: "Internal server error during memory management simulation"
+            message: error.message || "internal server error during memory management simulation"
         });
     }
 });
