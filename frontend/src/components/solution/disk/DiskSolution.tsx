@@ -355,12 +355,6 @@ export default function DiskSolution({ solution, onBack }: DiskSolutionProps) {
                             <strong>Current Position:</strong> {currentStep.currentPosition !== undefined ? currentStep.currentPosition : "N/A"}
                         </Text>
                         
-                        {currentStep.targetRequest !== null && currentStep.targetRequest !== undefined && (
-                            <Text color={textColor} mb="2">
-                                <strong>Target Request:</strong> {currentStep.targetRequest}
-                            </Text>
-                        )}
-                        
                         <Text color={textColor} mb="2">
                             <strong>Seek Distance:</strong> {currentStep.seekDistance !== undefined ? currentStep.seekDistance : "0"}
                         </Text>
