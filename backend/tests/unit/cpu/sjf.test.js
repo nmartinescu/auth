@@ -1,4 +1,4 @@
-import SchedulerSJF from "../../../scheduler/algorithms/SchedulerSJF";
+import SchedulerSJF from "../../../algorithms/scheduler/algorithms/SchedulerSJF";
 
 describe("SJF Process Scheduling", () => {
     it("test 1", () => {

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import SchedulerMLFQ from '../../../scheduler/algorithms/SchedulerMLFQ.js';
+import SchedulerMLFQ from '../../../algorithms/scheduler/algorithms/SchedulerMLFQ.js';
 
 describe('MLFQ Scheduler', () => {
     let testProcesses;

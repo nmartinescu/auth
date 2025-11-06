@@ -1,6 +1,6 @@
 import Scheduler from "../Scheduler.js";
 import ReadyQueuesManager from "../ReadyQueuesManager.js";
-import { PROCESSES } from "../../constants.js";
+import { PROCESSES } from "../../../constants.js";
 import executionInfo from "../ExecutionInfo.js";
 import timer from "../Timer.js";
 
@@ -111,7 +111,7 @@ class SchedulerMLFQ extends Scheduler {
             );
 
             executionInfo.addExplanation(
-                `Process ${this.cpu} timed out, moved to queue ${nextPriority}.`
+                `Process ${this.cpu} timed out, moved to queue ${nextPriority + 1}.`
             );
             executionInfo.addPoint(this.cpu);
             executionInfo.addTimer();
@@ -181,7 +181,7 @@ class SchedulerMLFQ extends Scheduler {
             process.priority = nextPriority;
 
             executionInfo.addExplanation(
-                `Process ${this.cpu} timed out, moved to queue ${nextPriority}.`
+                `Process ${this.cpu} timed out, moved to queue ${nextPriority + 1}.`
             );
             executionInfo.addPoint(this.cpu);
             executionInfo.addTimer();
@@ -204,7 +204,7 @@ class SchedulerMLFQ extends Scheduler {
             }
 
             executionInfo.addExplanation(
-                `Process ${nextProcess} arrived and added to queue 0.`
+                `Process ${nextProcess} arrived and added to queue 1.`
             );
             if (this.cpu !== -1) {
                 executionInfo.addTemporaryPoint(this.cpu);
@@ -229,7 +229,7 @@ class SchedulerMLFQ extends Scheduler {
 
             this.readyQueues.addToReadyQueue(currentPriority, this.cpu);
             executionInfo.addExplanation(
-                `Process ${this.cpu} preempted by higher priority process, returned to queue ${currentPriority}.`
+                `Process ${this.cpu} preempted by higher priority process, returned to queue ${currentPriority + 1}.`
             );
             executionInfo.addPoint(this.cpu);
             executionInfo.addTimer();
@@ -248,7 +248,7 @@ class SchedulerMLFQ extends Scheduler {
         const priority = process.priority || 0;
 
         executionInfo.addExplanation(
-            `Process ${pid} scheduled from queue ${priority}.`
+            `Process ${pid} scheduled from queue ${priority + 1}.`
         );
         executionInfo.addPoint(pid);
         executionInfo.addTimer();
@@ -304,7 +304,7 @@ class SchedulerMLFQ extends Scheduler {
     resetAllProcessesToHighestPriority() {
         const currentTime = timer.getTimer();
         executionInfo.addExplanation(
-            `Allotment time expired at time ${currentTime}! Moving all processes back to queue 0.`
+            `Allotment time expired at time ${currentTime}! Moving all processes back to queue 1.`
         );
         executionInfo.addTimer();
 
@@ -353,7 +353,7 @@ class SchedulerMLFQ extends Scheduler {
                             fromQueue: queueIndex
                         });
                         executionInfo.addExplanation(
-                            `Process ${pid} moved from queue ${queueIndex} to queue 0.`
+                            `Process ${pid} moved from queue ${queueIndex + 1} to queue 1.`
                         );
                     }
                 }
@@ -389,7 +389,7 @@ class SchedulerMLFQ extends Scheduler {
             }
 
             executionInfo.addExplanation(
-                `Process ${pid} finished I/O at time ${time + 1}, added to queue 0.`
+                `Process ${pid} finished I/O at time ${time + 1}, added to queue 1.`
             );
             executionInfo.addTimer(true);
 
@@ -408,7 +408,7 @@ class SchedulerMLFQ extends Scheduler {
                 : 0;
 
             executionInfo.addExplanation(
-                `Process ${this.cpu} preempted due to I/O completion, returned to queue ${currentPriority}.`
+                `Process ${this.cpu} preempted due to I/O completion, returned to queue ${currentPriority + 1}.`
             );
             executionInfo.addPoint(this.cpu, true);
             executionInfo.addTimer(true);

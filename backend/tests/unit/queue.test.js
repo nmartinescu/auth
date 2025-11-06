@@ -1,6 +1,6 @@
 import { describe, it, beforeEach, expect } from '@jest/globals';
-import QueueManager from '../../scheduler/QueueManager.js';
-import ReadyQueuesManager from '../../scheduler/ReadyQueuesManager.js';
+import QueueManager from '../../algorithms/scheduler/QueueManager.js';
+import ReadyQueuesManager from '../../algorithms/scheduler/ReadyQueuesManager.js';
 
 describe('QueueManager', () => {
     let queueManager;

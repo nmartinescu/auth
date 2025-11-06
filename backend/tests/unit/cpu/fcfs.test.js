@@ -1,4 +1,4 @@
-import SchedulerFCFS from "../../../scheduler/algorithms/SchedulerFCFS";
+import SchedulerFCFS from "../../../algorithms/scheduler/algorithms/SchedulerFCFS";
 
 describe("FCFS Process Scheduling", () => {
     it("test 1", () => {

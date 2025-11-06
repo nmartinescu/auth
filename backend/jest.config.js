@@ -19,7 +19,7 @@ export default {
     coverageDirectory: "coverage",
     coverageReporters: ["text", "lcov", "html"],
     collectCoverageFrom: [
-        "Scheduler/**/*.js",
+        "algorithms/scheduler/**/*.js",
         "routes/**/*.js",
         "services/**/*.js",
         "!**/node_modules/**",

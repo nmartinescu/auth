@@ -1,9 +1,9 @@
 import express from "express";
-import SchedulerFCFS from "../scheduler/algorithms/SchedulerFCFS.js";
-import SchedulerSJF from "../scheduler/algorithms/SchedulerSJF.js";
-import SchedulerRR from "../scheduler/algorithms/SchedulerRR.js";
-import SchedulerSTCF from "../scheduler/algorithms/SchedulerSTCF.js";
-import SchedulerMLFQ from "../scheduler/algorithms/SchedulerMLFQ.js";
+import SchedulerFCFS from "../algorithms/scheduler/algorithms/SchedulerFCFS.js";
+import SchedulerSJF from "../algorithms/scheduler/algorithms/SchedulerSJF.js";
+import SchedulerRR from "../algorithms/scheduler/algorithms/SchedulerRR.js";
+import SchedulerSTCF from "../algorithms/scheduler/algorithms/SchedulerSTCF.js";
+import SchedulerMLFQ from "../algorithms/scheduler/algorithms/SchedulerMLFQ.js";
 
 const router = express.Router();
 

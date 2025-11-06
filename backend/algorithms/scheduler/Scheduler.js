@@ -1,4 +1,4 @@
-import { PROCESSES } from "../constants.js";
+import { PROCESSES } from "../../constants.js";
 import ProcessControlBlockManager from "./ProcessControlBlockManager.js";
 import executionInfo from "./ExecutionInfo.js";
 import timer from "./Timer.js";
@@ -23,9 +23,9 @@ class Scheduler {
             console.log(`Timer: ${timer.getTimer()}`);
 
             this.addNewProcesses();
+            this.finishProcess(); // Check if process is finished BEFORE checking timeout
             this.checkForTimeout();
             this.schedule();
-            this.finishProcess();
             this.executeProcess();
             this.handleIo();
             timer.clock();
@@ -44,6 +44,11 @@ class Scheduler {
         );
 
         if (!this.shouldDescheduleOnTimeout()) {
+            return;
+        }
+
+        // Don't deschedule if the process is already finished or has I/O
+        if (this.pcb.isProcessFinished(this.cpu) || this.pcb.hasIo(this.cpu)) {
             return;
         }
 
@@ -79,8 +84,6 @@ class Scheduler {
         this.readyQueues.removeFromReadyQueue(this.cpu);
 
         this.cpu = -1;
-
-        this.schedule();
     }
 
     addNewProcesses() {
@@ -137,7 +140,7 @@ class Scheduler {
         this.pcb.setProcessState(pid, PROCESSES.STATES.RUNNING);
 
         const priority = this.pcb.getRecord(pid).priority || 0;
-        console.log(priority, this.readyQueues.getQueueQuantum(priority))
+        console.log(priority, this.readyQueues.getQueueQuantum(priority));
         const quantum = this.readyQueues.getQueueQuantum(priority);
         this.pcb.setQuantumLeft(pid, quantum);
         this.cpu = pid;
@@ -163,7 +166,7 @@ class Scheduler {
         this.pcb.setProcessState(pid, PROCESSES.STATES.WAIT);
         this.pcb.addToWaitQueue(pid);
         this.cpu = -1;
-        
+
         // Immediately schedule a new process since CPU is now available
         this.schedule();
     }
@@ -175,15 +178,21 @@ class Scheduler {
         for (let i = 0; i < toBeAdded.length; i++) {
             const pid = toBeAdded[i];
             const time = timer.getTimer();
-            
-            executionInfo.addExplanation(`Process ${pid} finished I/O at time ${time + 1}.`);
+
+            executionInfo.addExplanation(
+                `Process ${pid} finished I/O at time ${time + 1}.`
+            );
             executionInfo.addTimer(true);
-            
+
             this.readyQueues.addToReadyQueue(0, pid);
             this.pcb.setProcessState(pid, PROCESSES.STATES.READY);
         }
 
-        if (toBeAdded.length > 0 && this.cpu !== -1 && this.shouldDescheduleOnNewProcess()) {
+        if (
+            toBeAdded.length > 0 &&
+            this.cpu !== -1 &&
+            this.shouldDescheduleOnNewProcess()
+        ) {
             executionInfo.addExplanation(
                 `Process ${this.cpu} descheduled due to I/O completion.`
             );
