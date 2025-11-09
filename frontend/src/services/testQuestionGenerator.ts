@@ -164,14 +164,21 @@ class TestQuestionGenerator {
             const ioOperations = this.generateIOOperations(burstTime, maxIoCount);
             
             processes.push({
-                id: i + 1,
+                id: i + 1, // Temporary ID
                 arrivalTime,
                 burstTime,
                 io: ioOperations
             });
         }
         
-        return processes.sort((a, b) => a.arrivalTime - b.arrivalTime);
+        // Sort by arrival time first, then reassign IDs to maintain P1, P2, P3... order
+        const sortedProcesses = processes.sort((a, b) => a.arrivalTime - b.arrivalTime);
+        
+        // Reassign IDs to ensure they are always P1, P2, P3... in order
+        return sortedProcesses.map((process, index) => ({
+            ...process,
+            id: index + 1
+        }));
     }
 
     private generateMLFQHardScenarioProcesses(processCount: number): TestProcess[] {
@@ -206,14 +213,21 @@ class TestQuestionGenerator {
             const arrivalTime = i === 0 ? 0 : this.randomBetween(0, 6);
             
             processes.push({
-                id: i + 1,
+                id: i + 1, // Temporary ID
                 arrivalTime,
                 burstTime,
                 io: ioOperations
             });
         }
         
-        return processes.sort((a, b) => a.arrivalTime - b.arrivalTime);
+        // Sort by arrival time first, then reassign IDs to maintain P1, P2, P3... order
+        const sortedProcesses = processes.sort((a, b) => a.arrivalTime - b.arrivalTime);
+        
+        // Reassign IDs to ensure they are always P1, P2, P3... in order
+        return sortedProcesses.map((process, index) => ({
+            ...process,
+            id: index + 1
+        }));
     }
 
     private generateBurstTime(difficulty: DifficultyLevel): number {
@@ -323,42 +337,21 @@ class TestQuestionGenerator {
         
         if (algorithm === 'MLFQ' && mlfqConfig) {
             const { queues, quantums, allotment } = mlfqConfig;
-            return `Apply ${algorithmName} scheduling algorithm to the following ${processes.length} processes.
+            const ioNote = processes.some(p => p.io.length > 0) ? ' Several processes contain I/O operations that will affect their priority levels during execution.' : '';
             
-            MLFQ Configuration:
-            - Number of Queues: ${queues} (Queue 0 = Highest Priority, Queue ${queues! - 1} = Lowest Priority)
-            - Quantum Times: ${quantums!.map((q, i) => `Queue ${i}: ${q}`).join(', ')}
-            - Allotment Time: ${allotment} (All processes reset to Queue 0 every ${allotment} time units)
-            
-            Complete the table with the correct scheduled time, waiting time, turnaround time, and completion time for each process.
-            ${processes.some(p => p.io.length > 0) ? 'Note: Some processes have I/O operations that boost priority back to Queue 0.' : ''}
-            
-            MLFQ Rules:
-            - New processes start in Queue 0 (highest priority)
-            - When quantum expires, process moves to next lower priority queue
-            - Processes cannot move below the lowest priority queue
-            - I/O completion boosts process back to Queue 0
-            - Every ${allotment} time units, ALL processes reset to Queue 0
-            - Higher priority queues always preempt lower priority queues
-            
-            Remember:
-            - Scheduled Time: When the process first gets the CPU
-            - Waiting Time: Total time spent waiting in ready queues
-            - Turnaround Time: Total time from arrival to completion
-            - Completion Time: When the process finishes execution`;
+            return `A computer system is running ${processes.length} processes using the ${algorithmName} scheduling algorithm. The system is configured with ${queues} priority queues where Queue 0 represents the highest priority and Queue ${queues! - 1} represents the lowest priority. Each queue operates with different time quantum values: ${quantums!.map((q, i) => `Queue ${i} uses ${q} time units`).join(', ')}. The system implements a priority boost mechanism that resets all processes to Queue 0 every ${allotment} time units to prevent starvation.${ioNote}
+
+The scheduler follows these operational rules: new processes always begin execution in Queue 0, processes that exhaust their quantum are demoted to the next lower priority queue, processes cannot be demoted below the lowest priority queue, I/O completion automatically promotes processes back to Queue 0, and higher priority queues always preempt lower priority queues when processes become ready.
+
+Your task is to determine the scheduled time (when each process first receives CPU access), waiting time (total time spent in ready queues), turnaround time (total time from arrival to completion), and completion time (when each process finishes execution) for all processes in the system.`;
         }
         
-        const quantumText = quantum ? ` with quantum = ${quantum}` : '';
+        const quantumText = quantum ? ` operating with a time quantum of ${quantum} units` : '';
+        const ioNote = processes.some(p => p.io.length > 0) ? ' Some processes will perform I/O operations during their execution, which will affect their scheduling behavior.' : '';
         
-        return `Apply ${algorithmName}${quantumText} scheduling algorithm to the following ${processes.length} processes. 
-        Complete the table with the correct scheduled time, waiting time, turnaround time, and completion time for each process.
-        ${processes.some(p => p.io.length > 0) ? 'Note: Some processes have I/O operations.' : ''}
-        
-        Remember:
-        - Scheduled Time: When the process first gets the CPU
-        - Waiting Time: Total time spent waiting in ready queue
-        - Turnaround Time: Total time from arrival to completion
-        - Completion Time: When the process finishes execution`;
+        return `A computer system needs to schedule ${processes.length} processes using the ${algorithmName} algorithm${quantumText}.${ioNote} You are required to analyze the scheduling behavior and determine the performance metrics for each process.
+
+Calculate the scheduled time (when the process first receives CPU access), waiting time (total time spent waiting in the ready queue), turnaround time (total time from arrival to completion), and completion time (when the process finishes execution) for each process in the system.`;
     }
 
     private generateMemoryDescription(
@@ -368,18 +361,11 @@ class TestQuestionGenerator {
     ): string {
         const algorithmName = this.getMemoryAlgorithmFullName(algorithm);
         
-        return `Apply ${algorithmName} page replacement algorithm to the following page reference sequence.
-        
-        Memory Configuration:
-        - Frame Count: ${frameCount}
-        - Page Reference Sequence: ${pageReferences.join(', ')}
-        
-        Calculate the total number of page faults and hit rate for this sequence.
-        
-        Remember:
-        - Page Fault: When a referenced page is not in memory
-        - Hit: When a referenced page is already in memory
-        - Hit Rate: (Total Hits / Total References) × 100%`;
+        return `A virtual memory system is configured with ${frameCount} physical memory frames and uses the ${algorithmName} page replacement algorithm. The system receives a sequence of page references: ${pageReferences.join(', ')}.
+
+When a process requests a page that is not currently in physical memory, a page fault occurs and the system must load the requested page. If all frames are occupied, the ${algorithmName} algorithm determines which existing page should be replaced to make room for the new page.
+
+Your task is to simulate the page replacement process and determine the total number of page faults that occur during the execution of this reference sequence. Additionally, calculate the hit rate, which represents the percentage of page references that were successfully found in memory without causing a page fault.`;
     }
 
     private getAlgorithmFullName(algorithm: AlgorithmType): string {
@@ -512,23 +498,13 @@ class TestQuestionGenerator {
     ): string {
         const algorithmName = this.getDiskAlgorithmFullName(algorithm);
         const needsDirection = ['SCAN', 'C-SCAN', 'LOOK', 'C-LOOK'].includes(algorithm);
-        const directionText = needsDirection ? ` The disk head is initially moving ${headDirection}.` : '';
+        const directionText = needsDirection ? ` The disk head is currently moving in the ${headDirection} direction.` : '';
         
-        return `Apply ${algorithmName} disk scheduling algorithm to the following disk requests.
-        
-        Disk Configuration:
-        - Maximum Disk Size: ${maxDiskSize} tracks (0 to ${maxDiskSize - 1})
-        - Initial Head Position: ${initialHeadPosition}
-        - Disk Requests: ${requests.join(', ')}${directionText}
-        
-        Calculate:
-        1. The sequence in which requests are serviced
-        2. Total seek time (sum of all head movements)
-        3. Average seek time (total seek time ÷ number of requests)
-        
-        Remember:
-        - Seek Time = |Current Position - Target Position|
-        - Head movement is the distance between consecutive positions`;
+        return `A disk storage system contains ${maxDiskSize} tracks numbered from 0 to ${maxDiskSize - 1}. The disk head is currently positioned at track ${initialHeadPosition} and needs to service the following sequence of disk requests: ${requests.join(', ')}.${directionText}
+
+The system uses the ${algorithmName} scheduling algorithm to determine the order in which these requests should be processed. The goal is to minimize the total seek time, which is the cumulative distance the disk head must travel to service all requests.
+
+Your task is to determine the sequence in which the requests will be serviced according to the ${algorithmName} algorithm. Calculate the total seek time by summing the distances traveled between consecutive positions, and then compute the average seek time by dividing the total seek time by the number of requests processed.`;
     }
 
     private getRandomDiskAlgorithm(): DiskAlgorithmType {

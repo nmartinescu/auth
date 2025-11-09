@@ -155,8 +155,24 @@ const TestPage: React.FC<TestPageProps> = ({ onTestStart }) => {
                             <Input 
                                 type="number" 
                                 value={numQuestions} 
-                                onChange={(e: ChangeEvent<HTMLInputElement>) => setNumQuestions(e.target.value)}
-                                onBlur={() => setTouched(true)}
+                                onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                                    const value = e.target.value;
+                                    // Prevent empty values, set minimum to 1
+                                    if (value === '' || parseInt(value) < 1) {
+                                        setNumQuestions('1');
+                                    } else if (parseInt(value) > 10) {
+                                        setNumQuestions('10');
+                                    } else {
+                                        setNumQuestions(value);
+                                    }
+                                }}
+                                onBlur={() => {
+                                    setTouched(true);
+                                    // Ensure we have a valid value on blur
+                                    if (!numQuestions || parseInt(numQuestions) < 1) {
+                                        setNumQuestions('1');
+                                    }
+                                }}
                                 placeholder="Enter number of questions (1-10)"
                                 borderColor={questionsError ? errorColor : undefined}
                                 _focus={{ borderColor: questionsError ? errorColor : "blue.500" }}

@@ -94,7 +94,7 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
         if (question.type === 'memory' && question.pageReferences && question.frameCount) {
             return question.pageReferences.map(pageRef => ({
                 pageReference: pageRef,
-                frameState: new Array(question.frameCount).fill(null),
+                frameState: new Array(question.frameCount).fill(0),
                 pageFault: false
             }));
         }
@@ -168,7 +168,7 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
             } else {
                 setMemorySteps(question.pageReferences.map(pageRef => ({
                     pageReference: pageRef,
-                    frameState: new Array(question.frameCount).fill(null),
+                    frameState: new Array(question.frameCount).fill(0),
                     pageFault: false
                 })));
             }
@@ -223,10 +223,11 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
     };
 
     const handleMemoryFrameChange = (stepIndex: number, frameIndex: number, value: string) => {
-        let numValue: number | null = null;
+        // Default to 0 if empty or invalid, don't allow null values
+        let numValue: number = 0;
         if (value !== '') {
             const parsed = parseInt(value);
-            if (!isNaN(parsed)) {
+            if (!isNaN(parsed) && parsed >= 0) {
                 numValue = parsed;
             }
         }
@@ -582,6 +583,11 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                                                     type="number"
                                                     value={process.scheduledTime}
                                                     onChange={(e) => handleProcessFieldChange(process.pid, 'scheduledTime', e.target.value)}
+                                                    onBlur={(e) => {
+                                                        if (e.target.value === '' || isNaN(parseFloat(e.target.value))) {
+                                                            handleProcessFieldChange(process.pid, 'scheduledTime', '0');
+                                                        }
+                                                    }}
                                                     size="sm"
                                                     w="80px"
                                                     min={0}
@@ -610,6 +616,11 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                                                     type="number"
                                                     value={process.waitingTime}
                                                     onChange={(e) => handleProcessFieldChange(process.pid, 'waitingTime', e.target.value)}
+                                                    onBlur={(e) => {
+                                                        if (e.target.value === '' || isNaN(parseFloat(e.target.value))) {
+                                                            handleProcessFieldChange(process.pid, 'waitingTime', '0');
+                                                        }
+                                                    }}
                                                     size="sm"
                                                     w="80px"
                                                     min={0}
@@ -638,6 +649,11 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                                                     type="number"
                                                     value={process.turnaroundTime}
                                                     onChange={(e) => handleProcessFieldChange(process.pid, 'turnaroundTime', e.target.value)}
+                                                    onBlur={(e) => {
+                                                        if (e.target.value === '' || isNaN(parseFloat(e.target.value))) {
+                                                            handleProcessFieldChange(process.pid, 'turnaroundTime', '0');
+                                                        }
+                                                    }}
                                                     size="sm"
                                                     w="80px"
                                                     min={0}
@@ -666,6 +682,11 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                                                     type="number"
                                                     value={process.completionTime}
                                                     onChange={(e) => handleProcessFieldChange(process.pid, 'completionTime', e.target.value)}
+                                                    onBlur={(e) => {
+                                                        if (e.target.value === '' || isNaN(parseFloat(e.target.value))) {
+                                                            handleProcessFieldChange(process.pid, 'completionTime', '0');
+                                                        }
+                                                    }}
                                                     size="sm"
                                                     w="80px"
                                                     min={0}
@@ -789,6 +810,12 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                                                             type="number"
                                                             value={position}
                                                             onChange={(e) => handleSequenceChange(index, e.target.value)}
+                                                            onBlur={(e) => {
+                                                                // Ensure we always have a valid number on blur
+                                                                if (e.target.value === '' || isNaN(parseInt(e.target.value))) {
+                                                                    handleSequenceChange(index, '0');
+                                                                }
+                                                            }}
                                                             size="sm"
                                                             w="80px"
                                                             min={0}
@@ -836,6 +863,11 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                                                         type="number"
                                                         value={totalSeekTime}
                                                         onChange={(e) => setTotalSeekTime(parseFloat(e.target.value) || 0)}
+                                                        onBlur={(e) => {
+                                                            if (e.target.value === '' || isNaN(parseFloat(e.target.value))) {
+                                                                setTotalSeekTime(0);
+                                                            }
+                                                        }}
                                                         size="sm"
                                                         w="120px"
                                                         min={0}
@@ -866,6 +898,11 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                                                         type="number"
                                                         value={averageSeekTime}
                                                         onChange={(e) => setAverageSeekTime(parseFloat(e.target.value) || 0)}
+                                                        onBlur={(e) => {
+                                                            if (e.target.value === '' || isNaN(parseFloat(e.target.value))) {
+                                                                setAverageSeekTime(0);
+                                                            }
+                                                        }}
                                                         size="sm"
                                                         w="120px"
                                                         min={0}
@@ -944,30 +981,32 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                                                 {reviewMode ? (
                                                     <VStack align="start" gap={1}>
                                                         <Text 
-                                                            color={correctStep && (() => {
-                                                                const userIsEmpty = frameValue === null || frameValue === undefined;
-                                                                const correctIsEmpty = correctStep.frameState[frameIndex] === null || correctStep.frameState[frameIndex] === undefined;
-                                                                return (frameValue === correctStep.frameState[frameIndex]) || (userIsEmpty && correctIsEmpty);
-                                                            })() ? "green.600" : "red.600"}
+                                                            color={correctStep && frameValue === correctStep.frameState[frameIndex] ? "green.600" : "red.600"}
                                                             fontWeight="semibold"
                                                         >
-                                                            Your: {frameValue ?? '-'}
+                                                            Your: {frameValue ?? 0}
                                                         </Text>
                                                         {correctStep && (
                                                             <Text color={textColor} fontSize="sm">
-                                                                Correct: {correctStep.frameState[frameIndex] ?? '-'}
+                                                                Correct: {correctStep.frameState[frameIndex] ?? 0}
                                                             </Text>
                                                         )}
                                                     </VStack>
                                                 ) : (
                                                     <Input
                                                         type="number"
-                                                        value={frameValue ?? ''}
+                                                        value={frameValue ?? 0}
                                                         onChange={(e) => handleMemoryFrameChange(stepIndex, frameIndex, e.target.value)}
+                                                        onBlur={(e) => {
+                                                            // Ensure we always have a valid number on blur
+                                                            if (e.target.value === '' || isNaN(parseInt(e.target.value))) {
+                                                                handleMemoryFrameChange(stepIndex, frameIndex, '0');
+                                                            }
+                                                        }}
                                                         size="sm"
                                                         w="60px"
-                                                        min={1}
-                                                        placeholder="-"
+                                                        min={0}
+                                                        placeholder="0"
                                                         color={primaryTextColor}
                                                     />
                                                 )}
