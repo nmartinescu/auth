@@ -169,6 +169,7 @@ class Scheduler {
 
         // Immediately schedule a new process since CPU is now available
         this.schedule();
+        this.executeProcess();
     }
 
     handleIo() {
