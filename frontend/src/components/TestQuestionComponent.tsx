@@ -821,7 +821,7 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
                                                             min={0}
                                                             max={(question.maxDiskSize || 200) - 1}
                                                             color={primaryTextColor}
-                                                            isDisabled={index === 0} // First position is initial head position
+                                                            disabled={index === 0} 
                                                         />
                                                     )}
 

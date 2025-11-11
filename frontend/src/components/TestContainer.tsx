@@ -5,7 +5,7 @@ import TestPage from "./TestPage";
 import TestQuestionComponent from "./TestQuestionComponent";
 import TestResults from "./TestResults";
 import { testSessionManager } from "../services/testSessionManager";
-import type { TestSession, TestQuestion, TestSolution } from "../types/Test";
+import type { TestSession, TestQuestion, TestSolution, MemoryTestSolution, DiskTestSolution } from "../types/Test";
 
 type TestState = 'config' | 'taking' | 'review' | 'results';
 
@@ -48,7 +48,7 @@ const TestContainer: React.FC = () => {
         }
     };
 
-    const handleSubmitAnswer = (solution: TestSolution) => {
+    const handleSubmitAnswer = (solution: TestSolution | MemoryTestSolution | DiskTestSolution) => {
         if (!currentQuestion) return;
         
         try {

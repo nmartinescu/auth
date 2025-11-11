@@ -74,7 +74,6 @@ const TestPage: React.FC<TestPageProps> = ({ onTestStart }) => {
     const errorBorderColor = useColorModeValue("red.200", "red.600");
     const primaryTextColor = useColorModeValue("gray.900", "white");
     const selectBg = useColorModeValue("white", "gray.700");
-    const selectTextColor = useColorModeValue("gray.900", "white");
 
     return (
         <Flex
