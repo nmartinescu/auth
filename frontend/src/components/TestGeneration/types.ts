@@ -191,3 +191,60 @@ export interface TestResultsProps {
     onRestart: () => void;
     onViewQuestion: (index: number) => void;
 }
+
+export interface QuestionHeaderProps {
+  questionNumber: number;
+  totalQuestions: number;
+  difficulty: 'easy' | 'medium' | 'hard';
+}
+
+export interface QuestionInfoProps { question: TestQuestion; }
+
+export interface SchedulingAnswerProps {
+  processResults: ProcessResult[];
+  onProcessResultsChange: (results: ProcessResult[]) => void;
+  reviewMode?: boolean;
+  correctSolution?: TestSolution;
+  userScore?: number;
+}
+
+export interface MemoryAnswerProps {
+  memorySteps: MemoryStepResult[];
+  frameCount: number;
+  onMemoryStepsChange: (steps: MemoryStepResult[]) => void;
+  reviewMode?: boolean;
+  correctSolution?: MemoryTestSolution;
+  userScore?: number;
+}
+
+export interface DiskAnswerProps {
+  diskSequence: number[];
+  maxDiskSize: number;
+  initialHeadPosition: number;
+  requests: number[];
+  onDiskSequenceChange: (sequence: number[]) => void;
+  reviewMode?: boolean;
+  correctSolution?: DiskTestSolution;
+  userScore?: number;
+}
+
+export interface QuestionNavigationProps {
+  hasPrevious: boolean;
+  hasNext: boolean;
+  reviewMode: boolean;
+  onPreviousQuestion: () => void;
+  onNextQuestion: () => void;
+  onSubmit: () => void;
+  onFinishTest: () => void;
+}
+
+export interface QuestionColors {
+  boxBg: string;
+  borderColor: string;
+  headerBg: string;
+  textColor: string;
+  valueColor: string;
+  primaryTextColor: string;
+  headerTextColor: string;
+  progressBg: string;
+}
