@@ -1,4 +1,3 @@
-import React from "react";
 import {
     Box,
     Flex,
@@ -12,28 +11,14 @@ import {
     GridItem
 } from "@chakra-ui/react";
 import { useColorModeValue } from "../../ui/color-mode";
-import type { TestSession } from "../../../types/Test";
+import type { TestResultsProps } from "../types.ts";
 
-interface TestResultsProps {
-    session: TestSession;
-    summary: {
-        totalQuestions: number;
-        answeredQuestions: number;
-        correctAnswers: number;
-        totalScore: number;
-        percentage: number;
-        duration: number;
-    };
-    onRestart: () => void;
-    onViewQuestion: (index: number) => void;
-}
-
-const TestResults: React.FC<TestResultsProps> = ({
+const TestResults = ({
     session,
     summary,
     onRestart,
     onViewQuestion
-}) => {
+}: TestResultsProps) => {
     // UI Colors
     const boxBg = useColorModeValue("white", "gray.800");
     const borderColor = useColorModeValue("gray.200", "gray.600");

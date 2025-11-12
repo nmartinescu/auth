@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import type { ChangeEvent } from "react";
 import { 
     Box, 
@@ -12,7 +12,7 @@ import { useColorModeValue } from "../../ui/color-mode";
 import { testSessionManager } from "../../../services/testSessionManager";
 import type { TestPageProps, TestConfig } from '../types.ts';
 
-const TestPage: React.FC<TestPageProps> = ({ onTestStart }) => {
+const TestPage = ({ onTestStart }: TestPageProps) => {
     const [includeScheduling, setIncludeScheduling] = useState(true);
     const [includeMemory, setIncludeMemory] = useState(false);
     const [includeDisk, setIncludeDisk] = useState(false);

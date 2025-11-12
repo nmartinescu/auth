@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Box, Text, Spinner, Flex } from "@chakra-ui/react";
 import { useColorModeValue } from "../../ui/color-mode";
 import TestPage from "./TestPage";
@@ -7,7 +7,7 @@ import TestResults from "./TestResults";
 import { testSessionManager } from "../../../services/testSessionManager";
 import type { TestSession, TestQuestion, TestSolution, MemoryTestSolution, DiskTestSolution, TestState } from "../types.ts";
 
-const TestContainer: React.FC = () => {
+const TestContainer = () => {
     const [testState, setTestState] = useState<TestState>('config');
     const [currentSession, setCurrentSession] = useState<TestSession | null>(null);
     const [currentQuestion, setCurrentQuestion] = useState<TestQuestion | null>(null);

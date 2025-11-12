@@ -147,3 +147,17 @@ export type DifficultyLevel = 'easy' | 'medium' | 'hard';
 export type AlgorithmType = 'FCFS' | 'SJF' | 'RR' | 'MLFQ';
 export type MemoryAlgorithmType = 'FIFO' | 'LRU' | 'OPT';
 export type DiskAlgorithmType = 'FCFS' | 'SSTF' | 'SCAN' | 'C-SCAN' | 'LOOK' | 'C-LOOK';
+
+export interface TestResultsProps {
+    session: TestSession;
+    summary: {
+        totalQuestions: number;
+        answeredQuestions: number;
+        correctAnswers: number;
+        totalScore: number;
+        percentage: number;
+        duration: number;
+    };
+    onRestart: () => void;
+    onViewQuestion: (index: number) => void;
+}

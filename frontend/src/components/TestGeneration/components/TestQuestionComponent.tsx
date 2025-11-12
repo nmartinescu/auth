@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
     Box,
     Flex,
@@ -15,7 +15,7 @@ import {
 import { useColorModeValue } from "../../ui/color-mode";
 import type { TestSolution, MemoryTestSolution, DiskTestSolution, ProcessResult, MemoryStepResult, TestQuestionComponentProps } from "../types.ts";
 
-const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
+const TestQuestionComponent = ({
     question,
     questionNumber,
     totalQuestions,
@@ -29,7 +29,7 @@ const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
     reviewMode = false,
     correctSolution,
     userScore
-}) => {
+}: TestQuestionComponentProps) => {
     // Scheduling-specific state
     const [processResults, setProcessResults] = useState<ProcessResult[]>(() => {
         if (question.type === 'scheduling' && initialAnswer && 'processes' in initialAnswer) {
