@@ -48,6 +48,7 @@ export interface TestQuestionComponentProps {
     reviewMode?: boolean;
     correctSolution?: TestSolution | MemoryTestSolution | DiskTestSolution;
     userScore?: number;
+    onBackToResults?: () => void;
 }
 
 export interface TestQuestion {
@@ -236,6 +237,7 @@ export interface QuestionNavigationProps {
   onNextQuestion: () => void;
   onSubmit: () => void;
   onFinishTest: () => void;
+  onBackToResults?: () => void;
 }
 
 export interface QuestionColors {
@@ -247,4 +249,56 @@ export interface QuestionColors {
   primaryTextColor: string;
   headerTextColor: string;
   progressBg: string;
+}
+
+export interface ResultsHeaderProps {
+  primaryTextColor: string;
+  textColor: string;
+}
+
+export interface OverallResultsProps {
+  summary: TestSummary;
+  boxBg: string;
+  borderColor: string;
+  textColor: string;
+  primaryTextColor: string;
+}
+
+export interface QuestionDetailsProps {
+  session: TestSession;
+  onViewQuestion: (index: number) => void;
+  boxBg: string;
+  borderColor: string;
+  textColor: string;
+  primaryTextColor: string;
+}
+
+export interface TestConfigurationProps {
+  session: TestSession;
+  boxBg: string;
+  borderColor: string;
+  textColor: string;
+  primaryTextColor: string;
+}
+
+export interface ResultsActionsProps {
+  onRestart: () => void;
+}
+
+export interface TestSummary {
+  totalQuestions: number;
+  answeredQuestions: number;
+  correctAnswers: number;
+  totalScore: number;
+  percentage: number;
+  duration: number;
+}
+
+export interface ResultsColors {
+  boxBg: string;
+  borderColor: string;
+  textColor: string;
+  primaryTextColor: string;
+  cardBg: string;
+  hoverBg: string;
 }

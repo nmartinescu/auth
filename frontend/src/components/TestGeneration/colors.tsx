@@ -1,5 +1,5 @@
 import { useColorModeValue } from "../ui/color-mode";
-import type { QuestionColors } from "./types";
+import type { QuestionColors, ResultsColors } from "./types";
 
 export const useTestGenColors = () => ({
   boxBg: useColorModeValue("white", "gray.800"),
@@ -30,6 +30,20 @@ export const getDifficultyColor = (difficulty: string): string => {
   }
 };
 
+export const getScoreColor = (percentage: number): string => {
+  if (percentage >= 80) return "green";
+  if (percentage >= 60) return "yellow";
+  return "red";
+};
+
+export const formatDuration = (minutes: number): string => {
+  if (minutes < 1) return "< 1 minute";
+  if (minutes < 60) return `${Math.round(minutes)} minutes`;
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = Math.round(minutes % 60);
+  return `${hours}h ${remainingMinutes}m`;
+};
+
 export const useQuestionColors = (): QuestionColors => ({
   boxBg: useColorModeValue("white", "gray.800"),
   borderColor: useColorModeValue("gray.200", "gray.600"),
@@ -39,4 +53,13 @@ export const useQuestionColors = (): QuestionColors => ({
   primaryTextColor: useColorModeValue("gray.900", "white"),
   headerTextColor: useColorModeValue("gray.700", "gray.200"),
   progressBg: useColorModeValue("gray.200", "gray.600")
+});
+
+export const useResultsColors = (): ResultsColors => ({
+  boxBg: useColorModeValue("white", "gray.800"),
+  borderColor: useColorModeValue("gray.200", "gray.600"),
+  textColor: useColorModeValue("gray.600", "gray.300"),
+  primaryTextColor: useColorModeValue("gray.900", "white"),
+  cardBg: useColorModeValue("gray.50", "gray.700"),
+  hoverBg: useColorModeValue("gray.50", "gray.600")
 });

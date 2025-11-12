@@ -30,6 +30,7 @@ const TestQuestionComponent = ({
     reviewMode = false,
     correctSolution,
     userScore,
+    onBackToResults,
 }: TestQuestionComponentProps) => {
     const { boxBg, borderColor, primaryTextColor } = useTestGenColors();
     const [processResults, setProcessResults] = useState<ProcessResult[]>(
@@ -290,6 +291,7 @@ const TestQuestionComponent = ({
                 onNextQuestion={onNextQuestion}
                 onSubmit={handleSubmit}
                 onFinishTest={onFinishTest}
+                onBackToResults={onBackToResults}
             />
         </Flex>
     );

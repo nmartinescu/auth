@@ -3,7 +3,7 @@ import { Box, Text, Spinner, Flex } from "@chakra-ui/react";
 import { useColorModeValue } from "../../ui/color-mode";
 import TestPage from "./Main/TestPage.tsx";
 import TestQuestionComponent from "./Question/TestQuestionComponent";
-import TestResults from "./TestResults";
+import TestResults from "./Results/TestResults.tsx";
 import { testSessionManager } from "../../../services/testSessionManager";
 import type { TestSession, TestQuestion, TestSolution, MemoryTestSolution, DiskTestSolution, TestState } from "../types.ts";
 
@@ -99,6 +99,10 @@ const TestContainer = () => {
     };
 
     const handleCompleteReview = () => {
+        setTestState('results');
+    };
+
+    const handleBackToResults = () => {
         setTestState('results');
     };
 
@@ -224,6 +228,7 @@ const TestContainer = () => {
                     reviewMode={true}
                     correctSolution={reviewUserAnswer?.correctSolution}
                     userScore={reviewUserAnswer?.score}
+                    onBackToResults={handleBackToResults}
                 />
             );
             
