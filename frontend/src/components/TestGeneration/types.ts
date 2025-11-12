@@ -1,3 +1,25 @@
+export type TestState = 'config' | 'taking' | 'review' | 'results';
+
+export interface TestPageProps {
+    onTestStart?: (sessionId: string) => void;
+}
+
+export interface TestQuestionComponentProps {
+    question: TestQuestion;
+    questionNumber: number;
+    totalQuestions: number;
+    onSubmitAnswer: (solution: TestSolution | MemoryTestSolution | DiskTestSolution) => void;
+    onNextQuestion: () => void;
+    onPreviousQuestion: () => void;
+    onFinishTest: () => void;
+    hasNext: boolean;
+    hasPrevious: boolean;
+    initialAnswer?: TestSolution | MemoryTestSolution | DiskTestSolution;
+    reviewMode?: boolean;
+    correctSolution?: TestSolution | MemoryTestSolution | DiskTestSolution;
+    userScore?: number;
+}
+
 export interface TestQuestion {
     id: string;
     type: 'scheduling' | 'memory' | 'disk';

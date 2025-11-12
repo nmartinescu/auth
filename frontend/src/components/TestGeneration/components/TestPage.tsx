@@ -8,13 +8,9 @@ import {
     Button, 
     Text
 } from "@chakra-ui/react";
-import { useColorModeValue } from "./ui/color-mode";
-import { testSessionManager } from "../services/testSessionManager";
-import type { TestConfig } from "../types/Test";
-
-interface TestPageProps {
-    onTestStart?: (sessionId: string) => void;
-}
+import { useColorModeValue } from "../../ui/color-mode";
+import { testSessionManager } from "../../../services/testSessionManager";
+import type { TestPageProps, TestConfig } from '../types.ts';
 
 const TestPage: React.FC<TestPageProps> = ({ onTestStart }) => {
     const [includeScheduling, setIncludeScheduling] = useState(true);

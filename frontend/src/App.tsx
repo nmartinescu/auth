@@ -13,7 +13,7 @@ import { DeleteAccount } from "./components/auth/DeleteAccount";
 import { ProtectedRoute } from "./components/routing/ProtectedRoute";
 import { ThemeToggle } from "./components/ui/ThemeToggle";
 import { Box } from "@chakra-ui/react";
-import TestContainer from "./components/TestContainer";
+import TestContainer from "./components/TestGeneration/components/TestContainer";
 
 function App() {
     return (

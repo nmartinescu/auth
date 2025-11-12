@@ -12,24 +12,8 @@ import {
     Grid,
     GridItem
 } from "@chakra-ui/react";
-import { useColorModeValue } from "./ui/color-mode";
-import type { TestQuestion, TestSolution, MemoryTestSolution, DiskTestSolution, ProcessResult, MemoryStepResult } from "../types/Test";
-
-interface TestQuestionComponentProps {
-    question: TestQuestion;
-    questionNumber: number;
-    totalQuestions: number;
-    onSubmitAnswer: (solution: TestSolution | MemoryTestSolution | DiskTestSolution) => void;
-    onNextQuestion: () => void;
-    onPreviousQuestion: () => void;
-    onFinishTest: () => void;
-    hasNext: boolean;
-    hasPrevious: boolean;
-    initialAnswer?: TestSolution | MemoryTestSolution | DiskTestSolution;
-    reviewMode?: boolean;
-    correctSolution?: TestSolution | MemoryTestSolution | DiskTestSolution;
-    userScore?: number;
-}
+import { useColorModeValue } from "../../ui/color-mode";
+import type { TestSolution, MemoryTestSolution, DiskTestSolution, ProcessResult, MemoryStepResult, TestQuestionComponentProps } from "../types.ts";
 
 const TestQuestionComponent: React.FC<TestQuestionComponentProps> = ({
     question,

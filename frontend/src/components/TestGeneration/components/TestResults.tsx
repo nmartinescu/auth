@@ -11,8 +11,8 @@ import {
     Grid,
     GridItem
 } from "@chakra-ui/react";
-import { useColorModeValue } from "./ui/color-mode";
-import type { TestSession } from "../types/Test";
+import { useColorModeValue } from "../../ui/color-mode";
+import type { TestSession } from "../../../types/Test";
 
 interface TestResultsProps {
     session: TestSession;
