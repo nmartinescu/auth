@@ -8,7 +8,7 @@ import {
     Button, 
     Text
 } from "@chakra-ui/react";
-import { useColorModeValue } from "../../ui/color-mode";
+import { useTestGenColors } from "../colors.tsx";
 import { testSessionManager } from "../../../services/testSessionManager";
 import type { TestPageProps, TestConfig } from '../types.ts';
 
@@ -21,7 +21,17 @@ const TestPage = ({ onTestStart }: TestPageProps) => {
     const [touched, setTouched] = useState(false);
     const [isStarting, setIsStarting] = useState(false);
     const [error, setError] = useState<string | null>(null);
-
+    const {
+        boxBg,
+        borderColor,
+        errorColor,
+        labelColor,
+        errorBg,
+        errorBorderColor,
+        primaryTextColor,
+        selectBg
+    } = useTestGenColors();
+    
     const questionsError =
         (includeScheduling || includeMemory || includeDisk) && touched && (!numQuestions || parseInt(numQuestions, 10) < 1);
     
@@ -60,16 +70,6 @@ const TestPage = ({ onTestStart }: TestPageProps) => {
             setIsStarting(false);
         }
     };
-
-    // UI Colors
-    const boxBg = useColorModeValue("white", "gray.800");
-    const borderColor = useColorModeValue("gray.200", "gray.600");
-    const errorColor = useColorModeValue("red.500", "red.300");
-    const labelColor = useColorModeValue("gray.600", "gray.300");
-    const errorBg = useColorModeValue("red.50", "red.900");
-    const errorBorderColor = useColorModeValue("red.200", "red.600");
-    const primaryTextColor = useColorModeValue("gray.900", "white");
-    const selectBg = useColorModeValue("white", "gray.700");
 
     return (
         <Flex
@@ -222,3 +222,4 @@ const TestPage = ({ onTestStart }: TestPageProps) => {
 };
 
 export default TestPage;
+
