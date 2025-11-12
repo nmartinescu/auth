@@ -9,6 +9,10 @@ export const useTestGenColors = () => {
     errorBg: useColorModeValue("red.50", "red.900"),
     errorBorderColor: useColorModeValue("red.200", "red.600"),
     primaryTextColor: useColorModeValue("gray.900", "white"),
-    selectBg: useColorModeValue("white", "gray.700"),
+    cardBg: useColorModeValue("gray.50", "gray.750"),
+    hoverBg: useColorModeValue("gray.50", "gray.700"),
+    sectionBg: useColorModeValue("blue.50", "blue.900"),
+    sectionBorderColor: useColorModeValue("blue.200", "blue.700"),
+    secondaryTextColor: useColorModeValue("gray.600", "gray.400"),
   };
 };

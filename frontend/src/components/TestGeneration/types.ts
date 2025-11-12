@@ -4,6 +4,36 @@ export interface TestPageProps {
     onTestStart?: (sessionId: string) => void;
 }
 
+export interface DifficultySelectorProps {
+    difficulty: string;
+    onDifficultyChange: (difficulty: string) => void;
+}
+
+export interface QuestionCountInputProps {
+    numQuestions: string;
+    questionsError: boolean;
+    onNumQuestionsChange: (value: string) => void;
+    onBlur: () => void;
+}
+
+export interface TestParametersProps {
+    numQuestions: string;
+    difficulty: string;
+    questionsError: boolean;
+    onNumQuestionsChange: (value: string) => void;
+    onDifficultyChange: (difficulty: string) => void;
+    onBlur: () => void;
+}
+
+export interface TopicSelectorProps {
+    includeScheduling: boolean;
+    includeMemory: boolean;
+    includeDisk: boolean;
+    onSchedulingChange: (checked: boolean) => void;
+    onMemoryChange: (checked: boolean) => void;
+    onDiskChange: (checked: boolean) => void;
+}
+
 export interface TestQuestionComponentProps {
     question: TestQuestion;
     questionNumber: number;

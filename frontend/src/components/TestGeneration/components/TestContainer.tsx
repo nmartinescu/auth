@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Box, Text, Spinner, Flex } from "@chakra-ui/react";
 import { useColorModeValue } from "../../ui/color-mode";
-import TestPage from "./TestPage";
+import TestPage from "./Main/TestPage.tsx";
 import TestQuestionComponent from "./TestQuestionComponent";
 import TestResults from "./TestResults";
 import { testSessionManager } from "../../../services/testSessionManager";
