@@ -151,23 +151,6 @@ const TestQuestionComponent = ({
                 stepResults: memorySteps,
             };
         } else if (question.type === "disk") {
-            const expectedSequenceLength = 1 + (question.requests?.length || 0);
-            if (diskSequence.length < expectedSequenceLength) {
-                alert(
-                    `Please complete the sequence. You need ${expectedSequenceLength} positions total (initial position + ${question.requests?.length || 0} requests).`
-                );
-                return;
-            }
-            const hasIncompleteEntries = diskSequence.some(
-                (pos, index) =>
-                    index !== 0 && pos === 0 && !question.requests?.includes(0)
-            );
-            if (hasIncompleteEntries) {
-                const proceed = confirm(
-                    "Your sequence contains some zero values that may not be valid track positions. Do you want to submit anyway?"
-                );
-                if (!proceed) return;
-            }
             let totalSeekTime = 0;
             for (let i = 1; i < diskSequence.length; i++)
                 totalSeekTime += Math.abs(

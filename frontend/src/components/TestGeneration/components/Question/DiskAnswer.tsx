@@ -15,7 +15,8 @@ const DiskAnswer = ({ diskSequence, maxDiskSize, initialHeadPosition, requests, 
   };
   useEffect(() => { calculateSeekTimes(diskSequence); }, [diskSequence]);
   const handleSequenceChange = (index: number, value: string) => {
-    const numValue = parseInt(value) || 0; onDiskSequenceChange(diskSequence.map((pos, idx) => idx === index ? numValue : pos));
+    const numValue = value === '' ? 0 : (parseInt(value) || 0);
+    onDiskSequenceChange(diskSequence.map((pos, idx) => idx === index ? numValue : pos));
   };
   const expectedLength = 1 + requests.length; const isComplete = diskSequence.length === expectedLength;
   return (
@@ -42,7 +43,7 @@ const DiskAnswer = ({ diskSequence, maxDiskSize, initialHeadPosition, requests, 
                       ) : <Text color={primaryTextColor}>{position}</Text>}
                     </Box>
                   ) : (
-                    <Input type="number" value={position} onChange={(e) => handleSequenceChange(index, e.target.value)} onBlur={(e) => { if (e.target.value === '' || isNaN(parseInt(e.target.value))) handleSequenceChange(index, '0'); }} size="sm" w="80px" min={0} max={maxDiskSize - 1} color={primaryTextColor} disabled={index === 0} borderRadius="md" />
+                    <Input type="number" value={position} onChange={(e) => handleSequenceChange(index, e.target.value)} size="sm" w="80px" min={0} max={maxDiskSize - 1} color={primaryTextColor} disabled={index === 0} borderRadius="md" />
                   )}
                 </HStack>
               ))}

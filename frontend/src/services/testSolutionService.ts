@@ -84,10 +84,21 @@ class TestSolutionService {
     }
 
     private async calculateMemorySolution(question: TestQuestion): Promise<MemoryTestSolution> {
+        // Map algorithm names to backend format
+        const algorithmMapping: { [key: string]: string } = {
+            'FIFO': 'fifo',
+            'LRU': 'lru',
+            'LFU': 'lfu',
+            'MRU': 'mru',
+            'OPT': 'optimal'  // Map OPT to optimal for backend
+        };
+
+        const backendAlgorithm = algorithmMapping[question.algorithm] || question.algorithm.toLowerCase();
+
         // Prepare request data for memory management
         const requestData = {
             frameCount: question.frameCount!,
-            selectedAlgorithm: [question.algorithm.toLowerCase()],
+            selectedAlgorithm: [backendAlgorithm],
             pageReferences: question.pageReferences!
         };
 
@@ -278,8 +289,20 @@ class TestSolutionService {
         
         const data = backendResponse.data || backendResponse;
         
+        // Map backend algorithm names back to frontend format
+        const backendToFrontendAlgorithm: { [key: string]: string } = {
+            'fifo': 'FIFO',
+            'lru': 'LRU',
+            'lfu': 'LFU',
+            'mru': 'MRU',
+            'optimal': 'OPT'  // Map optimal back to OPT
+        };
+
+        const frontendAlgorithm = backendToFrontendAlgorithm[data.algorithm] || data.algorithm?.toUpperCase() || 'FIFO';
+        
         console.log('Extracted data:', {
             algorithm: data.algorithm,
+            frontendAlgorithm: frontendAlgorithm,
             frameCount: data.frameCount,
             pageReferences: data.pageReferences,
             totalPageFaults: data.totalPageFaults,
@@ -296,7 +319,7 @@ class TestSolutionService {
         );
         
         const solution: MemoryTestSolution = {
-            algorithm: data.algorithm || 'FIFO',
+            algorithm: frontendAlgorithm,
             frameCount: data.frameCount || 0,
             pageReferences: data.pageReferences || [],
             totalPageFaults: data.totalPageFaults || 0,
