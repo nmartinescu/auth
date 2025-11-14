@@ -86,10 +86,7 @@ const TestContainer = () => {
     const handleFinishTest = () => {
         try {
             testSessionManager.finishTest();
-            setTestState('review');
-            // Go to first question for review
-            const firstQuestion = testSessionManager.goToQuestion(0);
-            setCurrentQuestion(firstQuestion);
+            setTestState('results');
             // Update session
             setCurrentSession({ ...testSessionManager.getCurrentSession()! });
         } catch (err) {
