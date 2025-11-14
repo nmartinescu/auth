@@ -204,6 +204,12 @@ export interface QuestionInfoProps { question: TestQuestion; }
 export interface SchedulingAnswerProps {
   processResults: ProcessResult[];
   onProcessResultsChange: (results: ProcessResult[]) => void;
+  avgWaitingTime: number;
+  avgTurnaroundTime: number;
+  completionTime: number;
+  onAvgWaitingTimeChange: (value: number) => void;
+  onAvgTurnaroundTimeChange: (value: number) => void;
+  onCompletionTimeChange: (value: number) => void;
   reviewMode?: boolean;
   correctSolution?: TestSolution;
   userScore?: number;

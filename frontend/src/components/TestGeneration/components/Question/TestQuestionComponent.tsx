@@ -55,6 +55,38 @@ const TestQuestionComponent = ({
         }
     );
 
+    const [avgWaitingTime, setAvgWaitingTime] = useState<number>(() => {
+        if (
+            question.type === "scheduling" &&
+            initialAnswer &&
+            "avgWaitingTime" in initialAnswer
+        )
+            return initialAnswer.avgWaitingTime;
+        return 0;
+    });
+
+    const [avgTurnaroundTime, setAvgTurnaroundTime] = useState<number>(
+        () => {
+            if (
+                question.type === "scheduling" &&
+                initialAnswer &&
+                "avgTurnaroundTime" in initialAnswer
+            )
+                return initialAnswer.avgTurnaroundTime;
+            return 0;
+        }
+    );
+
+    const [completionTime, setCompletionTime] = useState<number>(() => {
+        if (
+            question.type === "scheduling" &&
+            initialAnswer &&
+            "completionTime" in initialAnswer
+        )
+            return initialAnswer.completionTime;
+        return 0;
+    });
+
     const [memorySteps, setMemorySteps] = useState<MemoryStepResult[]>(() => {
         if (initialAnswer && "stepResults" in initialAnswer)
             return initialAnswer.stepResults;
@@ -117,9 +149,15 @@ const TestQuestionComponent = ({
                 setDiskSequence(initialSequence);
             }
         } else if (question.type === "scheduling" && question.processes) {
-            if (initialAnswer && "processes" in initialAnswer)
+            if (initialAnswer && "processes" in initialAnswer) {
                 setProcessResults(initialAnswer.processes);
-            else
+                if ("avgWaitingTime" in initialAnswer)
+                    setAvgWaitingTime(initialAnswer.avgWaitingTime);
+                if ("avgTurnaroundTime" in initialAnswer)
+                    setAvgTurnaroundTime(initialAnswer.avgTurnaroundTime);
+                if ("completionTime" in initialAnswer)
+                    setCompletionTime(initialAnswer.completionTime);
+            } else {
                 setProcessResults(
                     question.processes.map((p) => ({
                         pid: p.id,
@@ -131,6 +169,10 @@ const TestQuestionComponent = ({
                         completionTime: 0,
                     }))
                 );
+                setAvgWaitingTime(0);
+                setAvgTurnaroundTime(0);
+                setCompletionTime(0);
+            }
         }
     }, [question, initialAnswer]);
 
@@ -168,15 +210,6 @@ const TestQuestionComponent = ({
                 averageSeekTime,
             };
         } else {
-            const avgWaitingTime =
-                processResults.reduce((sum, p) => sum + p.waitingTime, 0) /
-                processResults.length;
-            const avgTurnaroundTime =
-                processResults.reduce((sum, p) => sum + p.turnaroundTime, 0) /
-                processResults.length;
-            const completionTime = Math.max(
-                ...processResults.map((p) => p.completionTime)
-            );
             solution = {
                 processes: processResults,
                 avgWaitingTime: Math.round(avgWaitingTime * 100) / 100,
@@ -228,6 +261,12 @@ const TestQuestionComponent = ({
                     <SchedulingAnswer
                         processResults={processResults}
                         onProcessResultsChange={setProcessResults}
+                        avgWaitingTime={avgWaitingTime}
+                        avgTurnaroundTime={avgTurnaroundTime}
+                        completionTime={completionTime}
+                        onAvgWaitingTimeChange={setAvgWaitingTime}
+                        onAvgTurnaroundTimeChange={setAvgTurnaroundTime}
+                        onCompletionTimeChange={setCompletionTime}
                         reviewMode={reviewMode}
                         correctSolution={
                             correctSolution && "processes" in correctSolution

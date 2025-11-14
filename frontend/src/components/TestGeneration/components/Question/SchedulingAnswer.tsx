@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import {
     Box,
     Text,
@@ -14,6 +13,12 @@ import { useTestGenColors } from "../../colors";
 const SchedulingAnswer = ({
     processResults,
     onProcessResultsChange,
+    avgWaitingTime,
+    avgTurnaroundTime,
+    completionTime,
+    onAvgWaitingTimeChange,
+    onAvgTurnaroundTimeChange,
+    onCompletionTimeChange,
     reviewMode = false,
     correctSolution,
     userScore,
@@ -26,25 +31,6 @@ const SchedulingAnswer = ({
         primaryTextColor,
         headerTextColor,
     } = useTestGenColors();
-    const [avgWaitingTime, setAvgWaitingTime] = useState(0);
-    const [avgTurnaroundTime, setAvgTurnaroundTime] = useState(0);
-    const [completionTime, setCompletionTime] = useState(0);
-    useEffect(() => {
-        if (processResults.length > 0) {
-            const avgWT =
-                processResults.reduce((sum, p) => sum + p.waitingTime, 0) /
-                processResults.length;
-            const avgTT =
-                processResults.reduce((sum, p) => sum + p.turnaroundTime, 0) /
-                processResults.length;
-            const maxCompletion = Math.max(
-                ...processResults.map((p) => p.completionTime)
-            );
-            setAvgWaitingTime(Math.round(avgWT * 100) / 100);
-            setAvgTurnaroundTime(Math.round(avgTT * 100) / 100);
-            setCompletionTime(maxCompletion);
-        }
-    }, [processResults]);
     const handleProcessFieldChange = (
         pid: number,
         field: string,
@@ -439,13 +425,28 @@ const SchedulingAnswer = ({
                                 </Text>
                             </VStack>
                         ) : (
-                            <Text
-                                fontSize="lg"
-                                color={valueColor}
-                                fontWeight="semibold"
-                            >
-                                {avgWaitingTime}
-                            </Text>
+                            <Input
+                                type="number"
+                                value={avgWaitingTime}
+                                onChange={(e) =>
+                                    onAvgWaitingTimeChange(
+                                        parseFloat(e.target.value) || 0
+                                    )
+                                }
+                                onBlur={(e) => {
+                                    if (
+                                        e.target.value === "" ||
+                                        isNaN(parseFloat(e.target.value))
+                                    )
+                                        onAvgWaitingTimeChange(0);
+                                }}
+                                size="sm"
+                                w="120px"
+                                min={0}
+                                step={0.01}
+                                color={primaryTextColor}
+                                borderRadius="md"
+                            />
                         )}
                     </Box>
                     <Box>
@@ -477,13 +478,28 @@ const SchedulingAnswer = ({
                                 </Text>
                             </VStack>
                         ) : (
-                            <Text
-                                fontSize="lg"
-                                color={valueColor}
-                                fontWeight="semibold"
-                            >
-                                {avgTurnaroundTime}
-                            </Text>
+                            <Input
+                                type="number"
+                                value={avgTurnaroundTime}
+                                onChange={(e) =>
+                                    onAvgTurnaroundTimeChange(
+                                        parseFloat(e.target.value) || 0
+                                    )
+                                }
+                                onBlur={(e) => {
+                                    if (
+                                        e.target.value === "" ||
+                                        isNaN(parseFloat(e.target.value))
+                                    )
+                                        onAvgTurnaroundTimeChange(0);
+                                }}
+                                size="sm"
+                                w="120px"
+                                min={0}
+                                step={0.01}
+                                color={primaryTextColor}
+                                borderRadius="md"
+                            />
                         )}
                     </Box>
                     <Box>
@@ -515,13 +531,28 @@ const SchedulingAnswer = ({
                                 </Text>
                             </VStack>
                         ) : (
-                            <Text
-                                fontSize="lg"
-                                color={valueColor}
-                                fontWeight="semibold"
-                            >
-                                {completionTime}
-                            </Text>
+                            <Input
+                                type="number"
+                                value={completionTime}
+                                onChange={(e) =>
+                                    onCompletionTimeChange(
+                                        parseFloat(e.target.value) || 0
+                                    )
+                                }
+                                onBlur={(e) => {
+                                    if (
+                                        e.target.value === "" ||
+                                        isNaN(parseFloat(e.target.value))
+                                    )
+                                        onCompletionTimeChange(0);
+                                }}
+                                size="sm"
+                                w="120px"
+                                min={0}
+                                step={0.01}
+                                color={primaryTextColor}
+                                borderRadius="md"
+                            />
                         )}
                     </Box>
                     {reviewMode && userScore !== undefined && (
