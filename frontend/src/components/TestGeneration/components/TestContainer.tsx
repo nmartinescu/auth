@@ -19,6 +19,42 @@ const TestContainer = () => {
     const errorColor = useColorModeValue("red.500", "red.300");
 
     useEffect(() => {
+        // Check if we're loading a test result for review
+        const urlParams = new URLSearchParams(window.location.search);
+        const isReview = urlParams.get('review') === 'true';
+        
+        if (isReview) {
+            const savedTestResult = sessionStorage.getItem('reviewTestResult');
+            if (savedTestResult) {
+                try {
+                    const testResult = JSON.parse(savedTestResult);
+                    // Convert saved test result to TestSession format
+                    const reviewSession: TestSession = {
+                        id: testResult.sessionId,
+                        config: testResult.config,
+                        questions: testResult.questions,
+                        currentQuestionIndex: 0,
+                        userAnswers: testResult.userAnswers,
+                        startTime: new Date(testResult.startTime),
+                        endTime: new Date(testResult.endTime),
+                        score: testResult.score
+                    };
+                    
+                    // Load the session into the session manager
+                    testSessionManager['currentSession'] = reviewSession;
+                    setCurrentSession(reviewSession);
+                    setTestState('results');
+                    
+                    // Clear the stored test result
+                    sessionStorage.removeItem('reviewTestResult');
+                } catch (error) {
+                    console.error('Error loading test result for review:', error);
+                }
+            }
+        }
+    }, []);
+
+    useEffect(() => {
         // Update current question when session changes
         if (currentSession) {
             const question = testSessionManager.getCurrentQuestion();

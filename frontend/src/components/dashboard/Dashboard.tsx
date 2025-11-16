@@ -1,15 +1,19 @@
-import { Box, Flex, Text, Button, VStack, HStack, Grid, Spinner } from "@chakra-ui/react";
+import { Box, Flex, Text, Button, VStack, HStack, Grid, Spinner, Badge } from "@chakra-ui/react";
 import { useColorModeValue } from "../ui/color-mode";
 import { useState, useEffect } from "react";
-import { LuUser, LuTrash2, LuPlay, LuCalendar, LuCpu, LuHardDrive, LuMemoryStick, LuRefreshCw } from "react-icons/lu";
+import { LuUser, LuTrash2, LuPlay, LuCalendar, LuCpu, LuHardDrive, LuMemoryStick, LuRefreshCw, LuFileText, LuEye, LuTrophy, LuTarget } from "react-icons/lu";
 import type { User } from "../../types/user";
 import { simulationService, type Simulation } from "../../services/simulationService";
+import { testResultsService } from "../../services/testResultsService";
 
 export function Dashboard() {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [simulations, setSimulations] = useState<Simulation[]>([]);
     const [simulationsLoading, setSimulationsLoading] = useState(false);
+    const [testResults, setTestResults] = useState<any[]>([]);
+    const [testResultsLoading, setTestResultsLoading] = useState(false);
+    const [testStats, setTestStats] = useState<any>(null);
 
     const bgColor = useColorModeValue("gray.50", "gray.900");
     const cardBg = useColorModeValue("white", "gray.800");
@@ -44,8 +48,10 @@ export function Dashboard() {
             const parsedUser = JSON.parse(userData);
             setUser(parsedUser);
             
-            // Load user's simulations
+            // Load user's simulations and test results
             loadSimulations();
+            loadTestResults();
+            loadTestStatistics();
         } catch (error) {
             console.error("Error parsing user data:", error);
             handleLogout();
@@ -75,6 +81,44 @@ export function Dashboard() {
         } finally {
             setSimulationsLoading(false);
         }
+    };
+
+    const loadTestResults = async () => {
+        setTestResultsLoading(true);
+        try {
+            const results = await testResultsService.getTestResults({ limit: 10, sortBy: 'createdAt', order: 'desc' });
+            setTestResults(Array.isArray(results) ? results : []);
+        } catch (error) {
+            console.error("Error loading test results:", error);
+            setTestResults([]);
+        } finally {
+            setTestResultsLoading(false);
+        }
+    };
+
+    const loadTestStatistics = async () => {
+        try {
+            const stats = await testResultsService.getTestStatistics();
+            setTestStats(stats);
+        } catch (error) {
+            console.error("Error loading test statistics:", error);
+        }
+    };
+
+    const handleDeleteTestResult = async (testResultId: string) => {
+        try {
+            await testResultsService.deleteTestResult(testResultId);
+            loadTestResults();
+            loadTestStatistics();
+        } catch (error) {
+            console.error("Error deleting test result:", error);
+        }
+    };
+
+    const handleViewTestResult = (testResult: any) => {
+        // Store test result in sessionStorage for review
+        sessionStorage.setItem('reviewTestResult', JSON.stringify(testResult));
+        window.location.href = '/test?review=true';
     };
 
     const handleDeleteSimulation = async (simulationId: string) => {
@@ -362,6 +406,199 @@ export function Dashboard() {
                                         </Box>
                                     ))}
                                 </Grid>
+                            )}
+                        </VStack>
+                    </Box>
+
+                    {/* Test Results Section */}
+                    <Box
+                        bg={cardBg}
+                        p={6}
+                        borderRadius="xl"
+                        shadow={shadowColor}
+                        border="1px"
+                        borderColor={borderColor}
+                    >
+                        <VStack align="start" gap={4}>
+                            <HStack justify="space-between" w="100%">
+                                <Text
+                                    fontSize="xl"
+                                    fontWeight="bold"
+                                    color={textColor}
+                                >
+                                    Test Results ({testResults.length})
+                                </Text>
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                        loadTestResults();
+                                        loadTestStatistics();
+                                    }}
+                                    disabled={testResultsLoading}
+                                    color={textColor}
+                                    borderColor={borderColor}
+                                    bg="transparent"
+                                    _hover={{
+                                        bg: refreshButtonHoverBg,
+                                        color: textColor
+                                    }}
+                                >
+                                    <LuRefreshCw size={16} />
+                                    Refresh
+                                </Button>
+                            </HStack>
+
+                            {/* Test Statistics */}
+                            {testStats && testStats.totalTests > 0 && (
+                                <Grid
+                                    templateColumns="repeat(auto-fit, minmax(150px, 1fr))"
+                                    gap={4}
+                                    w="100%"
+                                >
+                                    <Box
+                                        p={4}
+                                        bg={simulationCardBg}
+                                        borderRadius="md"
+                                        border="1px"
+                                        borderColor={borderColor}
+                                    >
+                                        <VStack align="start" gap={1}>
+                                            <Text color={subtextColor} fontSize="sm">Total Tests</Text>
+                                            <Text color={textColor} fontSize="2xl" fontWeight="bold">{testStats.totalTests}</Text>
+                                        </VStack>
+                                    </Box>
+                                    <Box
+                                        p={4}
+                                        bg={simulationCardBg}
+                                        borderRadius="md"
+                                        border="1px"
+                                        borderColor={borderColor}
+                                    >
+                                        <VStack align="start" gap={1}>
+                                            <Text color={subtextColor} fontSize="sm">Avg Score</Text>
+                                            <Text color={textColor} fontSize="2xl" fontWeight="bold">{testStats.averageScore}%</Text>
+                                        </VStack>
+                                    </Box>
+                                    <Box
+                                        p={4}
+                                        bg={simulationCardBg}
+                                        borderRadius="md"
+                                        border="1px"
+                                        borderColor={borderColor}
+                                    >
+                                        <VStack align="start" gap={1}>
+                                            <Text color={subtextColor} fontSize="sm">Best Score</Text>
+                                            <Text color={textColor} fontSize="2xl" fontWeight="bold">{testStats.highestScore}%</Text>
+                                        </VStack>
+                                    </Box>
+                                    <Box
+                                        p={4}
+                                        bg={simulationCardBg}
+                                        borderRadius="md"
+                                        border="1px"
+                                        borderColor={borderColor}
+                                    >
+                                        <VStack align="start" gap={1}>
+                                            <Text color={subtextColor} fontSize="sm">Correct Answers</Text>
+                                            <Text color={textColor} fontSize="2xl" fontWeight="bold">{testStats.correctAnswers}/{testStats.totalQuestions}</Text>
+                                        </VStack>
+                                    </Box>
+                                </Grid>
+                            )}
+
+                            {testResultsLoading ? (
+                                <Flex justify="center" p={8}>
+                                    <Spinner size="lg" color="blue.500" />
+                                </Flex>
+                            ) : testResults.length === 0 ? (
+                                <Box textAlign="center" p={8}>
+                                    <Text color={subtextColor} fontSize="lg">
+                                        No test results yet
+                                    </Text>
+                                    <Text color={subtextColor} mt={2}>
+                                        Take your first test to see results here
+                                    </Text>
+                                </Box>
+                            ) : (
+                                <VStack align="stretch" gap={3} w="100%">
+                                    {testResults.map((result: any) => (
+                                        <Box
+                                            key={result._id}
+                                            bg={simulationCardBg}
+                                            p={4}
+                                            borderRadius="lg"
+                                            border="1px"
+                                            borderColor={borderColor}
+                                            _hover={{
+                                                shadow: "md",
+                                                transform: "translateY(-2px)",
+                                                transition: "all 0.2s"
+                                            }}
+                                        >
+                                            <Flex justify="space-between" align="start" gap={4}>
+                                                <HStack gap={3} flex="1">
+                                                    <Box
+                                                        p={2}
+                                                        bg="blue.100"
+                                                        borderRadius="md"
+                                                        color="blue.600"
+                                                        _dark={{
+                                                            bg: "blue.900",
+                                                            color: "blue.300"
+                                                        }}
+                                                    >
+                                                        <LuFileText size={20} />
+                                                    </Box>
+                                                    <VStack align="start" gap={1} flex="1">
+                                                        <HStack gap={2} wrap="wrap">
+                                                            <Text fontWeight="semibold" color={textColor}>
+                                                                {result.config.difficulty.charAt(0).toUpperCase() + result.config.difficulty.slice(1)} Test
+                                                            </Text>
+                                                            <Badge colorScheme={result.summary.percentage >= 80 ? "green" : result.summary.percentage >= 60 ? "yellow" : "red"}>
+                                                                {result.summary.percentage}%
+                                                            </Badge>
+                                                        </HStack>
+                                                        <HStack gap={4} fontSize="xs" color={subtextColor} wrap="wrap">
+                                                            <HStack>
+                                                                <LuCalendar size={12} />
+                                                                <Text>{new Date(result.createdAt).toLocaleDateString()}</Text>
+                                                            </HStack>
+                                                            <HStack>
+                                                                <LuTarget size={12} />
+                                                                <Text>{result.summary.answeredQuestions}/{result.summary.totalQuestions} questions</Text>
+                                                            </HStack>
+                                                            <HStack>
+                                                                <LuTrophy size={12} />
+                                                                <Text>{result.summary.correctAnswers} correct</Text>
+                                                            </HStack>
+                                                        </HStack>
+                                                    </VStack>
+                                                </HStack>
+                                                <HStack gap={2}>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        colorScheme="blue"
+                                                        onClick={() => handleViewTestResult(result)}
+                                                    >
+                                                        <LuEye size={16} />
+                                                        Review
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        colorScheme="red"
+                                                        onClick={() => handleDeleteTestResult(result._id)}
+                                                        p={1}
+                                                    >
+                                                        <LuTrash2 size={16} />
+                                                    </Button>
+                                                </HStack>
+                                            </Flex>
+                                        </Box>
+                                    ))}
+                                </VStack>
                             )}
                         </VStack>
                     </Box>

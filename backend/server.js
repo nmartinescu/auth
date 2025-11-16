@@ -99,9 +99,13 @@ app.use("/api/disk", diskRoutes);
 
 
 import simulationRoutes from "./routes/simulations/index.js";
+import testResultsRoutes from "./routes/testResults.js";
 
 
 app.use("/api/simulations", simulationRoutes);
+
+
+app.use("/api/test-results", testResultsRoutes);
 
 
 app.use("/api/logs", logsRoutes);

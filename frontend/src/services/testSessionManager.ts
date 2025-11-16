@@ -9,6 +9,8 @@ import type {
 } from '../types/Test';
 import { testQuestionGenerator } from './testQuestionGenerator';
 import { testSolutionService } from './testSolutionService';
+import { testResultsService } from './testResultsService';
+import { isAuthenticated } from '../utils/auth';
 
 class TestSessionManager {
     private static instance: TestSessionManager;
@@ -149,6 +151,24 @@ class TestSessionManager {
         const maxPossibleScore = this.currentSession.questions.length * 100;
         this.currentSession.score = maxPossibleScore > 0 ? 
             Math.round((totalScore / maxPossibleScore) * 100) : 0;
+
+        // Save test result to backend if user is logged in
+        if (isAuthenticated()) {
+            const results = this.getTestResults();
+            if (results) {
+                testResultsService.saveTestResult(this.currentSession, results.summary)
+                    .then(success => {
+                        if (success) {
+                            console.log('✅ Test result saved to backend');
+                        } else {
+                            console.log('⚠️ Failed to save test result to backend');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('❌ Error saving test result:', error);
+                    });
+            }
+        }
 
         return this.currentSession;
     }
