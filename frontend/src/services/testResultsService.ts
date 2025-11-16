@@ -1,4 +1,4 @@
-import type { TestSession } from '../types/Test';
+import type { TestSession } from '../types/Test.ts';
 import { getAuthToken } from '../utils/auth';
 
 class TestResultsService {

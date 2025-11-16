@@ -483,7 +483,6 @@ export function Process() {
                             }}
                             // Check real authentication status
                             isLoggedIn={isAuthenticated()} 
-                            onLoadFromAccount={() => console.log("Loading from account...")}
                         />
                     </Box>
 

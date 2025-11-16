@@ -8,7 +8,7 @@ interface TokenData {
 }
 
 class TokenService {
-    private refreshPromise: Promise<TokenData> | null = null;
+    private refreshPromise: Promise<TokenData | null> | null = null;
 
     // Store tokens in localStorage
     setTokens(accessToken: string, refreshToken: string, expiresIn: number): void {

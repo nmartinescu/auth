@@ -1,4 +1,4 @@
-import type { TestQuestion, TestSolution, MemoryTestSolution, DiskTestSolution, ProcessResult, GanttEntry } from '../types/Test';
+import type { TestQuestion, TestSolution, MemoryTestSolution, DiskTestSolution, ProcessResult, GanttEntry } from '../types/Test.ts';
 
 class TestSolutionService {
     private static instance: TestSolutionService;
@@ -27,7 +27,7 @@ class TestSolutionService {
 
     private async calculateSchedulingSolution(question: TestQuestion): Promise<TestSolution> {
         // Convert test processes to backend format
-        const processes = question.processes!.map(p => ({
+        const processes = question.processes!.map((p: any) => ({
             arrivalTime: p.arrivalTime,
             burstTime: p.burstTime,
             io: p.io
@@ -251,7 +251,7 @@ class TestSolutionService {
     }
 
     private findOriginalBurstTime(pid: number, question: TestQuestion): number {
-        const process = question.processes.find(p => p.id === pid);
+        const process = question.processes?.find((p: any) => p.id === pid);
         return process?.burstTime || 0;
     }
 

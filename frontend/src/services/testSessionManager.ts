@@ -6,7 +6,7 @@ import type {
     TestSolution,
     MemoryTestSolution,
     DiskTestSolution
-} from '../types/Test';
+} from '../types/Test.ts';
 import { testQuestionGenerator } from './testQuestionGenerator';
 import { testSolutionService } from './testSolutionService';
 import { testResultsService } from './testResultsService';
@@ -91,7 +91,7 @@ class TestSessionManager {
     submitAnswer(questionId: string, userSolution: TestSolution | MemoryTestSolution | DiskTestSolution): UserAnswer | null {
         if (!this.currentSession) return null;
 
-        const question = this.currentSession.questions.find(q => q.id === questionId);
+        const question = this.currentSession.questions.find((q: TestQuestion) => q.id === questionId);
         if (!question || !question.expectedSolution) return null;
 
         console.log('=== SUBMIT ANSWER DEBUG ===');
@@ -122,7 +122,7 @@ class TestSessionManager {
 
         // Update or add the answer
         const existingAnswerIndex = this.currentSession.userAnswers.findIndex(
-            answer => answer.questionId === questionId
+            (answer: UserAnswer) => answer.questionId === questionId
         );
 
         if (existingAnswerIndex >= 0) {
@@ -136,7 +136,7 @@ class TestSessionManager {
 
     getUserAnswer(questionId: string): UserAnswer | null {
         if (!this.currentSession) return null;
-        return this.currentSession.userAnswers.find(answer => answer.questionId === questionId) || null;
+        return this.currentSession.userAnswers.find((answer: UserAnswer) => answer.questionId === questionId) || null;
     }
 
     finishTest(): TestSession | null {
@@ -146,7 +146,7 @@ class TestSessionManager {
         
         // Calculate total score
         const totalScore = this.currentSession.userAnswers.reduce(
-            (sum, answer) => sum + answer.score, 0
+            (sum: number, answer: UserAnswer) => sum + answer.score, 0
         );
         const maxPossibleScore = this.currentSession.questions.length * 100;
         this.currentSession.score = maxPossibleScore > 0 ? 
@@ -187,8 +187,8 @@ class TestSessionManager {
         if (!this.currentSession) return null;
 
         const answeredQuestions = this.currentSession.userAnswers.length;
-        const correctAnswers = this.currentSession.userAnswers.filter(answer => answer.isCorrect).length;
-        const totalScore = this.currentSession.userAnswers.reduce((sum, answer) => sum + answer.score, 0);
+        const correctAnswers = this.currentSession.userAnswers.filter((answer: UserAnswer) => answer.isCorrect).length;
+        const totalScore = this.currentSession.userAnswers.reduce((sum: number, answer: UserAnswer) => sum + answer.score, 0);
         const maxPossibleScore = answeredQuestions * 100;
         const percentage = maxPossibleScore > 0 ? Math.round((totalScore / maxPossibleScore) * 100) : 0;
         

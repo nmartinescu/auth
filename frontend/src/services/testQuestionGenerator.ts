@@ -7,7 +7,7 @@ import type {
     MemoryAlgorithmType,
     DiskAlgorithmType,
     TestConfig
-} from '../types/Test';
+} from '../types/Test.ts';
 
 class TestQuestionGenerator {
     private static instance: TestQuestionGenerator;
@@ -396,7 +396,7 @@ Your task is to simulate the page replacement process and determine the total nu
         }
     }
 
-    private generatePageReferences(pageCount: number, frameCount: number, difficulty: DifficultyLevel): number[] {
+    private generatePageReferences(pageCount: number, frameCount: number, _difficulty: DifficultyLevel): number[] {
         const references: number[] = [];
         const maxPageNumber = frameCount + this.randomBetween(2, 5); // Ensure some page faults
         
