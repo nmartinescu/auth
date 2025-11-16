@@ -149,7 +149,7 @@ export const generateReport = () => {
     
     // Request Statistics
     const requestStats = getRequestStats();
-    console.log('🌐 REQUEST STATISTICS:');
+    console.log('REQUEST STATISTICS:');
     console.log(`   Total Requests: ${requestStats.totalRequests}`);
     console.log(`   Average Response Time: ${requestStats.averageResponseTime}ms`);
     console.log('   Methods:', requestStats.methods);
@@ -178,7 +178,7 @@ export const generateReport = () => {
     // Security Events
     const securityEvents = getSecurityEvents();
     if (securityEvents.totalSecurityEvents > 0) {
-        console.log('\n🔒 SECURITY EVENTS:');
+        console.log('\nSECURITY EVENTS:');
         console.log(`   Total Security Events: ${securityEvents.totalSecurityEvents}`);
         console.log(`   Auth Attempts: ${securityEvents.authAttempts}`);
         console.log(`   Failed Logins: ${securityEvents.failedLogins}`);
@@ -187,7 +187,7 @@ export const generateReport = () => {
     // Rate Limiting
     const rateLimitEvents = getRateLimitEvents();
     if (rateLimitEvents.totalRateLimitHits > 0) {
-        console.log('\n🚫 RATE LIMITING:');
+        console.log('\nRATE LIMITING:');
         console.log(`   Total Rate Limit Hits: ${rateLimitEvents.totalRateLimitHits}`);
         console.log('   Most Affected IPs:', rateLimitEvents.affectedIPs);
     }

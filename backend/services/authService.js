@@ -45,7 +45,7 @@ export const generatePasswordResetToken = (userId) => {
 export const verifyAccessToken = (token) => {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        console.log("🔍 Token decoded successfully:", { userId: decoded.userId, type: decoded.type, exp: new Date(decoded.exp * 1000) });
+        console.log("Token decoded successfully:", { userId: decoded.userId, type: decoded.type, exp: new Date(decoded.exp * 1000) });
         
         if (decoded.type !== "access") {
             console.log("Invalid token type:", decoded.type);

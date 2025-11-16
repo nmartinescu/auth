@@ -10,7 +10,7 @@
 
 import logAnalyzer from '../utils/logAnalyzer.js';
 
-console.log('🔍 Starting log analysis...\n');
+console.log('Starting log analysis...\n');
 
 try {
     logAnalyzer.generateReport();

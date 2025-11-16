@@ -17,14 +17,14 @@ export const apiClient = axios.create({
 apiClient.interceptors.request.use(
   (config) => {
     const token = getToken();
-    console.log("🔑 Token from localStorage:", token ? "Token found" : "No token");
+    console.log("Token from localStorage:", token ? "Token found" : "No token");
     
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
       console.log("Added Authorization header to request");
     }
     
-    console.log("🌐 Making request to:", config.url, "with method:", config.method);
+    console.log("Making request to:", config.url, "with method:", config.method);
     return config;
   },
   (error) => {

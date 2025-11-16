@@ -3,15 +3,15 @@ import User from "../models/User.js";
 
 // Middleware to verify JWT access token and get user
 export const authenticateToken = async (req, res, next) => {
-    console.log("🔐 authenticateToken middleware called");
-    console.log("📋 Headers:", req.headers.authorization);
+    console.log("authenticateToken middleware called");
+    console.log("Headers:", req.headers.authorization);
     
     try {
         const authHeader = req.headers['authorization'];
         const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 
         if (!token) {
-            console.log("❌ No token provided");
+            console.log("No token provided");
             return res.status(401).json({
                 success: false,
                 message: 'Access token required',
@@ -19,10 +19,10 @@ export const authenticateToken = async (req, res, next) => {
             });
         }
 
-        console.log("🎫 Token found, verifying...");
+        console.log("Token found, verifying...");
         const tokenVerification = verifyAccessToken(token);
         if (!tokenVerification.success) {
-            console.log("❌ Token verification failed");
+            console.log("Token verification failed");
             return res.status(401).json({
                 success: false,
                 message: 'Invalid or expired access token',
@@ -30,10 +30,10 @@ export const authenticateToken = async (req, res, next) => {
             });
         }
 
-        console.log("✅ Token verified, looking up user...");
+        console.log("Token verified, looking up user...");
         const user = await User.findById(tokenVerification.decoded.userId);
         if (!user) {
-            console.log("❌ User not found");
+            console.log("User not found");
             return res.status(401).json({
                 success: false,
                 message: 'User not found',
@@ -42,7 +42,7 @@ export const authenticateToken = async (req, res, next) => {
         }
 
         req.user = user;
-        console.log("👤 User authenticated successfully:", user.email);
+        console.log("User authenticated successfully:", user.email);
         next();
     } catch (error) {
         return res.status(403).json({

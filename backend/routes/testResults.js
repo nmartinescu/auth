@@ -6,16 +6,16 @@ const router = express.Router();
 
 // Route to save a test result - requires authentication
 router.post('/', authenticateToken, async (req, res) => {
-    console.log("🔄 POST /api/test-results called");
-    console.log("📋 Request body keys:", Object.keys(req.body));
-    console.log("👤 User from token:", req.user);
+    console.log("POST /api/test-results called");
+    console.log("Request body keys:", Object.keys(req.body));
+    console.log("User from token:", req.user);
     
     try {
         const { sessionId, config, questions, userAnswers, score, startTime, endTime, duration, summary } = req.body;
         
         // Validate required fields
         if (!sessionId || !config || !questions || !userAnswers || score === undefined || !startTime || !endTime || !summary) {
-            console.log("❌ Missing required fields");
+            console.log("Missing required fields");
             return res.status(400).json({
                 success: false,
                 message: 'Missing required fields'
@@ -25,7 +25,7 @@ router.post('/', authenticateToken, async (req, res) => {
         // Check if test result already exists
         const existingResult = await TestResult.findOne({ sessionId });
         if (existingResult) {
-            console.log("⚠️ Test result already saved for session:", sessionId);
+            console.log("Test result already saved for session:", sessionId);
             return res.status(200).json({
                 success: true,
                 message: 'Test result already saved',
@@ -47,12 +47,12 @@ router.post('/', authenticateToken, async (req, res) => {
             summary
         });
         
-        console.log("💾 About to save test result");
+        console.log("About to save test result");
         
         // Save to database
         await testResult.save();
         
-        console.log("✅ Test result saved successfully with ID:", testResult._id);
+        console.log("Test result saved successfully with ID:", testResult._id);
         
         res.status(201).json({
             success: true,
@@ -60,7 +60,7 @@ router.post('/', authenticateToken, async (req, res) => {
             data: testResult
         });
     } catch (error) {
-        console.error("❌ Error saving test result:", error);
+        console.error("Error saving test result:", error);
         res.status(500).json({
             success: false,
             message: 'Failed to save test result',
@@ -71,8 +71,8 @@ router.post('/', authenticateToken, async (req, res) => {
 
 // Route to get all test results for the authenticated user
 router.get('/', authenticateToken, async (req, res) => {
-    console.log("🔄 GET /api/test-results called");
-    console.log("👤 User from token:", req.user);
+    console.log("GET /api/test-results called");
+    console.log("User from token:", req.user);
     
     try {
         const { limit = 50, skip = 0, sortBy = 'createdAt', order = 'desc' } = req.query;
@@ -85,7 +85,7 @@ router.get('/', authenticateToken, async (req, res) => {
         
         const total = await TestResult.countDocuments({ userId: req.user.id });
         
-        console.log(`✅ Found ${testResults.length} test results for user`);
+        console.log(`Found ${testResults.length} test results for user`);
         
         res.status(200).json({
             success: true,
@@ -98,7 +98,7 @@ router.get('/', authenticateToken, async (req, res) => {
             }
         });
     } catch (error) {
-        console.error("❌ Error fetching test results:", error);
+        console.error("Error fetching test results:", error);
         res.status(500).json({
             success: false,
             message: 'Failed to fetch test results',
@@ -109,9 +109,9 @@ router.get('/', authenticateToken, async (req, res) => {
 
 // Route to get a specific test result by ID
 router.get('/:id', authenticateToken, async (req, res) => {
-    console.log("🔄 GET /api/test-results/:id called");
-    console.log("📋 Test result ID:", req.params.id);
-    console.log("👤 User from token:", req.user);
+    console.log("GET /api/test-results/:id called");
+    console.log("Test result ID:", req.params.id);
+    console.log("User from token:", req.user);
     
     try {
         const testResult = await TestResult.findOne({
@@ -120,21 +120,21 @@ router.get('/:id', authenticateToken, async (req, res) => {
         }).lean();
         
         if (!testResult) {
-            console.log("❌ Test result not found");
+            console.log("Test result not found");
             return res.status(404).json({
                 success: false,
                 message: 'Test result not found'
             });
         }
         
-        console.log("✅ Test result found");
+        console.log("Test result found");
         
         res.status(200).json({
             success: true,
             data: testResult
         });
     } catch (error) {
-        console.error("❌ Error fetching test result:", error);
+        console.error("Error fetching test result:", error);
         res.status(500).json({
             success: false,
             message: 'Failed to fetch test result',
@@ -145,9 +145,9 @@ router.get('/:id', authenticateToken, async (req, res) => {
 
 // Route to delete a test result
 router.delete('/:id', authenticateToken, async (req, res) => {
-    console.log("🔄 DELETE /api/test-results/:id called");
-    console.log("📋 Test result ID:", req.params.id);
-    console.log("👤 User from token:", req.user);
+    console.log("DELETE /api/test-results/:id called");
+    console.log("Test result ID:", req.params.id);
+    console.log("User from token:", req.user);
     
     try {
         const testResult = await TestResult.findOneAndDelete({
@@ -156,21 +156,21 @@ router.delete('/:id', authenticateToken, async (req, res) => {
         });
         
         if (!testResult) {
-            console.log("❌ Test result not found");
+            console.log("Test result not found");
             return res.status(404).json({
                 success: false,
                 message: 'Test result not found'
             });
         }
         
-        console.log("✅ Test result deleted successfully");
+        console.log("Test result deleted successfully");
         
         res.status(200).json({
             success: true,
             message: 'Test result deleted successfully'
         });
     } catch (error) {
-        console.error("❌ Error deleting test result:", error);
+        console.error("Error deleting test result:", error);
         res.status(500).json({
             success: false,
             message: 'Failed to delete test result',
@@ -181,8 +181,8 @@ router.delete('/:id', authenticateToken, async (req, res) => {
 
 // Route to get test statistics for the authenticated user
 router.get('/stats/summary', authenticateToken, async (req, res) => {
-    console.log("🔄 GET /api/test-results/stats/summary called");
-    console.log("👤 User from token:", req.user);
+    console.log("GET /api/test-results/stats/summary called");
+    console.log("User from token:", req.user);
     
     try {
         const results = await TestResult.find({ userId: req.user.id }).lean();
@@ -223,7 +223,7 @@ router.get('/stats/summary', authenticateToken, async (req, res) => {
             }
         });
     } catch (error) {
-        console.error("❌ Error fetching test statistics:", error);
+        console.error("Error fetching test statistics:", error);
         res.status(500).json({
             success: false,
             message: 'Failed to fetch test statistics',

@@ -6,16 +6,16 @@ const router = express.Router();
 
 // Route to save a simulation - requires authentication
 router.post('/', authenticateToken, async (req, res) => {
-    console.log("🔄 POST /api/simulations called");
-    console.log("📋 Request body:", req.body);
-    console.log("👤 User from token:", req.user);
+    console.log("POST /api/simulations called");
+    console.log("Request body:", req.body);
+    console.log("User from token:", req.user);
     
     try {
         const { name, type, data } = req.body;
         
         // Validate required fields
         if (!name || !type || !data) {
-            console.log("❌ Missing required fields");
+            console.log("Missing required fields");
             return res.status(400).json({
                 success: false,
                 message: 'Missing required fields: name, type, and data are required'
@@ -39,12 +39,12 @@ router.post('/', authenticateToken, async (req, res) => {
             data
         });
         
-        console.log("💾 About to save simulation:", simulation);
+        console.log("About to save simulation:", simulation);
         
         // Save to database
         await simulation.save();
         
-        console.log("✅ Simulation saved successfully with ID:", simulation._id);
+        console.log("Simulation saved successfully with ID:", simulation._id);
         
         res.status(201).json({
             success: true,

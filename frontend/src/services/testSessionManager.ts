@@ -159,13 +159,13 @@ class TestSessionManager {
                 testResultsService.saveTestResult(this.currentSession, results.summary)
                     .then(success => {
                         if (success) {
-                            console.log('✅ Test result saved to backend');
+                            console.log('Test result saved to backend');
                         } else {
-                            console.log('⚠️ Failed to save test result to backend');
+                            console.log('Failed to save test result to backend');
                         }
                     })
                     .catch(error => {
-                        console.error('❌ Error saving test result:', error);
+                        console.error('Error saving test result:', error);
                     });
             }
         }

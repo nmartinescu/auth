@@ -287,7 +287,7 @@ export function Memory() {
                                                     removePage(index)
                                                 }
                                             >
-                                                {page} ✕
+                                                {page} ×
                                             </Button>
                                         ))}
                                     </Wrap>
@@ -357,9 +357,6 @@ export function Memory() {
                                 setPageReferences(data.pageReferences);
                             }}
                             isLoggedIn={isAuthenticated()}
-                            onLoadFromAccount={() =>
-                                console.log("Loading from account...")
-                            }
                         />
                     </Box>
 

@@ -109,10 +109,10 @@ function checkAnswer(userAnswer, correctAnswer) {
             feedback.score += 50;
             feedback.feedback.push("Sequence is correct!");
         } else {
-            feedback.feedback.push(`❌ Sequence is incorrect. Expected: [${correctSeq.join(' → ')}], Got: [${userSeq.join(' → ')}]`);
+            feedback.feedback.push(`Sequence is incorrect. Expected: [${correctSeq.join(' → ')}], Got: [${userSeq.join(' → ')}]`);
         }
     } else {
-        feedback.feedback.push("❌ Sequence is missing or invalid");
+        feedback.feedback.push("Sequence is missing or invalid");
     }
     
     // Check total seek time
@@ -122,12 +122,12 @@ function checkAnswer(userAnswer, correctAnswer) {
         
         if (userSeekTime === correctSeekTime) {
             feedback.score += 30;
-            feedback.feedback.push("✅ Total seek time is correct!");
+            feedback.feedback.push("Total seek time is correct!");
         } else {
-            feedback.feedback.push(`❌ Total seek time is incorrect. Expected: ${correctSeekTime}, Got: ${userSeekTime}`);
+            feedback.feedback.push(`Total seek time is incorrect. Expected: ${correctSeekTime}, Got: ${userSeekTime}`);
         }
     } else {
-        feedback.feedback.push("❌ Total seek time is missing");
+        feedback.feedback.push("Total seek time is missing");
     }
     
     // Check average seek time (with tolerance for rounding)
@@ -137,21 +137,21 @@ function checkAnswer(userAnswer, correctAnswer) {
         
         if (Math.abs(userAvgSeekTime - correctAvgSeekTime) < 0.01) {
             feedback.score += 20;
-            feedback.feedback.push("✅ Average seek time is correct!");
+            feedback.feedback.push("Average seek time is correct!");
         } else {
-            feedback.feedback.push(`❌ Average seek time is incorrect. Expected: ${correctAvgSeekTime.toFixed(2)}, Got: ${userAvgSeekTime.toFixed(2)}`);
+            feedback.feedback.push(`Average seek time is incorrect. Expected: ${correctAvgSeekTime.toFixed(2)}, Got: ${userAvgSeekTime.toFixed(2)}`);
         }
     } else {
-        feedback.feedback.push("❌ Average seek time is missing");
+        feedback.feedback.push("Average seek time is missing");
     }
     
     // Determine if answer is correct (need at least 80% score)
     feedback.isCorrect = feedback.score >= 80;
     
     if (feedback.isCorrect) {
-        feedback.feedback.unshift("🎉 Excellent work! Your answer is correct.");
+        feedback.feedback.unshift("Excellent work! Your answer is correct.");
     } else {
-        feedback.feedback.unshift(`📚 Your answer needs improvement. Score: ${feedback.score}/100`);
+        feedback.feedback.unshift(`Your answer needs improvement. Score: ${feedback.score}/100`);
     }
     
     return feedback;

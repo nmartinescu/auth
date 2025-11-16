@@ -213,7 +213,7 @@ export function Process() {
                 })),
             };
 
-            console.log("📤 Sending API request:", apiData);
+            console.log("Sending API request:", apiData);
 
             // Make the API call
             const response = await fetch("/api/cpu", {

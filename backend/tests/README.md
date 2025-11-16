@@ -2,7 +2,7 @@
 
 This directory contains comprehensive unit tests for the CPU scheduling system, covering all major components and algorithms.
 
-## 🧪 Test Structure
+## Test Structure
 
 ```
 backend/tests/
@@ -163,7 +163,7 @@ npm run test:verbose
   - Reset after operations
   - Large cycle handling
 
-## 🛠️ Test Utilities
+## Test Utilities
 
 The test suite includes global utilities available in all tests:
 
@@ -191,7 +191,7 @@ const processWithIO = testUtils.createProcessWithIO([
 - **Functions**: > 95%
 - **Lines**: > 90%
 
-## 🧩 Test Patterns
+## Test Patterns
 
 ### Unit Test Structure
 ```javascript
@@ -232,7 +232,7 @@ describe('API Endpoint', () => {
 });
 ```
 
-## 🔧 Configuration
+## Configuration
 
 Tests are configured via `jest.config.js`:
 - ES modules support
@@ -252,7 +252,7 @@ When adding new tests:
 5. **Mock external dependencies**: Use Jest mocks
 6. **Assert specific behaviors**: Avoid generic assertions
 
-## 🐛 Debugging Tests
+## Debugging Tests
 
 ### Common Issues
 - **ES Module errors**: Ensure proper import/export syntax

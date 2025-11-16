@@ -146,10 +146,10 @@ async function main() {
         });
 
         if (passedSuites === totalTests) {
-            console.log(colorize('\n🎉 All disk scheduling tests passed!', 'green'));
+            console.log(colorize('\nAll disk scheduling tests passed!', 'green'));
             console.log(colorize('The disk scheduling implementation is ready for production.', 'bright'));
         } else {
-            console.log(colorize('\n⚠️  Some tests failed. Please review the output above.', 'yellow'));
+            console.log(colorize('\nSome tests failed. Please review the output above.', 'yellow'));
         }
 
         // Additional recommendations

@@ -23,14 +23,14 @@ export const simulationService = {
     console.log("simulationService.saveSimulation called with:", { name, type, data });
     
     const payload = { name, type, data };
-    console.log("📤 Sending POST request to /api/simulations with payload:", payload);
+    console.log("Sending POST request to /api/simulations with payload:", payload);
     
     try {
       const response = await apiClient.post('/api/simulations', payload);
-      console.log("📥 Response received:", response);
+      console.log("Response received:", response);
       return response.data;
     } catch (error) {
-      console.error("💥 Error in simulationService.saveSimulation:", error);
+      console.error("Error in simulationService.saveSimulation:", error);
       throw error;
     }
   },

@@ -368,7 +368,7 @@ export function Disk() {
                                                     removeRequest(index)
                                                 }
                                             >
-                                                {request} ✕
+                                                {request} ×
                                             </Button>
                                         ))}
                                     </Wrap>
@@ -445,9 +445,6 @@ export function Disk() {
                                 setRequests(data.requests);
                             }}
                             isLoggedIn={isAuthenticated()}
-                            onLoadFromAccount={() =>
-                                console.log("Loading from account...")
-                            }
                         />
                     </Box>
 
