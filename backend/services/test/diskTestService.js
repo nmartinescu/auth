@@ -3,7 +3,7 @@
  * Generates test questions for disk scheduling algorithms
  */
 
-import { simulateDiskScheduling } from './diskSchedulingService.js';
+import { simulateDiskScheduling } from '../diskSchedulingService.js';
 
 /**
  * Generate a random disk scheduling test question
@@ -58,16 +58,34 @@ function generateDiskSchedulingQuestion(difficulty = 'medium') {
         headDirection
     );
     
+    // Generate description
+    const algorithmName = getDiskAlgorithmFullName(algorithm.toUpperCase());
+    const needsDirection = ['SCAN', 'C-SCAN', 'LOOK', 'C-LOOK'].includes(algorithm.toUpperCase());
+    const directionText = needsDirection ? ` The disk head is currently moving in the ${headDirection} direction.` : '';
+    
+    const description = `A disk storage system contains ${maxDiskSize} tracks numbered from 0 to ${maxDiskSize - 1}. The disk head is currently positioned at track ${initialHeadPosition} and needs to service the following sequence of disk requests: ${requests.join(', ')}.${directionText}
+
+The system uses the ${algorithmName} scheduling algorithm to determine the order in which these requests should be processed. The goal is to minimize the total seek time, which is the cumulative distance the disk head must travel to service all requests.
+
+Your task is to determine the sequence in which the requests will be serviced according to the ${algorithmName} algorithm. Calculate the total seek time by summing the distances traveled between consecutive positions, and then compute the average seek time by dividing the total seek time by the number of requests processed.`;
+    
     return {
         question: {
+            type: 'disk',
             algorithm: algorithm.toUpperCase(),
             maxDiskSize,
             initialHeadPosition,
             headDirection,
             requests: [...requests],
-            difficulty
+            difficulty,
+            description
         },
         correctAnswer: {
+            algorithm: algorithm.toUpperCase(),
+            maxDiskSize,
+            initialHeadPosition,
+            headDirection,
+            requests: [...requests],
             sequence: solution.sequence,
             totalSeekTime: solution.totalSeekTime,
             averageSeekTime: solution.averageSeekTime,
@@ -202,6 +220,27 @@ function generateCustomTest(params) {
             steps: solution.steps
         }
     };
+}
+
+function getDiskAlgorithmFullName(algorithm) {
+    switch (algorithm) {
+        case 'FCFS':
+            return 'First Come First Served (FCFS)';
+        case 'SSTF':
+            return 'Shortest Seek Time First (SSTF)';
+        case 'SCAN':
+            return 'SCAN (Elevator Algorithm)';
+        case 'C-SCAN':
+        case 'CSCAN':
+            return 'Circular SCAN (C-SCAN)';
+        case 'LOOK':
+            return 'LOOK Algorithm';
+        case 'C-LOOK':
+        case 'CLOOK':
+            return 'Circular LOOK (C-LOOK)';
+        default:
+            return algorithm;
+    }
 }
 
 export {

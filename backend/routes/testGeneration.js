@@ -1,5 +1,5 @@
 import express from 'express';
-import { generateMixedTest, generateTestByType, generateCustomTest } from '../services/testGenerationService.js';
+import { generateMixedTest, generateTestByType, generateCustomTest } from '../services/test/testGenerationService.js';
 
 const router = express.Router();
 

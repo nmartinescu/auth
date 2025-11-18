@@ -4,7 +4,7 @@ import {
     generateMultipleQuestions,
     checkAnswer,
     generateCustomTest
-} from "../services/diskTestService.js";
+} from "../services/test/diskTestService.js";
 
 const router = express.Router();
 

@@ -8,7 +8,7 @@ import type {
     DiskTestSolution
 } from '../types/Test.ts';
 import { testQuestionGenerator } from './test/testQuestionGenerator.ts';
-import { testSolutionService } from './testSolutionService';
+import { testSolutionService } from './test/testSolutionService.ts';
 import { testResultsService } from './test/testResultsService.ts';
 import { isAuthenticated } from '../utils/auth';
 

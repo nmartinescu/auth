@@ -27,15 +27,6 @@ class TestSessionManager {
         // Generate questions from backend
         const { sessionId, questions } = await testQuestionGenerator.generateQuestions(config);
         
-        // Calculate correct solutions for all questions
-        for (const question of questions) {
-            try {
-                question.expectedSolution = await testSolutionService.calculateSolution(question);
-            } catch (error) {
-                console.error(`Failed to calculate solution for question ${question.id}:`, error);
-            }
-        }
-
         // Create test session
         this.currentSession = {
             id: sessionId, // Use backend session ID
@@ -92,33 +83,18 @@ class TestSessionManager {
         if (!this.currentSession) return null;
 
         const question = this.currentSession.questions.find((q: TestQuestion) => q.id === questionId);
-        if (!question || !question.expectedSolution) return null;
+        if (!question) return null;
 
-        console.log('=== SUBMIT ANSWER DEBUG ===');
-        console.log('Question ID:', questionId);
-        console.log('Question:', question);
-        console.log('Expected Solution:', question.expectedSolution);
-        console.log('User Solution:', userSolution);
-
-        // Compare user answer with correct solution
-        const comparison = testSolutionService.compareAnswers(
-            userSolution, 
-            question.expectedSolution
-        );
-
-        console.log('Comparison Result:', comparison);
-
+        // Store user's answer without verification
+        // Verification will happen on backend after test completion
         const userAnswer: UserAnswer = {
             questionId,
             userSolution,
-            correctSolution: question.expectedSolution,
-            isCorrect: comparison.isCorrect,
-            score: comparison.score,
-            maxScore: comparison.maxScore
+            correctSolution: undefined as any, // Will be filled after backend verification
+            isCorrect: false, // Will be determined by backend
+            score: 0, // Will be calculated by backend
+            maxScore: 100
         };
-
-        console.log('Final User Answer:', userAnswer);
-        console.log('=== END SUBMIT ANSWER DEBUG ===');
 
         // Update or add the answer
         const existingAnswerIndex = this.currentSession.userAnswers.findIndex(
@@ -139,12 +115,48 @@ class TestSessionManager {
         return this.currentSession.userAnswers.find((answer: UserAnswer) => answer.questionId === questionId) || null;
     }
 
-    finishTest(): TestSession | null {
+    async finishTest(): Promise<TestSession | null> {
         if (!this.currentSession) return null;
 
         this.currentSession.endTime = new Date();
         
-        // Calculate total score
+        try {
+            // Get correct answers from backend
+            const correctAnswers = await testQuestionGenerator.getCorrectAnswers(this.currentSession.id);
+            
+            // Match user answers with correct answers and calculate scores
+            for (const userAnswer of this.currentSession.userAnswers) {
+                const correctAnswer = correctAnswers.find((ca: any) => ca.id === userAnswer.questionId);
+                if (correctAnswer) {
+                    // Calculate the expected solution from correct answer data
+                    const question = this.currentSession.questions.find(q => q.id === userAnswer.questionId);
+                    if (question) {
+                        // Use the correct answer from backend to calculate solution
+                        const expectedSolution = await testSolutionService.calculateSolution({
+                            ...question,
+                            // Override with backend's correct answer parameters
+                            ...correctAnswer
+                        });
+                        
+                        // Compare user's solution with the expected solution
+                        const comparison = testSolutionService.compareAnswers(
+                            userAnswer.userSolution,
+                            expectedSolution
+                        );
+                        
+                        // Update user answer with results
+                        userAnswer.correctSolution = expectedSolution;
+                        userAnswer.isCorrect = comparison.isCorrect;
+                        userAnswer.score = comparison.score;
+                        userAnswer.maxScore = comparison.maxScore;
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Failed to retrieve and verify correct answers:', error);
+        }
+        
+        // Calculate total score based on verified answers
         const totalScore = this.currentSession.userAnswers.reduce(
             (sum: number, answer: UserAnswer) => sum + answer.score, 0
         );
@@ -157,13 +169,6 @@ class TestSessionManager {
             const results = this.getTestResults();
             if (results) {
                 testResultsService.saveTestResult(this.currentSession, results.summary)
-                    .then(success => {
-                        if (success) {
-                            console.log('Test result saved to backend');
-                        } else {
-                            console.log('Failed to save test result to backend');
-                        }
-                    })
                     .catch(error => {
                         console.error('Error saving test result:', error);
                     });

@@ -119,9 +119,9 @@ const TestContainer = () => {
         }
     };
 
-    const handleFinishTest = () => {
+    const handleFinishTest = async () => {
         try {
-            testSessionManager.finishTest();
+            await testSessionManager.finishTest();
             setTestState('results');
             // Update session
             setCurrentSession({ ...testSessionManager.getCurrentSession()! });
