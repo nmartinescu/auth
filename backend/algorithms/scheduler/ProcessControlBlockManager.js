@@ -1,4 +1,4 @@
-import { PROCESSES } from "../../constants.js";
+import { PROCESSES } from "./constants.js";
 import executionInfo from "./ExecutionInfo.js";
 import timer from "./Timer.js";
 

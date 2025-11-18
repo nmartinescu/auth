@@ -1,6 +1,6 @@
 import Scheduler from "../Scheduler.js";
 import ReadyQueuesManager from "../ReadyQueuesManager.js";
-import { PROCESSES } from "../../../constants.js";
+import { PROCESSES } from "../constants.js";
 import executionInfo from "../ExecutionInfo.js";
 import timer from "../Timer.js";
 
