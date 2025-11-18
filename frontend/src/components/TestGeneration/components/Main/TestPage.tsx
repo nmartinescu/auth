@@ -7,7 +7,7 @@ import {
     Text
 } from "@chakra-ui/react";
 import { useTestGenColors } from "../../colors.tsx";
-import { testSessionManager } from "../../../../services/testSessionManager.ts";
+import { testSessionManager } from "../../../../services/test/testSessionManager.ts";
 import type { TestPageProps, TestConfig } from '../../types.ts';
 import { TopicSelector } from "./TopicSelector.tsx";
 import { TestParameters } from "./TestParameters.tsx";

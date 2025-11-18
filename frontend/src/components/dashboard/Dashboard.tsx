@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { LuUser, LuTrash2, LuPlay, LuCalendar, LuCpu, LuHardDrive, LuMemoryStick, LuRefreshCw, LuFileText, LuEye, LuTrophy, LuTarget } from "react-icons/lu";
 import type { User } from "../../types/user";
 import { simulationService, type Simulation } from "../../services/simulationService";
-import { testResultsService } from "../../services/testResultsService";
+import { testResultsService } from "../../services/test/testResultsService";
 
 export function Dashboard() {
     const [user, setUser] = useState<User | null>(null);

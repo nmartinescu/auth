@@ -6,11 +6,11 @@ import type {
     TestSolution,
     MemoryTestSolution,
     DiskTestSolution
-} from '../types/Test.ts';
-import { testQuestionGenerator } from './test/testQuestionGenerator.ts';
+} from '../../types/Test.ts';
+import { testQuestionGenerator } from './testQuestionGenerator';
 import { testSolutionService } from './testSolutionService';
-import { testResultsService } from './test/testResultsService.ts';
-import { isAuthenticated } from '../utils/auth';
+import { testResultsService } from './testResultsService';
+import { isAuthenticated } from '../../utils/auth.ts';
 
 class TestSessionManager {
     private static instance: TestSessionManager;

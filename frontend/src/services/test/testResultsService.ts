@@ -1,5 +1,5 @@
-import type { TestSession } from '../types/Test.ts';
-import { getAuthToken } from '../utils/auth';
+import type { TestSession } from '../../types/Test.ts';
+import { getAuthToken } from '../../utils/auth.ts';
 
 class TestResultsService {
     private static instance: TestResultsService;

@@ -1,8 +1,8 @@
 import type { 
     TestQuestion, 
     TestConfig
-} from '../types/Test.ts';
-import { apiClient } from './apiClient';
+} from '../../types/Test.ts';
+import { apiClient } from '../apiClient.ts';
 
 class TestQuestionGenerator {
     private static instance: TestQuestionGenerator;

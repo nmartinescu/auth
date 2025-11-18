@@ -1,4 +1,4 @@
-import type { TestQuestion, TestSolution, MemoryTestSolution, DiskTestSolution, ProcessResult, GanttEntry } from '../types/Test.ts';
+import type { TestQuestion, TestSolution, MemoryTestSolution, DiskTestSolution, ProcessResult, GanttEntry } from '../../types/Test.ts';
 
 class TestSolutionService {
     private static instance: TestSolutionService;

@@ -4,7 +4,7 @@ import { useColorModeValue } from "../../ui/color-mode";
 import TestPage from "./Main/TestPage.tsx";
 import TestQuestionComponent from "./Question/TestQuestionComponent";
 import TestResults from "./Results/TestResults.tsx";
-import { testSessionManager } from "../../../services/testSessionManager";
+import { testSessionManager } from "../../../services/test/testSessionManager.ts";
 import type { TestSession, TestQuestion, TestSolution, MemoryTestSolution, DiskTestSolution, TestState } from "../types.ts";
 
 const TestContainer = () => {
