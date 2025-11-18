@@ -1,4 +1,3 @@
-// Registration validation
 export const validateRegistration = (data) => {
     const { name, email, password, confirmPassword } = data;
     const errors = [];
@@ -31,7 +30,6 @@ export const validateRegistration = (data) => {
     };
 };
 
-// Login validation
 export const validateLogin = (data) => {
     const { email, password } = data;
     const errors = [];
@@ -46,7 +44,6 @@ export const validateLogin = (data) => {
     };
 };
 
-// Forgot password validation
 export const validateForgotPassword = (data) => {
     const { email } = data;
     const errors = [];
@@ -61,7 +58,6 @@ export const validateForgotPassword = (data) => {
     };
 };
 
-// Reset password validation
 export const validateResetPassword = (data) => {
     const { token, newPassword, confirmPassword } = data;
     const errors = [];
@@ -84,7 +80,6 @@ export const validateResetPassword = (data) => {
     };
 };
 
-// Account deletion validation
 export const validateAccountDeletion = (data) => {
     const { password, confirmDeletion } = data;
     const errors = [];

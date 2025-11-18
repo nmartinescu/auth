@@ -13,7 +13,7 @@ router.post('/', authenticateToken, async (req, res) => {
     try {
         const { sessionId, config, questions, userAnswers, score, startTime, endTime, duration, summary } = req.body;
         
-        // Validate required fields
+        // validate required fields
         if (!sessionId || !config || !questions || !userAnswers || score === undefined || !startTime || !endTime || !summary) {
             console.log("Missing required fields");
             return res.status(400).json({
@@ -22,7 +22,7 @@ router.post('/', authenticateToken, async (req, res) => {
             });
         }
         
-        // Check if test result already exists
+        // check if test result already exists
         const existingResult = await TestResult.findOne({ sessionId });
         if (existingResult) {
             console.log("Test result already saved for session:", sessionId);
@@ -33,7 +33,7 @@ router.post('/', authenticateToken, async (req, res) => {
             });
         }
         
-        // Create new test result
+        // create new test result
         const testResult = new TestResult({
             userId: req.user.id,
             sessionId,
@@ -49,7 +49,7 @@ router.post('/', authenticateToken, async (req, res) => {
         
         console.log("About to save test result");
         
-        // Save to database
+        // save to database
         await testResult.save();
         
         console.log("Test result saved successfully with ID:", testResult._id);

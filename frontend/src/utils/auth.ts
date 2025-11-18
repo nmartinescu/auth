@@ -15,11 +15,11 @@ export const isAuthenticated = (): boolean => {
   }
   
   try {
-    // Validate that user data is valid JSON
+    // validate that user data is valid JSON
     JSON.parse(userData);
     return true;
   } catch (error) {
-    // Invalid user data, clean up
+    // invalid user data, clean up
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
     return false;

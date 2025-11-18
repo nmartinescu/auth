@@ -3,7 +3,7 @@ import { generateMixedTest, generateTestByType, generateCustomTest } from '../se
 
 const router = express.Router();
 
-// Store generated tests temporarily (in production, use Redis or database)
+// store generated tests temporarily (in production, use Redis or database)
 const testStore = new Map();
 
 /**
@@ -22,7 +22,7 @@ router.post('/generate', (req, res) => {
     try {
         const config = req.body;
         
-        // Validate configuration
+        // validate configuration
         if (config.numQuestions && (config.numQuestions < 1 || config.numQuestions > 50)) {
             return res.status(400).json({
                 success: false,
@@ -38,23 +38,23 @@ router.post('/generate', (req, res) => {
             });
         }
         
-        // Generate test
+        // generate test
         const testData = generateMixedTest(config);
         
-        // Create session ID
+        // create session ID
         const sessionId = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         
-        // Store correct answers server-side
+        // store correct answers server-side
         testStore.set(sessionId, {
             answers: testData.map(t => t.correctAnswer),
             createdAt: Date.now(),
             config
         });
         
-        // Clean up old sessions (older than 1 hour)
+        // clean up old sessions (older than 1 hour)
         cleanupOldSessions();
         
-        // Return only questions to frontend
+        // return only questions to frontend
         res.json({
             success: true,
             data: {
@@ -110,13 +110,13 @@ router.post('/generate-by-type', (req, res) => {
             });
         }
         
-        // Generate test
+        // generate test
         const testData = generateTestByType(type, count, difficulty, algorithm);
         
-        // Create session ID
+        // create session ID
         const sessionId = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         
-        // Store correct answers server-side
+        // store correct answers server-side
         testStore.set(sessionId, {
             answers: testData.map(t => t.correctAnswer),
             createdAt: Date.now(),
@@ -127,7 +127,7 @@ router.post('/generate-by-type', (req, res) => {
         
         cleanupOldSessions();
         
-        // Return only questions to frontend
+        // return only questions to frontend
         res.json({
             success: true,
             data: {
@@ -168,13 +168,13 @@ router.post('/custom', (req, res) => {
             });
         }
         
-        // Generate custom test
+        // generate custom test
         const testData = generateCustomTest(params);
         
-        // Create session ID
+        // create session ID
         const sessionId = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         
-        // Store correct answer server-side
+        // store correct answer server-side
         testStore.set(sessionId, {
             answers: [testData.correctAnswer],
             createdAt: Date.now(),
@@ -183,7 +183,7 @@ router.post('/custom', (req, res) => {
         
         cleanupOldSessions();
         
-        // Return only question to frontend
+        // return only question to frontend
         res.json({
             success: true,
             data: {
@@ -278,7 +278,7 @@ function cleanupOldSessions() {
     }
 }
 
-// Run cleanup every 10 minutes
+// run cleanup every 10 minutes
 setInterval(cleanupOldSessions, 10 * 60 * 1000);
 
 export default router;

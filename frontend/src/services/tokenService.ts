@@ -10,7 +10,7 @@ interface TokenData {
 class TokenService {
     private refreshPromise: Promise<TokenData | null> | null = null;
 
-    // Store tokens in localStorage
+    // store tokens in localStorage
     setTokens(accessToken: string, refreshToken: string, expiresIn: number): void {
         const expiresAt = Date.now() + expiresIn;
         const tokenData: TokenData = {
@@ -22,7 +22,7 @@ class TokenService {
         localStorage.setItem('tokenData', JSON.stringify(tokenData));
     }
 
-    // Get stored tokens
+    // get stored tokens
     getTokens(): TokenData | null {
         const tokenData = localStorage.getItem('tokenData');
         if (!tokenData) return null;
@@ -34,19 +34,19 @@ class TokenService {
         }
     }
 
-    // Get access token (legacy support)
+    // get access token (legacy support)
     getAccessToken(): string | null {
         const tokens = this.getTokens();
         return tokens?.accessToken || localStorage.getItem('authToken');
     }
 
-    // Get refresh token
+    // get refresh token
     getRefreshToken(): string | null {
         const tokens = this.getTokens();
         return tokens?.refreshToken || null;
     }
 
-    // Check if access token is expired or will expire soon (within 2 minutes)
+    // check if access token is expired or will expire soon (within 2 minutes)
     isTokenExpired(): boolean {
         const tokens = this.getTokens();
         if (!tokens) return true;
@@ -55,7 +55,7 @@ class TokenService {
         return Date.now() >= (tokens.expiresAt - bufferTime);
     }
 
-    // Refresh access token
+    // refresh access token
     async refreshAccessToken(): Promise<TokenData | null> {
     
         if (this.refreshPromise) {
@@ -94,7 +94,7 @@ class TokenService {
                 const { accessToken, refreshToken: newRefreshToken, expiresIn } = data.data;
                 this.setTokens(accessToken, newRefreshToken, expiresIn);
                 
-                // Update legacy token storage for backward compatibility
+                // update legacy token storage for backward compatibility
                 localStorage.setItem('authToken', accessToken);
                 localStorage.setItem('user', JSON.stringify(data.data.user));
                 
@@ -110,7 +110,7 @@ class TokenService {
         }
     }
 
-    // Get valid access token (refresh if needed)
+    // get valid access token (refresh if needed)
     async getValidAccessToken(): Promise<string | null> {
         if (!this.isTokenExpired()) {
             return this.getAccessToken();
@@ -120,20 +120,20 @@ class TokenService {
         return refreshedTokens?.accessToken || null;
     }
 
-    // Clear all tokens
+    // clear all tokens
     clearTokens(): void {
         localStorage.removeItem('tokenData');
         localStorage.removeItem('authToken');
         localStorage.removeItem('user');
     }
 
-    // Check if user is authenticated
+    // check if user is authenticated
     isAuthenticated(): boolean {
         const tokens = this.getTokens();
         return !!(tokens?.accessToken && tokens?.refreshToken);
     }
 
-    // Logout user
+    // logout user
     logout(): void {
         this.clearTokens();
         window.location.href = '/login';

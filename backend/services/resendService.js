@@ -21,13 +21,13 @@ const getResendClient = () => {
 
 export const sendPasswordResetEmail = async (email, resetToken) => {
     try {
-        // Check if API key is available
+        // check if API key is available
         if (!process.env.RESEND_API_KEY) {
             console.error("RESEND_API_KEY is not set in environment variables");
             return { success: false, error: "Email service not configured" };
         }
 
-        // Determine the correct frontend URL based on environment
+        // determine the correct frontend URL based on environment
         const frontendUrl =
             process.env.NODE_ENV === "production"
                 ? "https://ostep-web.onrender.com"

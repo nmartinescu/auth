@@ -10,7 +10,7 @@ function generateCPUSchedulingQuestion(difficulty = 'medium', algorithm = null) 
     const selectedAlgorithm = algorithm || getRandomAlgorithm();
     const { processCount, ioCount } = getDifficultyParams(difficulty);
     
-    // Use specialized process generation for MLFQ hard tests
+    // use specialized process generation for MLFQ hard tests
     const processes = (selectedAlgorithm === 'MLFQ' && difficulty === 'hard') 
         ? generateMLFQHardScenarioProcesses(processCount)
         : generateProcesses(processCount, ioCount, difficulty);
@@ -41,7 +41,7 @@ function generateCPUSchedulingQuestion(difficulty = 'medium', algorithm = null) 
             processes,
             description
         },
-        // These stay on the server for verification
+        // these stay on the server for verification
         correctAnswer: {
             algorithm: selectedAlgorithm,
             processes,
@@ -96,7 +96,7 @@ function generateProcesses(processCount, maxIoCount, difficulty) {
         });
     }
     
-    // Sort by arrival time first, then reassign IDs to maintain P1, P2, P3... order
+    // sort by arrival time first, then reassign IDs to maintain P1, P2, P3... order
     const sortedProcesses = processes.sort((a, b) => a.arrivalTime - b.arrivalTime);
     
     return sortedProcesses.map((process, index) => ({
@@ -124,7 +124,7 @@ function generateMLFQHardScenarioProcesses(processCount) {
                 { start: randomBetween(12, 18), duration: randomBetween(1, 3) }
             ];
         } else {
-            // Mixed workload processes
+            // mixed workload processes
             burstTime = randomBetween(12, 20);
             if (Math.random() > 0.5) {
                 ioOperations = [
@@ -143,7 +143,7 @@ function generateMLFQHardScenarioProcesses(processCount) {
         });
     }
     
-    // Sort by arrival time first, then reassign IDs
+    // sort by arrival time first, then reassign IDs
     const sortedProcesses = processes.sort((a, b) => a.arrivalTime - b.arrivalTime);
     
     return sortedProcesses.map((process, index) => ({

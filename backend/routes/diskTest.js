@@ -16,7 +16,7 @@ router.post("/generate", async (req, res) => {
     try {
         const { difficulty = 'medium' } = req.body;
 
-        // Validate difficulty
+        // validate difficulty
         const validDifficulties = ['easy', 'medium', 'hard'];
         if (!validDifficulties.includes(difficulty)) {
             return res.status(400).json({
@@ -62,7 +62,7 @@ router.post("/generate-multiple", async (req, res) => {
     try {
         const { count = 5, difficulty = 'medium' } = req.body;
 
-        // Validate inputs
+        // validate inputs
         if (count < 1 || count > 20) {
             return res.status(400).json({
                 success: false,
@@ -94,7 +94,7 @@ router.post("/generate-multiple", async (req, res) => {
                 })),
                 count: testQuestions.length
             },
-            // Store correct answers server-side
+            // store correct answers server-side
             _correctAnswers: testQuestions.map(q => q.correctAnswer)
         });
 
@@ -123,7 +123,7 @@ router.post("/custom", async (req, res) => {
             requests
         } = req.body;
 
-        // Validate required fields
+        // validate required fields
         if (!algorithm) {
             return res.status(400).json({
                 success: false,
@@ -191,7 +191,7 @@ router.post("/check", async (req, res) => {
     try {
         const { userAnswer, correctAnswer } = req.body;
 
-        // Validate inputs
+        // validate inputs
         if (!userAnswer) {
             return res.status(400).json({
                 success: false,

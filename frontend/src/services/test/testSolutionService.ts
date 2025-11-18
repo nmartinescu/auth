@@ -26,14 +26,14 @@ class TestSolutionService {
     }
 
     private async calculateSchedulingSolution(question: TestQuestion): Promise<TestSolution> {
-        // Convert test processes to backend format
+        // convert test processes to backend format
         const processes = question.processes!.map((p: any) => ({
             arrivalTime: p.arrivalTime,
             burstTime: p.burstTime,
             io: p.io
         }));
 
-        // Prepare request data
+        // prepare request data
         const requestData: any = {
             algorithm: question.algorithm,
             processes
@@ -43,7 +43,7 @@ class TestSolutionService {
             requestData.quantum = question.quantum;
         }
 
-        // Add MLFQ-specific parameters
+        // add MLFQ-specific parameters
         if (question.algorithm === 'MLFQ') {
             if (question.queues) {
                 requestData.queues = question.queues;
@@ -60,7 +60,7 @@ class TestSolutionService {
         console.log('Algorithm:', question.algorithm);
         console.log('Request Data:', JSON.stringify(requestData, null, 2));
 
-        // Call backend scheduler
+        // call backend scheduler
         const response = await fetch('/api/cpu', {
             method: 'POST',
             headers: {
@@ -79,12 +79,12 @@ class TestSolutionService {
         console.log('Backend response received:', JSON.stringify(result, null, 2));
         console.log('=== END SCHEDULING SOLUTION REQUEST DEBUG ===');
         
-        // Convert backend response to test solution format
+        // convert backend response to test solution format
         return this.convertBackendResponseToSolution(result, question);
     }
 
     private async calculateMemorySolution(question: TestQuestion): Promise<MemoryTestSolution> {
-        // Map algorithm names to backend format
+        // map algorithm names to backend format
         const algorithmMapping: { [key: string]: string } = {
             'FIFO': 'fifo',
             'LRU': 'lru',
@@ -95,14 +95,14 @@ class TestSolutionService {
 
         const backendAlgorithm = algorithmMapping[question.algorithm] || question.algorithm.toLowerCase();
 
-        // Prepare request data for memory management
+        // prepare request data for memory management
         const requestData = {
             frameCount: question.frameCount!,
             selectedAlgorithm: [backendAlgorithm],
             pageReferences: question.pageReferences!
         };
 
-        // Call backend memory management API
+        // call backend memory management API
         const response = await fetch('/api/memory', {
             method: 'POST',
             headers: {
@@ -117,12 +117,12 @@ class TestSolutionService {
 
         const result = await response.json();
         
-        // Convert backend response to memory test solution format
+        // convert backend response to memory test solution format
         return this.convertMemoryBackendResponseToSolution(result);
     }
 
     private async calculateDiskSolution(question: TestQuestion): Promise<DiskTestSolution> {
-        // Map algorithm names to backend format
+        // map algorithm names to backend format
         const algorithmMapping: { [key: string]: string } = {
             'FCFS': 'fcfs',
             'SSTF': 'sstf', 
@@ -134,7 +134,7 @@ class TestSolutionService {
 
         const backendAlgorithm = algorithmMapping[question.algorithm] || question.algorithm.toLowerCase();
 
-        // Prepare request data for disk scheduling
+        // prepare request data for disk scheduling
         const requestData = {
             algorithm: backendAlgorithm,
             requests: question.requests!,
@@ -148,7 +148,7 @@ class TestSolutionService {
         console.log('Mapped backend algorithm:', backendAlgorithm);
         console.log('Request data being sent:', JSON.stringify(requestData, null, 2));
 
-        // Call backend disk scheduling API
+        // call backend disk scheduling API
         const response = await fetch('/api/disk', {
             method: 'POST',
             headers: {
@@ -167,7 +167,7 @@ class TestSolutionService {
         console.log('Backend response received:', JSON.stringify(result, null, 2));
         console.log('=== END DISK SOLUTION CALCULATION DEBUG ===');
         
-        // Convert backend response to disk test solution format
+        // convert backend response to disk test solution format
         return this.convertDiskBackendResponseToSolution(result);
     }
 
@@ -179,7 +179,7 @@ class TestSolutionService {
         console.log('Backend Response:', JSON.stringify(backendResponse, null, 2));
         console.log('Question:', JSON.stringify(question, null, 2));
         
-        // Extract the solution steps from backend response
+        // extract the solution steps from backend response
         const solutionSteps = backendResponse.data?.solution || [];
         console.log('Solution Steps:', solutionSteps);
         
@@ -191,7 +191,7 @@ class TestSolutionService {
         const lastStep = solutionSteps[solutionSteps.length - 1];
         console.log('Last Step:', lastStep);
         
-        // Extract the final graphic table from the last step
+        // extract the final graphic table from the last step
         const graphicTable = lastStep.graphicTable || [];
         console.log('Final Graphic Table:', graphicTable);
         
@@ -199,7 +199,7 @@ class TestSolutionService {
             throw new Error('No graphic table found in final step');
         }
         
-        // Convert to ProcessResult format using the final graphicTable
+        // convert to ProcessResult format using the final graphicTable
         const processes: ProcessResult[] = graphicTable.map((entry: any) => {
             const originalBurstTime = this.findOriginalBurstTime(entry.pid, question);
             const processResult = {
@@ -229,10 +229,10 @@ class TestSolutionService {
             ? backendMetrics.averageTurnaroundTime
             : (processes.length > 0 ? processes.reduce((sum, p) => sum + p.turnaroundTime, 0) / processes.length : 0);
         
-        // Find completion time - use the maximum completion time from processes
+        // find completion time - use the maximum completion time from processes
         const completionTime = processes.length > 0 ? Math.max(...processes.map(p => p.completionTime)) : 0;
 
-        // Generate Gantt chart from execution info
+        // generate Gantt chart from execution info
         const solutionData = backendResponse.data?.solution || [];
         const ganttChart = this.generateGanttChart(solutionData);
 
@@ -260,16 +260,16 @@ class TestSolutionService {
         
         for (const entry of customData) {
             if (entry.point && entry.timer !== undefined) {
-                // Check if this is a process execution point
+                // check if this is a process execution point
                 if (typeof entry.point === 'number' && entry.point > 0) {
-                    // Find if we need to extend an existing entry or create a new one
+                    // find if we need to extend an existing entry or create a new one
                     const lastEntry = ganttChart[ganttChart.length - 1];
                     
                     if (lastEntry && lastEntry.processId === entry.point && lastEntry.endTime === entry.timer) {
-                        // Extend the existing entry
+                        // extend the existing entry
                         lastEntry.endTime = entry.timer + 1;
                     } else {
-                        // Create a new entry
+                        // create a new entry
                         ganttChart.push({
                             processId: entry.point,
                             startTime: entry.timer,
@@ -311,7 +311,7 @@ class TestSolutionService {
             customDataLength: data.customData?.length
         });
         
-        // Convert frames and customData to step results
+        // convert frames and customData to step results
         const stepResults = this.convertFramesToStepResults(
             data.frames || [], 
             data.customData || [], 
@@ -382,7 +382,7 @@ class TestSolutionService {
             const frameState = frames[i] || [];
             const stepData = customData[i] || {};
             
-            // Convert -1 to null for empty frames
+            // convert -1 to null for empty frames
             const convertedFrameState = frameState.map(f => f === -1 ? null : f);
             
             const stepResult = {
@@ -411,7 +411,7 @@ class TestSolutionService {
         console.log('User Solution:', JSON.stringify(userSolution, null, 2));
         console.log('Correct Solution:', JSON.stringify(correctSolution, null, 2));
         
-        // Check if this is a memory question
+        // check if this is a memory question
         if ('totalPageFaults' in userSolution && 'totalPageFaults' in correctSolution) {
             return this.compareMemoryAnswers(userSolution, correctSolution);
         } else if ('sequence' in userSolution && 'sequence' in correctSolution) {
@@ -436,7 +436,7 @@ class TestSolutionService {
         let score = 0;
         const tolerance = 0.1; // Allow small rounding differences
 
-        // Check process-specific results (60% of score)
+        // check process-specific results (60% of score)
         const processScore = this.compareProcessResults(
             userSolution.processes, 
             correctSolution.processes
@@ -452,7 +452,7 @@ class TestSolutionService {
         if (waitingTimeCorrect) score += 15;
         console.log('Waiting Time - User:', userSolution.avgWaitingTime, 'Correct:', correctSolution.avgWaitingTime, 'Diff:', waitingTimeDiff, 'Correct:', waitingTimeCorrect);
 
-        // Check average turnaround time (15% of score)
+        // check average turnaround time (15% of score)
         const turnaroundTimeDiff = Math.abs(
             userSolution.avgTurnaroundTime - correctSolution.avgTurnaroundTime
         );
@@ -460,7 +460,7 @@ class TestSolutionService {
         if (turnaroundTimeCorrect) score += 15;
         console.log('Turnaround Time - User:', userSolution.avgTurnaroundTime, 'Correct:', correctSolution.avgTurnaroundTime, 'Diff:', turnaroundTimeDiff, 'Correct:', turnaroundTimeCorrect);
 
-        // Check completion time (10% of score)
+        // check completion time (10% of score)
         const completionTimeDiff = Math.abs(
             userSolution.completionTime - correctSolution.completionTime
         );
@@ -518,7 +518,7 @@ class TestSolutionService {
         let correctSteps = 0;
         let correctPageFaults = 0;
 
-        // Compare each step (80% of score)
+        // compare each step (80% of score)
         for (let i = 0; i < totalSteps; i++) {
             const userStep = userSolution.stepResults[i];
             const correctStep = correctSolution.stepResults[i];
@@ -532,15 +532,15 @@ class TestSolutionService {
             console.log('  User Step:', JSON.stringify(userStep));
             console.log('  Correct Step:', JSON.stringify(correctStep));
 
-            // Check frame state
+            // check frame state
             let frameStateCorrect = true;
             if (userStep.frameState.length === correctStep.frameState.length) {
                 for (let j = 0; j < correctStep.frameState.length; j++) {
                     const userFrame = userStep.frameState[j];
                     const correctFrame = correctStep.frameState[j];
                     
-                    // Handle null/undefined comparison carefully
-                    // Both null/undefined should be considered equal (empty frame)
+                    // handle null/undefined comparison carefully
+                    // both null/undefined should be considered equal (empty frame)
                     const userIsEmpty = userFrame === null || userFrame === undefined;
                     const correctIsEmpty = correctFrame === null || correctFrame === undefined;
                     
@@ -558,7 +558,7 @@ class TestSolutionService {
                 frameStateCorrect = false;
             }
 
-            // Check page fault
+            // check page fault
             const pageFaultCorrect = userStep.pageFault === correctStep.pageFault;
             
             console.log(`  Frame State Correct: ${frameStateCorrect}, Page Fault Correct: ${pageFaultCorrect}`);
@@ -573,7 +573,7 @@ class TestSolutionService {
             }
         }
 
-        // Score based on correct steps (80%) and page fault accuracy (20%)
+        // score based on correct steps (80%) and page fault accuracy (20%)
         const stepScore = (correctSteps / totalSteps) * 80;
         const pageFaultScore = (correctPageFaults / totalSteps) * 20;
         score = stepScore + pageFaultScore;
@@ -614,13 +614,13 @@ class TestSolutionService {
         console.log('User Disk Solution:', JSON.stringify(userSolution, null, 2));
         console.log('Correct Disk Solution:', JSON.stringify(correctSolution, null, 2));
 
-        // Check sequence (50% of score) - give partial credit
+        // check sequence (50% of score) - give partial credit
         let sequenceScore = 0;
         const sequenceCorrect = JSON.stringify(userSolution.sequence) === JSON.stringify(correctSolution.sequence);
         if (sequenceCorrect) {
             sequenceScore = 50;
         } else {
-            // Give partial credit for correct positions
+            // give partial credit for correct positions
             const minLength = Math.min(userSolution.sequence.length, correctSolution.sequence.length);
             let correctPositions = 0;
             for (let i = 0; i < minLength; i++) {
@@ -628,7 +628,7 @@ class TestSolutionService {
                     correctPositions++;
                 }
             }
-            // Partial credit: (correct positions / total positions) * 50
+            // partial credit: (correct positions / total positions) * 50
             if (correctSolution.sequence.length > 0) {
                 sequenceScore = (correctPositions / correctSolution.sequence.length) * 50;
             }
@@ -636,14 +636,14 @@ class TestSolutionService {
         score += sequenceScore;
         console.log('Sequence - User:', userSolution.sequence, 'Correct:', correctSolution.sequence, 'Partial Score:', sequenceScore);
 
-        // Check total seek time (30% of score) - give partial credit for close answers
+        // check total seek time (30% of score) - give partial credit for close answers
         const totalSeekTimeDiff = Math.abs(userSolution.totalSeekTime - correctSolution.totalSeekTime);
         const totalSeekTimeCorrect = totalSeekTimeDiff <= tolerance;
         let seekTimeScore = 0;
         if (totalSeekTimeCorrect) {
             seekTimeScore = 30;
         } else if (correctSolution.totalSeekTime > 0) {
-            // Give partial credit based on how close the answer is (within 20% gets some points)
+            // give partial credit based on how close the answer is (within 20% gets some points)
             const percentError = totalSeekTimeDiff / correctSolution.totalSeekTime;
             if (percentError <= 0.2) { // Within 20%
                 seekTimeScore = 30 * (1 - percentError / 0.2) * 0.5; // Up to 15 points for close answers
@@ -652,14 +652,14 @@ class TestSolutionService {
         score += seekTimeScore;
         console.log('Total Seek Time - User:', userSolution.totalSeekTime, 'Correct:', correctSolution.totalSeekTime, 'Diff:', totalSeekTimeDiff, 'Partial Score:', seekTimeScore);
 
-        // Check average seek time (20% of score) - give partial credit
+        // check average seek time (20% of score) - give partial credit
         const averageSeekTimeDiff = Math.abs(userSolution.averageSeekTime - correctSolution.averageSeekTime);
         const averageSeekTimeCorrect = averageSeekTimeDiff <= tolerance;
         let avgSeekTimeScore = 0;
         if (averageSeekTimeCorrect) {
             avgSeekTimeScore = 20;
         } else if (correctSolution.averageSeekTime > 0) {
-            // Give partial credit based on how close the answer is
+            // give partial credit based on how close the answer is
             const percentError = averageSeekTimeDiff / correctSolution.averageSeekTime;
             if (percentError <= 0.2) { // Within 20%
                 avgSeekTimeScore = 20 * (1 - percentError / 0.2) * 0.5; // Up to 10 points for close answers

@@ -8,7 +8,7 @@ class ApiService {
     async request(url: string, options: ApiOptions = {}): Promise<Response> {
         const { requiresAuth = false, ...fetchOptions } = options;
 
-        // If authentication is required, get a valid access token
+        // if authentication is required, get a valid access token
         if (requiresAuth) {
             const accessToken = await tokenService.getValidAccessToken();
             
@@ -18,26 +18,26 @@ class ApiService {
                 throw new Error('Authentication required');
             }
 
-            // Add authorization header
+            // add authorization header
             fetchOptions.headers = {
                 ...fetchOptions.headers,
                 'Authorization': `Bearer ${accessToken}`,
             };
         }
 
-        // Make the API call
+        // make the API call
         const response = await fetch(url, fetchOptions);
 
-        // Handle token expiration
+        // handle token expiration
         if (response.status === 401 && requiresAuth) {
             const data = await response.json().catch(() => ({}));
             
             if (data.code === 'TOKEN_EXPIRED') {
-                // Try to refresh token and retry the request
+                // try to refresh token and retry the request
                 const newAccessToken = await tokenService.refreshAccessToken();
                 
                 if (newAccessToken) {
-                    // Retry the request with new token
+                    // retry the request with new token
                     fetchOptions.headers = {
                         ...fetchOptions.headers,
                         'Authorization': `Bearer ${newAccessToken.accessToken}`,

@@ -14,7 +14,7 @@ function generateDiskSchedulingQuestion(difficulty = 'medium') {
     
     let maxDiskSize, requestCount, initialHeadPosition, requests;
     
-    // Set parameters based on difficulty
+    // set parameters based on difficulty
     switch (difficulty) {
         case 'easy':
             maxDiskSize = 100;
@@ -33,10 +33,10 @@ function generateDiskSchedulingQuestion(difficulty = 'medium') {
             requestCount = Math.floor(Math.random() * 4) + 5;
     }
     
-    // Generate random initial head position
+    // generate random initial head position
     initialHeadPosition = Math.floor(Math.random() * maxDiskSize);
     
-    // Generate random requests
+    // generate random requests
     requests = [];
     for (let i = 0; i < requestCount; i++) {
         let request;
@@ -46,10 +46,10 @@ function generateDiskSchedulingQuestion(difficulty = 'medium') {
         requests.push(request);
     }
     
-    // Random head direction for algorithms that need it
+    // random head direction for algorithms that need it
     const headDirection = Math.random() > 0.5 ? 'right' : 'left';
     
-    // Generate the correct solution
+    // generate the correct solution
     const solution = simulateDiskScheduling(
         algorithm,
         requests,
@@ -58,7 +58,7 @@ function generateDiskSchedulingQuestion(difficulty = 'medium') {
         headDirection
     );
     
-    // Generate description
+    // generate description with algorithm name and parameters
     const algorithmName = getDiskAlgorithmFullName(algorithm.toUpperCase());
     const needsDirection = ['SCAN', 'C-SCAN', 'LOOK', 'C-LOOK'].includes(algorithm.toUpperCase());
     const directionText = needsDirection ? ` The disk head is currently moving in the ${headDirection} direction.` : '';
@@ -118,7 +118,7 @@ function checkAnswer(userAnswer, correctAnswer) {
         correctAnswer
     };
     
-    // Check sequence
+    // check sequence
     if (userAnswer.sequence && Array.isArray(userAnswer.sequence)) {
         const userSeq = userAnswer.sequence.map(n => parseInt(n));
         const correctSeq = correctAnswer.sequence;
@@ -133,7 +133,7 @@ function checkAnswer(userAnswer, correctAnswer) {
         feedback.feedback.push("Sequence is missing or invalid");
     }
     
-    // Check total seek time
+    // check total seek time
     if (userAnswer.totalSeekTime !== undefined) {
         const userSeekTime = parseInt(userAnswer.totalSeekTime);
         const correctSeekTime = correctAnswer.totalSeekTime;
@@ -148,7 +148,7 @@ function checkAnswer(userAnswer, correctAnswer) {
         feedback.feedback.push("Total seek time is missing");
     }
     
-    // Check average seek time (with tolerance for rounding)
+    // check average seek time (with tolerance for rounding)
     if (userAnswer.averageSeekTime !== undefined) {
         const userAvgSeekTime = parseFloat(userAnswer.averageSeekTime);
         const correctAvgSeekTime = correctAnswer.averageSeekTime;
@@ -195,8 +195,8 @@ function generateCustomTest(params) {
     if (initialHeadPosition === undefined || initialHeadPosition < 0 || initialHeadPosition >= maxDiskSize) {
         throw new Error('Invalid initial head position');
     }
-    
-    // Generate the correct solution
+
+    // generate the correct solution
     const solution = simulateDiskScheduling(
         algorithm.toLowerCase(),
         requests,

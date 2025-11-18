@@ -24,10 +24,10 @@ class TestSessionManager {
     }
 
     async startTest(config: TestConfig): Promise<TestSession> {
-        // Generate questions from backend
+        // generate questions from backend
         const { sessionId, questions } = await testQuestionGenerator.generateQuestions(config);
         
-        // Create test session
+        // create test session
         this.currentSession = {
             id: sessionId, // Use backend session ID
             config,
@@ -85,8 +85,8 @@ class TestSessionManager {
         const question = this.currentSession.questions.find((q: TestQuestion) => q.id === questionId);
         if (!question) return null;
 
-        // Store user's answer without verification
-        // Verification will happen on backend after test completion
+        // store user's answer without verification
+        // verification will happen on backend after test completion
         const userAnswer: UserAnswer = {
             questionId,
             userSolution,
@@ -96,7 +96,7 @@ class TestSessionManager {
             maxScore: 100
         };
 
-        // Update or add the answer
+        // update or add the answer
         const existingAnswerIndex = this.currentSession.userAnswers.findIndex(
             (answer: UserAnswer) => answer.questionId === questionId
         );
@@ -121,30 +121,30 @@ class TestSessionManager {
         this.currentSession.endTime = new Date();
         
         try {
-            // Get correct answers from backend
+            // get correct answers from backend
             const correctAnswers = await testQuestionGenerator.getCorrectAnswers(this.currentSession.id);
             
-            // Match user answers with correct answers and calculate scores
+            // match user answers with correct answers and calculate scores
             for (const userAnswer of this.currentSession.userAnswers) {
                 const correctAnswer = correctAnswers.find((ca: any) => ca.id === userAnswer.questionId);
                 if (correctAnswer) {
-                    // Calculate the expected solution from correct answer data
+                    // calculate the expected solution from correct answer data
                     const question = this.currentSession.questions.find(q => q.id === userAnswer.questionId);
                     if (question) {
-                        // Use the correct answer from backend to calculate solution
+                        // use the correct answer from backend to calculate solution
                         const expectedSolution = await testSolutionService.calculateSolution({
                             ...question,
-                            // Override with backend's correct answer parameters
+                            // override with backend's correct answer parameters
                             ...correctAnswer
                         });
                         
-                        // Compare user's solution with the expected solution
+                        // compare user's solution with the expected solution
                         const comparison = testSolutionService.compareAnswers(
                             userAnswer.userSolution,
                             expectedSolution
                         );
                         
-                        // Update user answer with results
+                        // update user answer with results
                         userAnswer.correctSolution = expectedSolution;
                         userAnswer.isCorrect = comparison.isCorrect;
                         userAnswer.score = comparison.score;
@@ -156,7 +156,7 @@ class TestSessionManager {
             console.error('Failed to retrieve and verify correct answers:', error);
         }
         
-        // Calculate total score based on verified answers
+        // calculate total score based on verified answers
         const totalScore = this.currentSession.userAnswers.reduce(
             (sum: number, answer: UserAnswer) => sum + answer.score, 0
         );
@@ -164,7 +164,7 @@ class TestSessionManager {
         this.currentSession.score = maxPossibleScore > 0 ? 
             Math.round((totalScore / maxPossibleScore) * 100) : 0;
 
-        // Save test result to backend if user is logged in
+        // save test result to backend if user is logged in
         if (isAuthenticated()) {
             const results = this.getTestResults();
             if (results) {

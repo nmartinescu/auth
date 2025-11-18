@@ -24,10 +24,10 @@ class TestSessionManager {
     }
 
     async startTest(config: TestConfig): Promise<TestSession> {
-        // Generate questions from backend
+        // generate questions from backend
         const { sessionId, questions } = await testQuestionGenerator.generateQuestions(config);
         
-        // Calculate correct solutions for all questions
+        // calculate correct solutions for all questions
         for (const question of questions) {
             try {
                 question.expectedSolution = await testSolutionService.calculateSolution(question);
@@ -36,7 +36,7 @@ class TestSessionManager {
             }
         }
 
-        // Create test session
+        // create test session
         this.currentSession = {
             id: sessionId, // Use backend session ID
             config,

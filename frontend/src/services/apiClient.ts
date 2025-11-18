@@ -1,11 +1,9 @@
 import axios from 'axios';
 
-// Get token from local storage
 const getToken = () => {
   return localStorage.getItem('authToken'); // Changed from 'token' to 'authToken'
 };
 
-// Create axios instance with default config
 export const apiClient = axios.create({
   baseURL: 'http://localhost:5000',
   headers: {
@@ -13,7 +11,6 @@ export const apiClient = axios.create({
   },
 });
 
-// Request interceptor to add auth token to requests
 apiClient.interceptors.request.use(
   (config) => {
     const token = getToken();
@@ -33,20 +30,19 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Response interceptor to handle common errors
 apiClient.interceptors.response.use(
   (response) => {
     return response;
   },
   (error) => {
-    // Handle session expiry or unauthorized
+    // handle session expiry or unauthorized
     if (error.response?.status === 401) {
       console.error('Session expired or unauthorized');
-      // Remove invalid token
+      // remove invalid token
       localStorage.removeItem('authToken');
       localStorage.removeItem('user');
       
-      // Only redirect if we're not already on the login page
+      // only redirect if we're not already on the login page
       if (window.location.pathname !== '/login') {
         console.log('Redirecting to login due to expired token...');
         window.location.href = '/login';
