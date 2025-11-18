@@ -24,8 +24,8 @@ class TestSessionManager {
     }
 
     async startTest(config: TestConfig): Promise<TestSession> {
-        // Generate questions
-        const questions = testQuestionGenerator.generateQuestions(config);
+        // Generate questions from backend
+        const { sessionId, questions } = await testQuestionGenerator.generateQuestions(config);
         
         // Calculate correct solutions for all questions
         for (const question of questions) {
@@ -38,7 +38,7 @@ class TestSessionManager {
 
         // Create test session
         this.currentSession = {
-            id: `test-${Date.now()}`,
+            id: sessionId, // Use backend session ID
             config,
             questions,
             currentQuestionIndex: 0,
@@ -210,6 +210,11 @@ class TestSessionManager {
     }
 
     resetSession(): void {
+        // Clean up backend session if exists
+        if (this.currentSession?.id) {
+            testQuestionGenerator.cleanupSession(this.currentSession.id)
+                .catch(error => console.error('Failed to cleanup session:', error));
+        }
         this.currentSession = null;
     }
 

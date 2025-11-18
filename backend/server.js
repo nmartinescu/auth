@@ -8,6 +8,7 @@ import memoryRoutes from "./routes/memory.js";
 import diskRoutes from "./routes/disk.js";
 import simulationRoutes from "./routes/simulations/index.js";
 import testResultsRoutes from "./routes/testResults.js";
+import testGenerationRoutes from "./routes/testGeneration.js";
 import { connectDB } from "./config/db.js";
 import { generalLimiter } from "./middleware/rateLimiter.js";
 import path from "path";
@@ -68,6 +69,7 @@ app.use("/api/memory", memoryRoutes);
 app.use("/api/disk", diskRoutes);
 app.use("/api/simulations", simulationRoutes);
 app.use("/api/test-results", testResultsRoutes);
+app.use("/api/test-generation", testGenerationRoutes);
 
 app.use((error, req, res, next) => {
     console.error("Unhandled error:", error);
