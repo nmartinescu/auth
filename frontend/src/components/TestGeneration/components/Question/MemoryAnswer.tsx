@@ -137,81 +137,89 @@ const MemoryAnswer = ({
                                     </Text>
                                 </GridItem>
                                 {step.frameState.map(
-                                    (frameValue, frameIndex) => (
-                                        <GridItem
-                                            key={frameIndex}
-                                            p={3}
-                                            borderRight="1px"
-                                            borderColor={borderColor}
-                                        >
-                                            {reviewMode ? (
-                                                <VStack align="start" gap={1}>
-                                                    <Text
-                                                        color={
-                                                            correctStep &&
-                                                            frameValue ===
-                                                                correctStep
+                                    (frameValue, frameIndex) => {
+                                        // normalize values for comparison: treat 0, null, undefined as empty frame
+                                        const normalizeFrame = (frame: any) => {
+                                            if (frame === null || frame === undefined || frame === 0) {
+                                                return null;
+                                            }
+                                            return frame;
+                                        };
+                                        
+                                        const isFrameCorrect = correctStep &&
+                                            normalizeFrame(frameValue) === normalizeFrame(correctStep.frameState[frameIndex]);
+                                        
+                                        return (
+                                            <GridItem
+                                                key={frameIndex}
+                                                p={3}
+                                                borderRight="1px"
+                                                borderColor={borderColor}
+                                            >
+                                                {reviewMode ? (
+                                                    <VStack align="start" gap={1}>
+                                                        <Text
+                                                            color={
+                                                                isFrameCorrect
+                                                                    ? "green.600"
+                                                                    : "red.600"
+                                                            }
+                                                            fontWeight="semibold"
+                                                        >
+                                                            Your: {frameValue ?? 0}
+                                                        </Text>
+                                                        {correctStep && (
+                                                            <Text
+                                                                color={textColor}
+                                                                fontSize="sm"
+                                                            >
+                                                                Correct:{" "}
+                                                                {correctStep
                                                                     .frameState[
                                                                     frameIndex
-                                                                ]
-                                                                ? "green.600"
-                                                                : "red.600"
-                                                        }
-                                                        fontWeight="semibold"
-                                                    >
-                                                        Your: {frameValue ?? 0}
-                                                    </Text>
-                                                    {correctStep && (
-                                                        <Text
-                                                            color={textColor}
-                                                            fontSize="sm"
-                                                        >
-                                                            Correct:{" "}
-                                                            {correctStep
-                                                                .frameState[
-                                                                frameIndex
-                                                            ] ?? 0}
-                                                        </Text>
-                                                    )}
-                                                </VStack>
-                                            ) : (
-                                                <Input
-                                                    type="number"
-                                                    value={frameValue ?? 0}
-                                                    onChange={(e) =>
-                                                        handleMemoryFrameChange(
-                                                            stepIndex,
-                                                            frameIndex,
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                    onBlur={(e) => {
-                                                        if (
-                                                            e.target.value ===
-                                                                "" ||
-                                                            isNaN(
-                                                                parseInt(
-                                                                    e.target
-                                                                        .value
-                                                                )
-                                                            )
-                                                        )
+                                                                ] ?? 0}
+                                                            </Text>
+                                                        )}
+                                                    </VStack>
+                                                ) : (
+                                                    <Input
+                                                        type="number"
+                                                        value={frameValue ?? 0}
+                                                        onChange={(e) =>
                                                             handleMemoryFrameChange(
                                                                 stepIndex,
                                                                 frameIndex,
-                                                                "0"
-                                                            );
-                                                    }}
-                                                    size="sm"
-                                                    w="60px"
-                                                    min={0}
-                                                    placeholder="0"
-                                                    color={primaryTextColor}
-                                                    borderRadius="md"
-                                                />
-                                            )}
-                                        </GridItem>
-                                    )
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                        onBlur={(e) => {
+                                                            if (
+                                                                e.target.value ===
+                                                                    "" ||
+                                                                isNaN(
+                                                                    parseInt(
+                                                                        e.target
+                                                                            .value
+                                                                    )
+                                                                )
+                                                            )
+                                                                handleMemoryFrameChange(
+                                                                    stepIndex,
+                                                                    frameIndex,
+                                                                    "0"
+                                                                );
+                                                        }}
+                                                        size="sm"
+                                                        w="60px"
+                                                        min={0}
+                                                        placeholder="0"
+                                                        color={primaryTextColor}
+                                                        borderRadius="md"
+                                                    />
+                                                )}
+                                            </GridItem>
+                                        );
+                                    }
                                 )}
                                 <GridItem
                                     p={3}

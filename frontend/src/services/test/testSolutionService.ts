@@ -515,10 +515,11 @@ class TestSolutionService {
         }
 
         const totalSteps = correctSolution.stepResults.length;
-        let correctSteps = 0;
+        let totalFrames = 0;
+        let correctFrames = 0;
         let correctPageFaults = 0;
 
-        // compare each step (80% of score)
+        // compare each step - score frames and page faults separately
         for (let i = 0; i < totalSteps; i++) {
             const userStep = userSolution.stepResults[i];
             const correctStep = correctSolution.stepResults[i];
@@ -532,54 +533,56 @@ class TestSolutionService {
             console.log('  User Step:', JSON.stringify(userStep));
             console.log('  Correct Step:', JSON.stringify(correctStep));
 
-            // check frame state
-            let frameStateCorrect = true;
+            // check each frame in the step
             if (userStep.frameState.length === correctStep.frameState.length) {
                 for (let j = 0; j < correctStep.frameState.length; j++) {
+                    totalFrames++;
                     const userFrame = userStep.frameState[j];
                     const correctFrame = correctStep.frameState[j];
                     
-                    // handle null/undefined comparison carefully
-                    // both null/undefined should be considered equal (empty frame)
-                    const userIsEmpty = userFrame === null || userFrame === undefined;
-                    const correctIsEmpty = correctFrame === null || correctFrame === undefined;
+                    // normalize values: treat 0, null, undefined as empty frame
+                    const normalizeFrame = (frame: any) => {
+                        if (frame === null || frame === undefined || frame === 0) {
+                            return null;
+                        }
+                        return frame;
+                    };
                     
-                    const framesMatch = (userFrame === correctFrame) || 
-                                       (userIsEmpty && correctIsEmpty);
+                    const normalizedUser = normalizeFrame(userFrame);
+                    const normalizedCorrect = normalizeFrame(correctFrame);
                     
-                    if (!framesMatch) {
+                    const framesMatch = normalizedUser === normalizedCorrect;
+                    
+                    if (framesMatch) {
+                        correctFrames++;
+                        console.log(`  Frame ${j} correct: user=${userFrame}, correct=${correctFrame}`);
+                    } else {
                         console.log(`  Frame ${j} mismatch: user=${userFrame}, correct=${correctFrame}`);
-                        frameStateCorrect = false;
-                        break;
                     }
                 }
             } else {
                 console.log(`  Frame state length mismatch: user=${userStep.frameState.length}, correct=${correctStep.frameState.length}`);
-                frameStateCorrect = false;
+                // still count the frames for total
+                totalFrames += correctStep.frameState.length;
             }
 
-            // check page fault
+            // check page fault separately
             const pageFaultCorrect = userStep.pageFault === correctStep.pageFault;
             
-            console.log(`  Frame State Correct: ${frameStateCorrect}, Page Fault Correct: ${pageFaultCorrect}`);
-            console.log(`  User Page Fault: ${userStep.pageFault}, Correct Page Fault: ${correctStep.pageFault}`);
-            
-            if (frameStateCorrect && pageFaultCorrect) {
-                correctSteps++;
-            }
+            console.log(`  User Page Fault: ${userStep.pageFault}, Correct Page Fault: ${correctStep.pageFault}, Match: ${pageFaultCorrect}`);
             
             if (pageFaultCorrect) {
                 correctPageFaults++;
             }
         }
 
-        // score based on correct steps (80%) and page fault accuracy (20%)
-        const stepScore = (correctSteps / totalSteps) * 80;
-        const pageFaultScore = (correctPageFaults / totalSteps) * 20;
-        score = stepScore + pageFaultScore;
+        // score based on frame accuracy (70%) and page fault accuracy (30%)
+        const frameScore = totalFrames > 0 ? (correctFrames / totalFrames) * 70 : 0;
+        const pageFaultScore = totalSteps > 0 ? (correctPageFaults / totalSteps) * 30 : 0;
+        score = frameScore + pageFaultScore;
 
-        console.log(`Correct Steps: ${correctSteps}/${totalSteps}, Correct Page Faults: ${correctPageFaults}/${totalSteps}`);
-        console.log(`Step Score: ${stepScore}, Page Fault Score: ${pageFaultScore}, Total: ${score}`);
+        console.log(`Correct Frames: ${correctFrames}/${totalFrames}, Correct Page Faults: ${correctPageFaults}/${totalSteps}`);
+        console.log(`Frame Score: ${frameScore.toFixed(2)}, Page Fault Score: ${pageFaultScore.toFixed(2)}, Total: ${score.toFixed(2)}`);
 
         const isCorrect = score >= 80; // 80% threshold for correct answer
         console.log('Final Memory Score:', score, 'Is Correct:', isCorrect);
@@ -590,7 +593,7 @@ class TestSolutionService {
             score: Math.round(score),
             maxScore,
             details: {
-                stepResultsCorrect: correctSteps === totalSteps,
+                stepResultsCorrect: correctFrames === totalFrames,
                 pageFaultsCorrect: correctPageFaults === totalSteps
             }
         };

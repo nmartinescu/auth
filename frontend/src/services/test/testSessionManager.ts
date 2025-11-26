@@ -122,11 +122,11 @@ class TestSessionManager {
         
         try {
             // get correct answers from backend
-            const correctAnswers = await testQuestionGenerator.getCorrectAnswers(this.currentSession.id);
+            const backendAnswers = await testQuestionGenerator.getCorrectAnswers(this.currentSession.id);
             
             // match user answers with correct answers and calculate scores
             for (const userAnswer of this.currentSession.userAnswers) {
-                const correctAnswer = correctAnswers.find((ca: any) => ca.id === userAnswer.questionId);
+                const correctAnswer = backendAnswers.find((ca: any) => ca.id === userAnswer.questionId);
                 if (correctAnswer) {
                     // calculate the expected solution from correct answer data
                     const question = this.currentSession.questions.find(q => q.id === userAnswer.questionId);
