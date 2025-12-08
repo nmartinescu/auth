@@ -215,8 +215,8 @@ export function Process() {
 
             console.log("Sending API request:", apiData);
 
-            // Make the API call
-            const response = await fetch("/api/cpu", {
+            // Make the API call to CPU service
+            const response = await fetch(`${import.meta.env.VITE_CPU_SERVICE_URL || 'http://localhost:5001'}/api/cpu`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

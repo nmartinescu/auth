@@ -1,44 +1,24 @@
 {
-    "name": "express-backend",
+    "name": "ostep-web-microservices",
     "version": "1.0.0",
-    "description": "Express backend server",
-    "main": "server.js",
+    "description": "OSTEP Web Application - Microservices Architecture",
     "type": "module",
     "scripts": {
-        "start": "cross-env NODE_ENV=production node backend/server.js",
-        "dev": "cross-env NODE_ENV=development nodemon backend/server.js",
-        "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend",
-        "test": "cd backend && cross-env NODE_OPTIONS=--experimental-vm-modules jest",
-        "test:watch": "cd backend && cross-env NODE_OPTIONS=--experimental-vm-modules jest --watch",
-        "test:coverage": "cd backend && cross-env NODE_OPTIONS=--experimental-vm-modules jest --coverage --collectCoverage=true",
-        "test:unit": "cd backend && cross-env NODE_OPTIONS=--experimental-vm-modules jest tests/unit",
-        "test:verbose": "cd backend && cross-env NODE_OPTIONS=--experimental-vm-modules jest --verbose"
-    },
-    "dependencies": {
-        "bcryptjs": "^2.4.3",
-        "cors": "^2.8.5",
-        "cross-env": "^10.0.0",
-        "dotenv": "^16.3.1",
-        "express": "^4.18.2",
-        "express-rate-limit": "^8.0.1",
-        "helmet": "^8.1.0",
-        "jsonwebtoken": "^9.0.2",
-        "mongoose": "^8.0.3",
-        "node-fetch": "^3.3.2",
-        "nodemailer": "^7.0.5",
-        "resend": "^4.7.0",
-        "validator": "^13.11.0"
-    },
-    "devDependencies": {
-        "nodemon": "^3.0.1",
-        "jest": "^29.7.0",
-        "supertest": "^6.3.3",
-        "@jest/globals": "^29.7.0"
+        "start:main": "cd backend/main-service && npm start",
+        "start:cpu": "cd backend/cpu-service && npm start",
+        "dev:main": "cd backend/main-service && npm run dev",
+        "dev:cpu": "cd backend/cpu-service && npm run dev",
+        "dev:frontend": "cd frontend && npm run dev",
+        "install:all": "npm install && cd backend/main-service && npm install && cd ../cpu-service && npm install && cd ../../frontend && npm install",
+        "test:main": "cd backend/main-service && npm test",
+        "test:cpu": "cd backend/cpu-service && npm test"
     },
     "keywords": [
+        "microservices",
         "express",
         "backend",
-        "api"
+        "api",
+        "ostep"
     ],
     "author": "Martinescu Nicolae",
     "license": "ISC"

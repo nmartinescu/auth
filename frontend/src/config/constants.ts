@@ -8,7 +8,18 @@ const getApiBaseUrl = () => {
     return 'https://ostep-web.onrender.com';
 };
 
+const getCpuServiceUrl = () => {
+    // Development: when running locally (npm run dev)
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        return 'http://localhost:5001';
+    }
+
+    // Production: update with your CPU service URL
+    return 'https://cpu-service.onrender.com'; // Update this when deployed
+};
+
 export const API_BASE_URL = getApiBaseUrl();
+export const CPU_SERVICE_URL = getCpuServiceUrl();
 
 // API Endpoints
 export const API_ENDPOINTS = {
@@ -19,6 +30,9 @@ export const API_ENDPOINTS = {
         RESET_PASSWORD: `${API_BASE_URL}/api/auth/password/reset`,
         DELETE_ACCOUNT: `${API_BASE_URL}/api/auth/account/delete`,
         REFRESH: `${API_BASE_URL}/api/auth/refresh`,
+    },
+    CPU: {
+        SIMULATE: `${CPU_SERVICE_URL}/api/cpu`,
     }
 } as const;
 

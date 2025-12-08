@@ -60,8 +60,8 @@ class TestSolutionService {
         console.log('Algorithm:', question.algorithm);
         console.log('Request Data:', JSON.stringify(requestData, null, 2));
 
-        // call backend scheduler
-        const response = await fetch('/api/cpu', {
+        // call CPU scheduling service
+        const response = await fetch(`${import.meta.env.VITE_CPU_SERVICE_URL || 'http://localhost:5001'}/api/cpu`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

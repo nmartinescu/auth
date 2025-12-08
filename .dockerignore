@@ -1,6 +1,0 @@
-./logs
-./node_modules
-.env
-.gitignore
-./EMAIL_SETUP.md 
-.vscode
