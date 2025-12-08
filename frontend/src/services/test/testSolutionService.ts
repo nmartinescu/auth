@@ -1,4 +1,5 @@
 import type { TestQuestion, TestSolution, MemoryTestSolution, DiskTestSolution, ProcessResult, GanttEntry } from '../../types/Test.ts';
+import { MEMORY_SERVICE_URL, DISK_SERVICE_URL, CPU_SERVICE_URL } from '../../config/constants.ts';
 
 class TestSolutionService {
     private static instance: TestSolutionService;
@@ -61,7 +62,7 @@ class TestSolutionService {
         console.log('Request Data:', JSON.stringify(requestData, null, 2));
 
         // call CPU scheduling service
-        const response = await fetch(`${import.meta.env.VITE_CPU_SERVICE_URL || 'http://localhost:5001'}/api/cpu`, {
+        const response = await fetch(`${CPU_SERVICE_URL}/api/cpu`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -103,7 +104,7 @@ class TestSolutionService {
         };
 
         // call backend memory management API
-        const response = await fetch('/api/memory', {
+        const response = await fetch(`${MEMORY_SERVICE_URL}/api/memory`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -149,7 +150,7 @@ class TestSolutionService {
         console.log('Request data being sent:', JSON.stringify(requestData, null, 2));
 
         // call backend disk scheduling API
-        const response = await fetch('/api/disk', {
+        const response = await fetch(`${DISK_SERVICE_URL}/api/disk`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

@@ -1,7 +1,7 @@
 {
     "name": "main-service",
     "version": "1.0.0",
-    "description": "Main backend service - Authentication, Memory, Disk, Test Generation",
+    "description": "Main backend service - Authentication and Account Operations",
     "main": "server.js",
     "type": "module",
     "scripts": {

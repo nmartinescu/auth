@@ -6,12 +6,21 @@
     "scripts": {
         "start:main": "cd backend/main-service && npm start",
         "start:cpu": "cd backend/cpu-service && npm start",
+        "start:disk": "cd backend/disk-service && npm start",
+        "start:memory": "cd backend/memory-service && npm start",
+        "start:test": "cd backend/test-service && npm start",
         "dev:main": "cd backend/main-service && npm run dev",
         "dev:cpu": "cd backend/cpu-service && npm run dev",
+        "dev:disk": "cd backend/disk-service && npm run dev",
+        "dev:memory": "cd backend/memory-service && npm run dev",
+        "dev:test": "cd backend/test-service && npm run dev",
         "dev:frontend": "cd frontend && npm run dev",
-        "install:all": "npm install && cd backend/main-service && npm install && cd ../cpu-service && npm install && cd ../../frontend && npm install",
+        "install:all": "npm install && cd backend/main-service && npm install && cd ../cpu-service && npm install && cd ../disk-service && npm install && cd ../memory-service && npm install && cd ../test-service && npm install && cd ../../frontend && npm install",
         "test:main": "cd backend/main-service && npm test",
-        "test:cpu": "cd backend/cpu-service && npm test"
+        "test:cpu": "cd backend/cpu-service && npm test",
+        "test:disk": "cd backend/disk-service && npm test",
+        "test:memory": "cd backend/memory-service && npm test",
+        "test:test": "cd backend/test-service && npm test"
     },
     "keywords": [
         "microservices",

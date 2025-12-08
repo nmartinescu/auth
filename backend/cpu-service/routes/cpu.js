@@ -4,8 +4,12 @@ import SchedulerSJF from "../algorithms/algorithms/SchedulerSJF.js";
 import SchedulerRR from "../algorithms/algorithms/SchedulerRR.js";
 import SchedulerSTCF from "../algorithms/algorithms/SchedulerSTCF.js";
 import SchedulerMLFQ from "../algorithms/algorithms/SchedulerMLFQ.js";
+import cpuTestRoutes from "./cpuTest.js";
 
 const router = express.Router();
+
+// Mount test routes
+router.use("/test", cpuTestRoutes);
 
 /**
  * POST /

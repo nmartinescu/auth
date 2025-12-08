@@ -22,7 +22,7 @@ import {
 } from "react-icons/lu";
 import { useColorModeValue } from "../ui/color-mode";
 import { FormActionButtons, ActionButton } from "../ui/FormActionButtons";
-import { API_BASE_URL } from "../../config/constants";
+import { MEMORY_SERVICE_URL } from "../../config/constants";
 import { MEMORY_ALGORITHMS } from "../../config/memoryConstants";
 import { createListCollection } from "@chakra-ui/react";
 import MemorySolution from "../solution/memory/MemorySolution";
@@ -120,7 +120,7 @@ export function Memory() {
             console.log("Starting memory management simulation...");
             console.log("Input data:", body);
 
-            const response = await fetch(`${API_BASE_URL}/api/memory`, {
+            const response = await fetch(`${MEMORY_SERVICE_URL}/api/memory`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

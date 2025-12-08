@@ -3,7 +3,7 @@
  * main service for handling page replacement algorithm simulations
  */
 
-import { fifo, lru, lfu, optimal, mru } from "../algorithms/memory/index.js";
+import { fifo, lru, lfu, optimal, mru } from "../algorithms/index.js";
 
 /**
  * main memory management function

@@ -18,8 +18,41 @@ const getCpuServiceUrl = () => {
     return 'https://cpu-service.onrender.com'; // Update this when deployed
 };
 
+const getDiskServiceUrl = () => {
+    // Development: when running locally (npm run dev)
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        return 'http://localhost:5002';
+    }
+
+    // Production: update with your Disk service URL
+    return 'https://disk-service.onrender.com'; // Update this when deployed
+};
+
+const getMemoryServiceUrl = () => {
+    // Development: when running locally (npm run dev)
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        return 'http://localhost:5003';
+    }
+
+    // Production: update with your Memory service URL
+    return 'https://memory-service.onrender.com'; // Update this when deployed
+};
+
+const getTestServiceUrl = () => {
+    // Development: when running locally (npm run dev)
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        return 'http://localhost:5004';
+    }
+
+    // Production: update with your Test service URL
+    return 'https://test-service.onrender.com'; // Update this when deployed
+};
+
 export const API_BASE_URL = getApiBaseUrl();
 export const CPU_SERVICE_URL = getCpuServiceUrl();
+export const DISK_SERVICE_URL = getDiskServiceUrl();
+export const MEMORY_SERVICE_URL = getMemoryServiceUrl();
+export const TEST_SERVICE_URL = getTestServiceUrl();
 
 // API Endpoints
 export const API_ENDPOINTS = {
@@ -33,6 +66,35 @@ export const API_ENDPOINTS = {
     },
     CPU: {
         SIMULATE: `${CPU_SERVICE_URL}/api/cpu`,
+    },
+    DISK: {
+        SIMULATE: `${DISK_SERVICE_URL}/api/disk`,
+        TEST: {
+            GENERATE: `${DISK_SERVICE_URL}/api/disk/test/generate`,
+            GENERATE_MULTIPLE: `${DISK_SERVICE_URL}/api/disk/test/generate-multiple`,
+            CUSTOM: `${DISK_SERVICE_URL}/api/disk/test/custom`,
+            CHECK: `${DISK_SERVICE_URL}/api/disk/test/check`,
+        }
+    },
+    MEMORY: {
+        SIMULATE: `${MEMORY_SERVICE_URL}/api/memory`,
+    },
+    TEST_GENERATION: {
+        GENERATE: `${TEST_SERVICE_URL}/api/test-generation/generate`,
+        GENERATE_BY_TYPE: `${TEST_SERVICE_URL}/api/test-generation/generate-by-type`,
+        CUSTOM: `${TEST_SERVICE_URL}/api/test-generation/custom`,
+        CHECK: `${TEST_SERVICE_URL}/api/test-generation/check`,
+    },
+    SIMULATIONS: {
+        SAVE: `${API_BASE_URL}/api/simulations`,
+        GET_ALL: `${API_BASE_URL}/api/simulations`,
+        GET_BY_ID: `${API_BASE_URL}/api/simulations`,
+        DELETE: `${API_BASE_URL}/api/simulations`,
+    },
+    TEST_RESULTS: {
+        SAVE: `${API_BASE_URL}/api/test-results`,
+        GET_ALL: `${API_BASE_URL}/api/test-results`,
+        GET_BY_ID: `${API_BASE_URL}/api/test-results`,
     }
 } as const;
 
@@ -41,5 +103,9 @@ export const ENV_INFO = {
     hostname: typeof window !== 'undefined' ? window.location.hostname : 'unknown',
     origin: typeof window !== 'undefined' ? window.location.origin : 'unknown',
     apiBaseUrl: API_BASE_URL,
+    cpuServiceUrl: CPU_SERVICE_URL,
+    diskServiceUrl: DISK_SERVICE_URL,
+    memoryServiceUrl: MEMORY_SERVICE_URL,
+    testServiceUrl: TEST_SERVICE_URL,
     isProduction: window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1',
 } as const;

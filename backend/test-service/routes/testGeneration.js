@@ -1,5 +1,5 @@
 import express from 'express';
-import { generateMixedTest, generateTestByType, generateCustomTest } from '../services/test/testGenerationService.js';
+import { generateMixedTest, generateTestByType, generateCustomTest } from '../services/testGenerationService.js';
 
 const router = express.Router();
 
@@ -18,7 +18,7 @@ const testStore = new Map();
  *   includeDisk: true
  * }
  */
-router.post('/generate', (req, res) => {
+router.post('/generate', async (req, res) => {
     try {
         const config = req.body;
         
@@ -39,7 +39,7 @@ router.post('/generate', (req, res) => {
         }
         
         // generate test
-        const testData = generateMixedTest(config);
+        const testData = await generateMixedTest(config);
         
         // create session ID
         const sessionId = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -84,7 +84,7 @@ router.post('/generate', (req, res) => {
  *   algorithm?: 'FCFS' | 'SJF' | ...
  * }
  */
-router.post('/generate-by-type', (req, res) => {
+router.post('/generate-by-type', async (req, res) => {
     try {
         const { type, count = 1, difficulty = 'medium', algorithm } = req.body;
         
@@ -111,7 +111,7 @@ router.post('/generate-by-type', (req, res) => {
         }
         
         // generate test
-        const testData = generateTestByType(type, count, difficulty, algorithm);
+        const testData = await generateTestByType(type, count, difficulty, algorithm);
         
         // create session ID
         const sessionId = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -157,7 +157,7 @@ router.post('/generate-by-type', (req, res) => {
  *   ...customParams (type-specific)
  * }
  */
-router.post('/custom', (req, res) => {
+router.post('/custom', async (req, res) => {
     try {
         const params = req.body;
         
@@ -169,7 +169,7 @@ router.post('/custom', (req, res) => {
         }
         
         // generate custom test
-        const testData = generateCustomTest(params);
+        const testData = await generateCustomTest(params);
         
         // create session ID
         const sessionId = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;

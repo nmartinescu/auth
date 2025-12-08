@@ -10,7 +10,7 @@ import {
     cscan,
     look,
     clook,
-} from "../algorithms/disk/index.js";
+} from "../algorithms/index.js";
 
 /**
  * main disk scheduling function

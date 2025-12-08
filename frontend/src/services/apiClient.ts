@@ -1,11 +1,19 @@
 import axios from 'axios';
+import { API_BASE_URL, TEST_SERVICE_URL } from '../config/constants';
 
 const getToken = () => {
   return localStorage.getItem('authToken'); // Changed from 'token' to 'authToken'
 };
 
+// Helper function to determine the correct base URL
+const getBaseURL = (url?: string) => {
+  if (url?.includes('/api/test-generation')) {
+    return TEST_SERVICE_URL;
+  }
+  return API_BASE_URL;
+};
+
 export const apiClient = axios.create({
-  baseURL: 'http://localhost:5000',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -13,6 +21,9 @@ export const apiClient = axios.create({
 
 apiClient.interceptors.request.use(
   (config) => {
+    // Set the baseURL dynamically based on the endpoint
+    config.baseURL = getBaseURL(config.url);
+    
     const token = getToken();
     console.log("Token from localStorage:", token ? "Token found" : "No token");
     
@@ -21,7 +32,7 @@ apiClient.interceptors.request.use(
       console.log("Added Authorization header to request");
     }
     
-    console.log("Making request to:", config.url, "with method:", config.method);
+    console.log("Making request to:", config.baseURL + config.url, "with method:", config.method);
     return config;
   },
   (error) => {

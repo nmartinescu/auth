@@ -22,7 +22,7 @@ import {
 } from "react-icons/lu";
 import { useColorModeValue } from "../ui/color-mode";
 import { FormActionButtons, ActionButton } from "../ui/FormActionButtons";
-import { API_BASE_URL } from "../../config/constants";
+import { DISK_SERVICE_URL } from "../../config/constants";
 import { DISK_ALGORITHMS, HEAD_DIRECTIONS, algorithmOptions, directionOptions } from "../../config/diskConstants";
 import DiskSolution from "../solution/disk/DiskSolution";
 import ActionModal from "../ui/ActionModal";
@@ -131,7 +131,7 @@ export function Disk() {
             console.log("Starting disk scheduling simulation...");
             console.log("Input data:", body);
 
-            const response = await fetch(`${API_BASE_URL}/api/disk`, {
+            const response = await fetch(`${DISK_SERVICE_URL}/api/disk`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
