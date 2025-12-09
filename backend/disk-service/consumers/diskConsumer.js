@@ -58,9 +58,24 @@ async function processDiskScheduling(message, channel) {
     } catch (error) {
         console.error("Disk scheduling error:", error);
         
+        let errorMessage = error.message || "Error running disk scheduling simulation";
+        let errorDetails = null;
+
+        // Provide more user-friendly error messages
+        if (error.message?.includes("must be a non empty array")) {
+            errorMessage = "Invalid input: Please provide a valid array of disk requests";
+        } else if (error.message?.includes("within disk bounds")) {
+            errorMessage = `Invalid input: Initial head position must be between 0 and ${maxDiskSize - 1}`;
+        } else if (error.message?.includes("no valid requests")) {
+            errorMessage = `Invalid input: All requests must be between 0 and ${maxDiskSize - 1}`;
+        } else if (error.message?.includes("unknown algorithm")) {
+            errorMessage = `Invalid algorithm: '${algorithm}' is not supported. Please use: FCFS, SSTF, SCAN, C-SCAN, LOOK, or C-LOOK`;
+        }
+        
         const errorResponse = {
             success: false,
-            message: error.message || "Error running disk scheduling simulation"
+            error: errorMessage,
+            details: errorDetails
         };
 
         if (message.replyTo && message.correlationId) {
@@ -69,7 +84,7 @@ async function processDiskScheduling(message, channel) {
                 Buffer.from(JSON.stringify(errorResponse)),
                 { correlationId: message.correlationId }
             );
-            console.log('Disk scheduling error response sent:', { correlationId: message.correlationId });
+            console.log('Disk scheduling error response sent:', { correlationId: message.correlationId, error: errorMessage });
         }
     }
 }

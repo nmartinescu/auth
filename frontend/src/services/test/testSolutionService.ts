@@ -70,7 +70,7 @@ class TestSolutionService {
         
         // Check if response indicates an error
         if (!result.success) {
-            throw new Error(result.message || 'Failed to calculate solution');
+            throw new Error(result.error || result.message || 'Failed to calculate solution');
         }
         
         // convert backend response to test solution format
@@ -100,8 +100,8 @@ class TestSolutionService {
         const response = await apiClient.post('/api/memory-management', requestData);
         const result = response.data;
 
-        if (!result.success && result.message) {
-            throw new Error(`Failed to calculate memory solution: ${result.message}`);
+        if (!result.success && (result.error || result.message)) {
+            throw new Error(result.error || result.message || 'Failed to calculate memory solution');
         }
         
         // convert backend response to memory test solution format
@@ -143,7 +143,7 @@ class TestSolutionService {
         console.log('=== END DISK SOLUTION CALCULATION DEBUG ===');
 
         if (!result.success) {
-            throw new Error(result.message || 'Failed to calculate disk solution');
+            throw new Error(result.error || result.message || 'Failed to calculate disk solution');
         }
         
         // convert backend response to disk test solution format

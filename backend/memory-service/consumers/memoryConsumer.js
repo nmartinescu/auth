@@ -62,9 +62,32 @@ async function processMemoryManagement(message, channel) {
     } catch (error) {
         console.error("Memory management error:", error);
         
+        let errorMessage = error.message || "An error occurred during memory management simulation";
+        let errorDetails = null;
+        
+        // Provide more user-friendly error messages
+        if (error.message?.includes("selectedAlgorithm array is required")) {
+            errorMessage = "Invalid input: Please select a valid algorithm";
+        } else if (error.message?.includes("unsupported algorithm")) {
+            errorMessage = "Invalid algorithm: Please choose from FIFO, LRU, LFU, Optimal, or MRU";
+        } else if (error.message?.includes("frameCount must be")) {
+            errorMessage = "Invalid input: Frame count must be between 1 and 20";
+        } else if (error.message?.includes("pageReferences array")) {
+            errorMessage = "Invalid input: Please provide a valid array of page references";
+        } else if (error.message?.includes("page reference")) {
+            errorMessage = error.message; // Keep detailed page validation errors
+        } else if (error.message?.includes("non empty array")) {
+            errorMessage = "Invalid input: Page references cannot be empty";
+        } else if (error.message?.includes("frame count cannot exceed")) {
+            errorMessage = "Invalid input: Frame count cannot be greater than the number of page references";
+        } else if (error.message?.includes("non negative integers")) {
+            errorMessage = "Invalid input: All page references must be non-negative integers";
+        }
+        
         const errorResponse = {
             success: false,
-            message: error.message || "internal server error during memory management simulation"
+            error: errorMessage,
+            details: errorDetails
         };
 
         if (message.replyTo && message.correlationId) {
@@ -73,7 +96,7 @@ async function processMemoryManagement(message, channel) {
                 Buffer.from(JSON.stringify(errorResponse)),
                 { correlationId: message.correlationId }
             );
-            console.log('Memory management error response sent:', { correlationId: message.correlationId });
+            console.log('Memory management error response sent:', { correlationId: message.correlationId, error: errorMessage });
         }
     }
 }
@@ -114,11 +137,17 @@ async function processTestGeneration(message, channel) {
         }
 
     } catch (error) {
-        console.error("Memory test generation error:", error);
+        console.error('Memory test generation error:', error);
+        
+        let errorMessage = error.message || 'An error occurred while generating memory test';
+        
+        if (error.message?.includes("difficulty")) {
+            errorMessage = "Invalid difficulty level. Please choose: easy, medium, or hard";
+        }
         
         const errorResponse = {
             success: false,
-            message: error.message || "internal server error during test generation"
+            error: errorMessage
         };
 
         if (message.replyTo && message.correlationId) {
@@ -127,7 +156,7 @@ async function processTestGeneration(message, channel) {
                 Buffer.from(JSON.stringify(errorResponse)),
                 { correlationId: message.correlationId }
             );
-            console.log('Memory test error response sent:', { correlationId: message.correlationId });
+            console.log('Memory test generation error response sent:', { correlationId: message.correlationId, error: errorMessage });
         }
     }
 }

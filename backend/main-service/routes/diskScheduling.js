@@ -26,9 +26,15 @@ router.post("/", async (req, res) => {
 
     } catch (error) {
         console.error("Disk scheduling request error:", error);
-        res.status(500).json({
+        
+        // Check if error response from service contains structured error
+        const errorMessage = error.response?.error || error.message || "Failed to process disk scheduling request";
+        const statusCode = error.response?.error ? 400 : 500;
+        
+        res.status(statusCode).json({
             success: false,
-            message: error.message || "Failed to process disk scheduling request"
+            error: errorMessage,
+            details: error.response?.details || null
         });
     }
 });
@@ -53,9 +59,13 @@ router.post("/test/generate", async (req, res) => {
 
     } catch (error) {
         console.error("Disk test generation request error:", error);
-        res.status(500).json({
+        
+        const errorMessage = error.response?.error || error.message || "Failed to generate disk test question";
+        const statusCode = error.response?.error ? 400 : 500;
+        
+        res.status(statusCode).json({
             success: false,
-            message: error.message || "Failed to generate disk test question"
+            error: errorMessage
         });
     }
 });
@@ -81,9 +91,13 @@ router.post("/test/generate-multiple", async (req, res) => {
 
     } catch (error) {
         console.error("Disk multiple test generation request error:", error);
-        res.status(500).json({
+        
+        const errorMessage = error.response?.error || error.message || "Failed to generate disk test questions";
+        const statusCode = error.response?.error ? 400 : 500;
+        
+        res.status(statusCode).json({
             success: false,
-            message: error.message || "Failed to generate disk test questions"
+            error: errorMessage
         });
     }
 });

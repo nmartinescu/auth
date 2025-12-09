@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { toast } from "../../utils/toast";
 import {
     Flex,
     Stack,
@@ -243,15 +244,19 @@ export function Process() {
                 );
                 console.log(`Throughput: ${result.data.metrics.throughput}`);
             } else {
-                console.error(
-                    "API Error:",
-                    result.message || "Unknown error"
-                );
+                const errorMessage = result.error || result.message || "Unknown error occurred";
+                console.error("API Error:", errorMessage);
                 console.error("Full response:", result);
+                toast.error(errorMessage);
             }
-        } catch (error) {
+        } catch (error: any) {
+            const errorMessage = error.response?.data?.error || 
+                                error.response?.data?.message || 
+                                error.message || 
+                                "Failed to connect to the CPU scheduling service";
             console.error("Network Error:", error);
             console.error("Failed to connect to the CPU scheduling API");
+            toast.error(errorMessage);
         }
     };
 

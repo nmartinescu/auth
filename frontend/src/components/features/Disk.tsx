@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { toast } from "../../utils/toast";
 import {
     Flex,
     Stack,
@@ -137,13 +138,17 @@ export function Disk() {
                 setSolution(response.data);
                 console.log("Disk Scheduling Result:", response.data);
             } else {
-                console.error(
-                    "API Error:",
-                    response.data.message || "Unknown error"
-                );
+                const errorMessage = response.data.error || response.data.message || "Unknown error occurred";
+                console.error("API Error:", errorMessage);
+                toast.error(errorMessage);
             }
-        } catch (error) {
+        } catch (error: any) {
+            const errorMessage = error.response?.data?.error || 
+                                error.response?.data?.message || 
+                                error.message || 
+                                "Failed to connect to the disk scheduling service";
             console.error("Network Error:", error);
+            toast.error(errorMessage);
         }
     };
 

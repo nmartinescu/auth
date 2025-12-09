@@ -30,9 +30,14 @@ router.post("/", async (req, res) => {
 
     } catch (error) {
         console.error("CPU scheduling request error:", error);
-        res.status(500).json({
+        
+        const errorMessage = error.response?.error || error.message || "Failed to process CPU scheduling request";
+        const statusCode = error.response?.error ? 400 : 500;
+        
+        res.status(statusCode).json({
             success: false,
-            message: error.message || "Failed to process CPU scheduling request"
+            error: errorMessage,
+            details: error.response?.details || null
         });
     }
 });
@@ -61,9 +66,13 @@ router.post("/test/generate", async (req, res) => {
 
     } catch (error) {
         console.error("CPU test generation request error:", error);
-        res.status(500).json({
+        
+        const errorMessage = error.response?.error || error.message || "Failed to generate CPU test question";
+        const statusCode = error.response?.error ? 400 : 500;
+        
+        res.status(statusCode).json({
             success: false,
-            message: error.message || "Failed to generate CPU test question"
+            error: errorMessage
         });
     }
 });
@@ -92,9 +101,13 @@ router.post("/test/generate-multiple", async (req, res) => {
 
     } catch (error) {
         console.error("CPU multiple test generation request error:", error);
-        res.status(500).json({
+        
+        const errorMessage = error.response?.error || error.message || "Failed to generate CPU test questions";
+        const statusCode = error.response?.error ? 400 : 500;
+        
+        res.status(statusCode).json({
             success: false,
-            message: error.message || "Failed to generate CPU test questions"
+            error: errorMessage
         });
     }
 });

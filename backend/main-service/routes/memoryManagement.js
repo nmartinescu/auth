@@ -24,9 +24,14 @@ router.post("/", async (req, res) => {
 
     } catch (error) {
         console.error("Memory management request error:", error);
-        res.status(500).json({
+        
+        const errorMessage = error.response?.error || error.message || "Failed to process memory management request";
+        const statusCode = error.response?.error ? 400 : 500;
+        
+        res.status(statusCode).json({
             success: false,
-            message: error.message || "Failed to process memory management request"
+            error: errorMessage,
+            details: error.response?.details || null
         });
     }
 });
@@ -51,9 +56,13 @@ router.post("/test/generate", async (req, res) => {
 
     } catch (error) {
         console.error("Memory test generation error:", error);
-        res.status(500).json({
+        
+        const errorMessage = error.response?.error || error.message || "Failed to generate memory test";
+        const statusCode = error.response?.error ? 400 : 500;
+        
+        res.status(statusCode).json({
             success: false,
-            message: error.message || "Failed to generate memory test"
+            error: errorMessage
         });
     }
 });
@@ -79,9 +88,13 @@ router.post("/test/generate-multiple", async (req, res) => {
 
     } catch (error) {
         console.error("Memory multiple test generation error:", error);
-        res.status(500).json({
+        
+        const errorMessage = error.response?.error || error.message || "Failed to generate memory tests";
+        const statusCode = error.response?.error ? 400 : 500;
+        
+        res.status(statusCode).json({
             success: false,
-            message: error.message || "Failed to generate memory tests"
+            error: errorMessage
         });
     }
 });

@@ -83,7 +83,15 @@ class RabbitMQClient {
             // Store the resolver
             this.responseQueues.set(correlationId, (response) => {
                 clearTimeout(timeoutId);
-                resolve(response);
+                
+                // Check if response indicates an error
+                if (response.success === false) {
+                    const error = new Error(response.error || response.message || 'Request failed');
+                    error.response = response;
+                    reject(error);
+                } else {
+                    resolve(response);
+                }
             });
 
             // Send the message

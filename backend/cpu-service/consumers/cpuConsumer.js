@@ -147,9 +147,30 @@ async function processCPUScheduling(message, channel) {
     } catch (error) {
         console.error("CPU scheduling error:", error);
         
+        let errorMessage = error.message || "An error occurred during CPU scheduling simulation";
+        let errorDetails = null;
+        
+        // Provide more user-friendly error messages
+        if (error.message?.includes("Processes array is required")) {
+            errorMessage = "Invalid input: Please provide at least one process";
+        } else if (error.message?.includes("arrivalTime must be")) {
+            errorMessage = error.message; // Keep detailed process validation errors
+        } else if (error.message?.includes("burstTime must be")) {
+            errorMessage = error.message; // Keep detailed process validation errors
+        } else if (error.message?.includes("io must be an array")) {
+            errorMessage = error.message; // Keep detailed IO validation errors
+        } else if (error.message?.includes("Round Robin algorithm requires")) {
+            errorMessage = "Invalid input: Round Robin requires a positive quantum value";
+        } else if (error.message?.includes("MLFQ algorithm requires")) {
+            errorMessage = error.message; // Keep detailed MLFQ validation errors
+        } else if (error.message?.includes("Unsupported algorithm")) {
+            errorMessage = `Invalid algorithm: Please choose from FCFS, SJF, RR, STCF, or MLFQ`;
+        }
+        
         const errorResponse = {
             success: false,
-            message: error.message || "Internal server error during CPU scheduling simulation"
+            error: errorMessage,
+            details: errorDetails
         };
 
         // Send error response back to reply queue
@@ -159,7 +180,7 @@ async function processCPUScheduling(message, channel) {
                 Buffer.from(JSON.stringify(errorResponse)),
                 { correlationId: message.correlationId }
             );
-            console.log('CPU scheduling error response sent:', { correlationId: message.correlationId, error: error.message });
+            console.log('CPU scheduling error response sent:', { correlationId: message.correlationId, error: errorMessage });
         }
     }
 }
@@ -228,9 +249,20 @@ async function processTestGeneration(message, channel) {
     } catch (error) {
         console.error("Test generation error:", error);
         
+        let errorMessage = error.message || "An error occurred while generating test question";
+        
+        // Provide more user-friendly error messages
+        if (error.message?.includes("Invalid difficulty")) {
+            errorMessage = "Invalid difficulty level. Please choose: easy, medium, or hard";
+        } else if (error.message?.includes("Count must be")) {
+            errorMessage = "Invalid count: Must be between 1 and 20";
+        } else if (error.message?.includes("Invalid test generation type")) {
+            errorMessage = "Invalid test type: Must be 'single' or 'multiple'";
+        }
+        
         const errorResponse = {
             success: false,
-            message: error.message || "Error generating test question"
+            error: errorMessage
         };
 
         // Send error response back to reply queue
@@ -240,7 +272,7 @@ async function processTestGeneration(message, channel) {
                 Buffer.from(JSON.stringify(errorResponse)),
                 { correlationId: message.correlationId }
             );
-            console.log('Test generation error response sent:', { correlationId: message.correlationId, error: error.message });
+            console.log('Test generation error response sent:', { correlationId: message.correlationId, error: errorMessage });
         }
     }
 }
