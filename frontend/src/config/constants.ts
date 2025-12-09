@@ -2,7 +2,7 @@
 const getApiBaseUrl = () => {
     // Development: when running locally (npm run dev)
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        return 'http://localhost:5000';
+        return 'http://localhost:3000';
     }
 
     return 'https://ostep-web.onrender.com';
@@ -11,7 +11,7 @@ const getApiBaseUrl = () => {
 const getTestServiceUrl = () => {
     // Development: when running locally (npm run dev)
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        return 'http://localhost:5004';
+        return 'http://localhost:3004';
     }
 
     // Production: update with your Test service URL
