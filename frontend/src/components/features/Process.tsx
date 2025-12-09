@@ -22,6 +22,7 @@ import {
     ActionButton,
     DeleteButton,
 } from "../ui/FormActionButtons";
+import { apiClient } from "../../services/apiClient";
 import {
     SelectContent,
     SelectItem,
@@ -215,18 +216,11 @@ export function Process() {
 
             console.log("Sending API request:", apiData);
 
-            // Make the API call to CPU service
-            const response = await fetch(`${import.meta.env.VITE_CPU_SERVICE_URL || 'http://localhost:5001'}/api/cpu`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(apiData),
-            });
+            // Make the API call to CPU service via main-service (RabbitMQ)
+            const response = await apiClient.post('/api/cpu-scheduling', apiData);
+            const result = response.data;
 
-            const result = await response.json();
-
-            if (response.ok && result.success) {
+            if (result.success) {
                 setSolution(result);
                 console.log("CPU Scheduling Result:", result);
                 console.log("Algorithm:", result.data.algorithm);

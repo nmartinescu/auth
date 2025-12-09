@@ -22,7 +22,7 @@ import {
 } from "react-icons/lu";
 import { useColorModeValue } from "../ui/color-mode";
 import { FormActionButtons, ActionButton } from "../ui/FormActionButtons";
-import { DISK_SERVICE_URL } from "../../config/constants";
+import { apiClient } from "../../services/apiClient";
 import { DISK_ALGORITHMS, HEAD_DIRECTIONS, algorithmOptions, directionOptions } from "../../config/diskConstants";
 import DiskSolution from "../solution/disk/DiskSolution";
 import ActionModal from "../ui/ActionModal";
@@ -131,23 +131,15 @@ export function Disk() {
             console.log("Starting disk scheduling simulation...");
             console.log("Input data:", body);
 
-            const response = await fetch(`${DISK_SERVICE_URL}/api/disk`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(body),
-            });
+            const response = await apiClient.post('/api/disk-scheduling', body);
 
-            const result = await response.json();
-
-            if (response.ok && result.success) {
-                setSolution(result);
-                console.log("Disk Scheduling Result:", result);
+            if (response.data.success) {
+                setSolution(response.data);
+                console.log("Disk Scheduling Result:", response.data);
             } else {
                 console.error(
                     "API Error:",
-                    result.message || "Unknown error"
+                    response.data.message || "Unknown error"
                 );
             }
         } catch (error) {

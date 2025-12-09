@@ -1,5 +1,12 @@
 import { describe, it, expect } from '@jest/globals';
 
+/**
+ * CPU Service RabbitMQ Message Handler Tests
+ * 
+ * These tests validate the message processing logic used by the CPU service
+ * when consuming messages from RabbitMQ queues.
+ */
+
 const validateProcesses = (processes) => {
     if (!processes || !Array.isArray(processes) || processes.length === 0) {
         return { valid: false, message: "Processes array is required and must not be empty" };
@@ -50,6 +57,33 @@ const validateQuantum = (algorithm, quantum) => {
     }
     return { valid: true };
 };
+
+const validateMLFQParams = (algorithm, queues, quantums, allotment) => {
+    if (algorithm.toUpperCase() === "MLFQ") {
+        if (typeof queues !== 'number' || queues <= 0) {
+            return { valid: false, message: "MLFQ algorithm requires a positive number of queues" };
+        }
+        
+        if (!Array.isArray(quantums) || quantums.length !== queues) {
+            return { valid: false, message: "MLFQ algorithm requires quantums array with length equal to number of queues" };
+        }
+        
+        for (let i = 0; i < quantums.length; i++) {
+            if (typeof quantums[i] !== 'number' || quantums[i] <= 0) {
+                return { valid: false, message: `MLFQ quantum at index ${i} must be a positive number` };
+            }
+        }
+        
+        if (typeof allotment !== 'number' || allotment <= 0) {
+            return { valid: false, message: "MLFQ algorithm requires a positive allotment value" };
+        }
+    }
+    return { valid: true };
+};
+
+describe('CPU Service Message Handler Validation Logic', () => {
+    return { valid: true };
+});
 
 describe('CPU API Validation Logic', () => {
     describe('Process Validation', () => {
@@ -156,6 +190,42 @@ describe('CPU API Validation Logic', () => {
             const result = validateQuantum('RR', 0);
             expect(result.valid).toBe(false);
             expect(result.message).toContain('Round Robin algorithm requires a positive quantum value');
+        });
+    });
+
+    describe('MLFQ Parameter Validation', () => {
+        it('should validate valid MLFQ parameters', () => {
+            const result = validateMLFQParams('MLFQ', 3, [2, 4, 8], 20);
+            expect(result.valid).toBe(true);
+        });
+
+        it('should not require MLFQ params for FCFS', () => {
+            const result = validateMLFQParams('FCFS', undefined, undefined, undefined);
+            expect(result.valid).toBe(true);
+        });
+
+        it('should reject MLFQ without queues', () => {
+            const result = validateMLFQParams('MLFQ', undefined, [2, 4], 20);
+            expect(result.valid).toBe(false);
+            expect(result.message).toContain('MLFQ algorithm requires a positive number of queues');
+        });
+
+        it('should reject MLFQ with mismatched quantums', () => {
+            const result = validateMLFQParams('MLFQ', 3, [2, 4], 20);
+            expect(result.valid).toBe(false);
+            expect(result.message).toContain('quantums array with length equal to number of queues');
+        });
+
+        it('should reject MLFQ with invalid quantum values', () => {
+            const result = validateMLFQParams('MLFQ', 3, [2, 0, 8], 20);
+            expect(result.valid).toBe(false);
+            expect(result.message).toContain('quantum at index 1 must be a positive number');
+        });
+
+        it('should reject MLFQ without allotment', () => {
+            const result = validateMLFQParams('MLFQ', 3, [2, 4, 8], undefined);
+            expect(result.valid).toBe(false);
+            expect(result.message).toContain('MLFQ algorithm requires a positive allotment value');
         });
     });
 

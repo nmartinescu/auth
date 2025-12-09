@@ -5,8 +5,12 @@ import dotenv from "dotenv";
 import authRoutes from "./routes/auth/index.js";
 import simulationRoutes from "./routes/simulations/index.js";
 import testResultsRoutes from "./routes/testResults.js";
+import cpuSchedulingRoutes from "./routes/cpuScheduling.js";
+import diskSchedulingRoutes from "./routes/diskScheduling.js";
+import memoryManagementRoutes from "./routes/memoryManagement.js";
 import { connectDB } from "./config/db.js";
 import { generalLimiter } from "./middleware/rateLimiter.js";
+import rabbitMQClient from "./services/rabbitMQClient.js";
 import path from "path";
 
 dotenv.config();
@@ -62,6 +66,9 @@ app.get("/api/health", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/simulations", simulationRoutes);
 app.use("/api/test-results", testResultsRoutes);
+app.use("/api/cpu-scheduling", cpuSchedulingRoutes);
+app.use("/api/disk-scheduling", diskSchedulingRoutes);
+app.use("/api/memory-management", memoryManagementRoutes);
 
 app.use((error, req, res, next) => {
     console.error("Unhandled error:", error);
@@ -81,6 +88,25 @@ if (process.env.NODE_ENV === "production") {
 app.listen(PORT, () => {
     connectDB();
     
+    // Initialize RabbitMQ client
+    rabbitMQClient.connect().catch(err => {
+        console.error('Failed to connect to RabbitMQ:', err);
+        console.warn('Main service will continue without RabbitMQ. CPU scheduling may not work.');
+    });
+    
     console.log(`Server running on port ${PORT}`);
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+});
+
+// Graceful shutdown
+process.on('SIGINT', async () => {
+    console.log('Shutting down Main Service...');
+    await rabbitMQClient.close();
+    process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
+    console.log('Shutting down Main Service...');
+    await rabbitMQClient.close();
+    process.exit(0);
 });

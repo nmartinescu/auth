@@ -2,7 +2,8 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import dotenv from "dotenv";
-import diskRoutes from "./routes/disk.js";
+import rabbitMQConnection from "./config/rabbitmq.js";
+import { startConsumer } from "./consumers/diskConsumer.js";
 
 dotenv.config();
 
@@ -46,9 +47,6 @@ app.get('/health', (req, res) => {
     res.json({ status: 'ok', service: 'disk-scheduling' });
 });
 
-// Disk scheduling routes
-app.use("/api/disk", diskRoutes);
-
 // Error handling middleware
 app.use((error, req, res, next) => {
     console.error("Unhandled error:", error);
@@ -58,7 +56,43 @@ app.use((error, req, res, next) => {
     });
 });
 
-app.listen(PORT, () => {
-    console.log(`Disk Scheduling Service running on port ${PORT}`);
-    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+// 404 handler
+app.use((req, res) => {
+    res.status(404).json({
+        success: false,
+        message: "Route not found - Disk service now uses RabbitMQ for communication"
+    });
 });
+
+async function initialize() {
+    try {
+        console.log('Initializing Disk Scheduling Service...');
+        await rabbitMQConnection.connect();
+        await startConsumer();
+        console.log('Disk Scheduling Service initialized successfully');
+    } catch (error) {
+        console.error('Failed to initialize Disk Scheduling Service:', error);
+        process.exit(1);
+    }
+}
+
+app.listen(PORT, () => {
+    console.log(`Disk Scheduling Service HTTP server running on port ${PORT} (health checks only)`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log('Disk Scheduling Service using RabbitMQ for message processing');
+    initialize();
+});
+
+process.on('SIGINT', async () => {
+    console.log('Shutting down Disk Scheduling Service...');
+    await rabbitMQConnection.close();
+    process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
+    console.log('Shutting down Disk Scheduling Service...');
+    await rabbitMQConnection.close();
+    process.exit(0);
+});
+
+export default app;

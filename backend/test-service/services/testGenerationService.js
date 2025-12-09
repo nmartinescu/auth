@@ -5,22 +5,21 @@
 
 import fetch from 'node-fetch';
 
-const CPU_SERVICE_URL = process.env.CPU_SERVICE_URL || 'http://localhost:5001';
-const MEMORY_SERVICE_URL = process.env.MEMORY_SERVICE_URL || 'http://localhost:5003';
-const DISK_SERVICE_URL = process.env.DISK_SERVICE_URL || 'http://localhost:5002';
+const MAIN_SERVICE_URL = process.env.MAIN_SERVICE_URL || 'http://localhost:5000';
 
 /**
- * Generate a CPU scheduling question from the CPU service
+ * Generate a CPU scheduling question from the main service (which uses RabbitMQ)
  */
 async function generateCPUSchedulingQuestion(difficulty = 'medium') {
-    const response = await fetch(`${CPU_SERVICE_URL}/api/cpu/test/generate`, {
+    const response = await fetch(`${MAIN_SERVICE_URL}/api/cpu-scheduling/test/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ difficulty })
     });
     
     if (!response.ok) {
-        throw new Error(`CPU service error: ${response.statusText}`);
+        const errorText = await response.text();
+        throw new Error(`Main service error: ${response.statusText} - ${errorText}`);
     }
     
     const data = await response.json();
@@ -34,40 +33,37 @@ async function generateCPUSchedulingQuestion(difficulty = 'medium') {
  * Generate a memory question from the memory service
  */
 async function generateMemoryQuestion(difficulty = 'medium') {
-    // Memory service doesn't have a test endpoint yet, so we'll generate locally
-    // This would call the memory service once it has a test generation endpoint
-    const algorithms = ['FIFO', 'LRU', 'LFU', 'OPTIMAL', 'MRU'];
-    const algorithm = algorithms[Math.floor(Math.random() * algorithms.length)];
-    
-    // For now, return a placeholder structure
-    // TODO: Implement proper memory test generation endpoint in memory-service
-    return {
-        question: {
-            type: 'memory',
-            algorithm,
-            difficulty,
-            description: `Memory test question for ${algorithm} algorithm`
-        },
-        correctAnswer: {
-            algorithm,
-            pageFrames: [],
-            pageFaults: 0
-        }
-    };
-}
-
-/**
- * Generate a disk scheduling question from the disk service
- */
-async function generateDiskSchedulingQuestion(difficulty = 'medium') {
-    const response = await fetch(`${DISK_SERVICE_URL}/api/disk/test/generate`, {
+    const response = await fetch(`${MAIN_SERVICE_URL}/api/memory-management/test/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ difficulty })
     });
     
     if (!response.ok) {
-        throw new Error(`Disk service error: ${response.statusText}`);
+        const errorText = await response.text();
+        throw new Error(`Main service error: ${response.statusText} - ${errorText}`);
+    }
+    
+    const data = await response.json();
+    return {
+        question: data.question,
+        correctAnswer: data.correctAnswer
+    };
+}
+
+/**
+ * Generate a disk scheduling question from the disk service via main service
+ */
+async function generateDiskSchedulingQuestion(difficulty = 'medium') {
+    const response = await fetch(`${MAIN_SERVICE_URL}/api/disk-scheduling/test/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ difficulty })
+    });
+    
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Main service error: ${response.statusText} - ${errorText}`);
     }
     
     const data = await response.json();

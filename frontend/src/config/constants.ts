@@ -8,36 +8,6 @@ const getApiBaseUrl = () => {
     return 'https://ostep-web.onrender.com';
 };
 
-const getCpuServiceUrl = () => {
-    // Development: when running locally (npm run dev)
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        return 'http://localhost:5001';
-    }
-
-    // Production: update with your CPU service URL
-    return 'https://cpu-service.onrender.com'; // Update this when deployed
-};
-
-const getDiskServiceUrl = () => {
-    // Development: when running locally (npm run dev)
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        return 'http://localhost:5002';
-    }
-
-    // Production: update with your Disk service URL
-    return 'https://disk-service.onrender.com'; // Update this when deployed
-};
-
-const getMemoryServiceUrl = () => {
-    // Development: when running locally (npm run dev)
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        return 'http://localhost:5003';
-    }
-
-    // Production: update with your Memory service URL
-    return 'https://memory-service.onrender.com'; // Update this when deployed
-};
-
 const getTestServiceUrl = () => {
     // Development: when running locally (npm run dev)
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
@@ -49,12 +19,9 @@ const getTestServiceUrl = () => {
 };
 
 export const API_BASE_URL = getApiBaseUrl();
-export const CPU_SERVICE_URL = getCpuServiceUrl();
-export const DISK_SERVICE_URL = getDiskServiceUrl();
-export const MEMORY_SERVICE_URL = getMemoryServiceUrl();
 export const TEST_SERVICE_URL = getTestServiceUrl();
 
-// API Endpoints
+// API Endpoints - All algorithm services now route through main-service
 export const API_ENDPOINTS = {
     AUTH: {
         LOGIN: `${API_BASE_URL}/api/auth/login`,
@@ -65,19 +32,25 @@ export const API_ENDPOINTS = {
         REFRESH: `${API_BASE_URL}/api/auth/refresh`,
     },
     CPU: {
-        SIMULATE: `${CPU_SERVICE_URL}/api/cpu`,
+        SIMULATE: `${API_BASE_URL}/api/cpu-scheduling`,
+        TEST: {
+            GENERATE: `${API_BASE_URL}/api/cpu-scheduling/test/generate`,
+            GENERATE_MULTIPLE: `${API_BASE_URL}/api/cpu-scheduling/test/generate-multiple`,
+        }
     },
     DISK: {
-        SIMULATE: `${DISK_SERVICE_URL}/api/disk`,
+        SIMULATE: `${API_BASE_URL}/api/disk-scheduling`,
         TEST: {
-            GENERATE: `${DISK_SERVICE_URL}/api/disk/test/generate`,
-            GENERATE_MULTIPLE: `${DISK_SERVICE_URL}/api/disk/test/generate-multiple`,
-            CUSTOM: `${DISK_SERVICE_URL}/api/disk/test/custom`,
-            CHECK: `${DISK_SERVICE_URL}/api/disk/test/check`,
+            GENERATE: `${API_BASE_URL}/api/disk-scheduling/test/generate`,
+            GENERATE_MULTIPLE: `${API_BASE_URL}/api/disk-scheduling/test/generate-multiple`,
         }
     },
     MEMORY: {
-        SIMULATE: `${MEMORY_SERVICE_URL}/api/memory`,
+        SIMULATE: `${API_BASE_URL}/api/memory-management`,
+        TEST: {
+            GENERATE: `${API_BASE_URL}/api/memory-management/test/generate`,
+            GENERATE_MULTIPLE: `${API_BASE_URL}/api/memory-management/test/generate-multiple`,
+        }
     },
     TEST_GENERATION: {
         GENERATE: `${TEST_SERVICE_URL}/api/test-generation/generate`,
@@ -103,9 +76,6 @@ export const ENV_INFO = {
     hostname: typeof window !== 'undefined' ? window.location.hostname : 'unknown',
     origin: typeof window !== 'undefined' ? window.location.origin : 'unknown',
     apiBaseUrl: API_BASE_URL,
-    cpuServiceUrl: CPU_SERVICE_URL,
-    diskServiceUrl: DISK_SERVICE_URL,
-    memoryServiceUrl: MEMORY_SERVICE_URL,
     testServiceUrl: TEST_SERVICE_URL,
     isProduction: window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1',
 } as const;

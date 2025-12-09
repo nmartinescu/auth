@@ -22,7 +22,7 @@ import {
 } from "react-icons/lu";
 import { useColorModeValue } from "../ui/color-mode";
 import { FormActionButtons, ActionButton } from "../ui/FormActionButtons";
-import { MEMORY_SERVICE_URL } from "../../config/constants";
+import { apiClient } from "../../services/apiClient";
 import { MEMORY_ALGORITHMS } from "../../config/memoryConstants";
 import { createListCollection } from "@chakra-ui/react";
 import MemorySolution from "../solution/memory/MemorySolution";
@@ -120,23 +120,15 @@ export function Memory() {
             console.log("Starting memory management simulation...");
             console.log("Input data:", body);
 
-            const response = await fetch(`${MEMORY_SERVICE_URL}/api/memory`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(body),
-            });
+            const response = await apiClient.post('/api/memory-management', body);
 
-            const result = await response.json();
-
-            if (response.ok && result.success) {
-                setSolution(result);
-                console.log("Memory Management Result:", result);
+            if (response.data.success) {
+                setSolution(response.data);
+                console.log("Memory Management Result:", response.data);
             } else {
                 console.error(
                     "API Error:",
-                    result.message || "Unknown error"
+                    response.data.message || "Unknown error"
                 );
             }
         } catch (error) {

@@ -1,5 +1,5 @@
 import type { TestQuestion, TestSolution, MemoryTestSolution, DiskTestSolution, ProcessResult, GanttEntry } from '../../types/Test.ts';
-import { MEMORY_SERVICE_URL, DISK_SERVICE_URL, CPU_SERVICE_URL } from '../../config/constants.ts';
+import { apiClient } from '../apiClient.ts';
 
 class TestSolutionService {
     private static instance: TestSolutionService;
@@ -61,24 +61,17 @@ class TestSolutionService {
         console.log('Algorithm:', question.algorithm);
         console.log('Request Data:', JSON.stringify(requestData, null, 2));
 
-        // call CPU scheduling service
-        const response = await fetch(`${CPU_SERVICE_URL}/api/cpu`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestData)
-        });
+        // call CPU scheduling service via main-service API (which uses RabbitMQ)
+        const response = await apiClient.post('/api/cpu-scheduling', requestData);
+        const result = response.data;
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Backend response error:', response.status, response.statusText, errorText);
-            throw new Error(`Failed to calculate solution: ${response.statusText} - ${errorText}`);
-        }
-
-        const result = await response.json();
         console.log('Backend response received:', JSON.stringify(result, null, 2));
         console.log('=== END SCHEDULING SOLUTION REQUEST DEBUG ===');
+        
+        // Check if response indicates an error
+        if (!result.success) {
+            throw new Error(result.message || 'Failed to calculate solution');
+        }
         
         // convert backend response to test solution format
         return this.convertBackendResponseToSolution(result, question);
@@ -103,20 +96,13 @@ class TestSolutionService {
             pageReferences: question.pageReferences!
         };
 
-        // call backend memory management API
-        const response = await fetch(`${MEMORY_SERVICE_URL}/api/memory`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestData)
-        });
+        // call backend memory management API via main-service (RabbitMQ)
+        const response = await apiClient.post('/api/memory-management', requestData);
+        const result = response.data;
 
-        if (!response.ok) {
-            throw new Error(`Failed to calculate memory solution: ${response.statusText}`);
+        if (!result.success && result.message) {
+            throw new Error(`Failed to calculate memory solution: ${result.message}`);
         }
-
-        const result = await response.json();
         
         // convert backend response to memory test solution format
         return this.convertMemoryBackendResponseToSolution(result);
@@ -149,24 +135,16 @@ class TestSolutionService {
         console.log('Mapped backend algorithm:', backendAlgorithm);
         console.log('Request data being sent:', JSON.stringify(requestData, null, 2));
 
-        // call backend disk scheduling API
-        const response = await fetch(`${DISK_SERVICE_URL}/api/disk`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(requestData)
-        });
+        // call backend disk scheduling API via main-service (RabbitMQ)
+        const response = await apiClient.post('/api/disk-scheduling', requestData);
+        const result = response.data;
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('Backend response error:', response.status, response.statusText, errorText);
-            throw new Error(`Failed to calculate disk solution: ${response.statusText} - ${errorText}`);
-        }
-
-        const result = await response.json();
         console.log('Backend response received:', JSON.stringify(result, null, 2));
         console.log('=== END DISK SOLUTION CALCULATION DEBUG ===');
+
+        if (!result.success) {
+            throw new Error(result.message || 'Failed to calculate disk solution');
+        }
         
         // convert backend response to disk test solution format
         return this.convertDiskBackendResponseToSolution(result);

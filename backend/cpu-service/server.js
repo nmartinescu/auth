@@ -2,7 +2,8 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import dotenv from "dotenv";
-import cpuRoutes from "./routes/cpu.js";
+import rabbitMQConnection from "./config/rabbitmq.js";
+import { startConsumer } from "./consumers/cpuConsumer.js";
 
 dotenv.config();
 
@@ -46,9 +47,6 @@ app.get('/health', (req, res) => {
     res.json({ status: 'ok', service: 'cpu-scheduling' });
 });
 
-// CPU scheduling routes
-app.use("/api/cpu", cpuRoutes);
-
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error('Error:', err);
@@ -62,12 +60,49 @@ app.use((err, req, res, next) => {
 app.use((req, res) => {
     res.status(404).json({
         success: false,
-        message: "Route not found"
+        message: "Route not found - CPU service now uses RabbitMQ for communication"
     });
 });
 
+// Initialize RabbitMQ connection and start consumer
+async function initialize() {
+    try {
+        console.log('Initializing CPU Scheduling Service...');
+        
+        // Connect to RabbitMQ
+        await rabbitMQConnection.connect();
+        
+        // Start consuming messages
+        await startConsumer();
+        
+        console.log('CPU Scheduling Service initialized successfully');
+    } catch (error) {
+        console.error('Failed to initialize CPU Scheduling Service:', error);
+        process.exit(1);
+    }
+}
+
+// Start the HTTP server for health checks
 app.listen(PORT, () => {
-    console.log(`CPU Scheduling Service running on port ${PORT}`);
+    console.log(`CPU Scheduling Service HTTP server running on port ${PORT} (health checks only)`);
+    console.log('CPU Scheduling Service using RabbitMQ for message processing');
+    
+    // Initialize RabbitMQ after HTTP server starts
+    initialize();
+});
+
+// Graceful shutdown
+process.on('SIGINT', async () => {
+    console.log('Shutting down CPU Scheduling Service...');
+    await rabbitMQConnection.close();
+    process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
+    console.log('Shutting down CPU Scheduling Service...');
+    await rabbitMQConnection.close();
+    process.exit(0);
 });
 
 export default app;
+

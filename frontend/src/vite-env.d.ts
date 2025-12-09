@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  readonly VITE_CPU_SERVICE_URL?: string;
+  // Add environment variables here if needed
 }
 
 interface ImportMeta {
