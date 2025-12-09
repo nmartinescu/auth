@@ -42,40 +42,94 @@ RABBITMQ_PASS=secure-password
 MONGO_PASS=secure-password
 ```
 
-### 3. Build and Start All Services
+### 3. Choose Your Mode
 
+#### **Development Mode** (Hot Reload - Files are Watched)
+```bash
+docker-compose -f docker-compose.dev.yml up -d --build
+```
+
+#### **Production Mode** (Optimized Build)
 ```bash
 docker-compose up -d --build
 ```
 
-### 4. Verify Services
+## Development Workflow
 
+### Live Development with Hot Reload
+
+1. **Start in development mode:**
 ```bash
-docker-compose ps
+docker-compose -f docker-compose.dev.yml up -d --build
 ```
 
-## Scaling Services
+2. **Edit your code** in `backend/` folders - changes are automatically reflected!
+   - Code is mounted as a volume
+   - Nodemon watches for changes and restarts the service
+   - See changes instantly without rebuilding
 
-### Scale CPU Service to 4 instances:
+3. **View logs to see restarts:**
 ```bash
-docker-compose up -d --scale cpu-service=4
+docker-compose -f docker-compose.dev.yml logs -f cpu-service
 ```
 
-### Scale Disk Service to 3 instances:
+4. **Install new npm packages:**
 ```bash
-docker-compose up -d --scale disk-service=3
+# Rebuild the specific service after adding to package.json
+docker-compose -f docker-compose.dev.yml up -d --build cpu-service
 ```
 
-### Scale Memory Service to 5 instances:
+### Key Differences: Dev vs Production
+
+| Feature | Development | Production |
+|---------|-------------|------------|
+| **Dockerfile** | `Dockerfile.dev` | `Dockerfile` |
+| **Dependencies** | All (including devDependencies) | Production only |
+| **Code mounting** | Volume mounted (live changes) | Copied into image |
+| **Restart** | Nodemon auto-restart | Manual restart needed |
+## Managing Services
+
+### View Logs
 ```bash
-docker-compose up -d --scale memory-service=5
+# All services (production)
+docker-compose logs -f
+
+# All services (development)
+docker-compose -f docker-compose.dev.yml logs -f
+
+# Specific service
+docker-compose -f docker-compose.dev.yml logs -f main-service
+docker-compose -f docker-compose.dev.yml logs -f cpu-service
 ```
 
-Or set in `.env` file:
-```env
-CPU_SERVICE_REPLICAS=4
-DISK_SERVICE_REPLICAS=3
-MEMORY_SERVICE_REPLICAS=5
+### Stop All Services
+```bash
+# Production
+docker-compose down
+
+# Development
+docker-compose -f docker-compose.dev.yml down
+```
+
+### Stop and Remove Volumes (Reset Database)
+```bash
+docker-compose -f docker-compose.dev.yml down -v
+```
+
+### Restart a Service
+```bash
+# Not needed in dev mode - nodemon auto-restarts on file changes!
+# But if you need to manually restart:
+docker-compose -f docker-compose.dev.yml restart cpu-service
+```
+
+### Rebuild After Package.json Changes
+```bash
+# In dev mode, only rebuild if you add new npm packages
+docker-compose -f docker-compose.dev.yml up -d --build cpu-service
+
+# Code changes don't require rebuild - they're automatically detected!
+```ORY_SERVICE_REPLICAS=5
 ```
 Then run: `docker-compose up -d`
 
