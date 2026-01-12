@@ -5,7 +5,7 @@
 
 import fetch from 'node-fetch';
 
-const MAIN_SERVICE_URL = process.env.MAIN_SERVICE_URL || 'http://localhost:5000';
+const MAIN_SERVICE_URL = process.env.MAIN_SERVICE_URL || 'http://main-service:3000';
 
 /**
  * Generate a CPU scheduling question from the main service (which uses RabbitMQ)

@@ -52,6 +52,13 @@ export const API_ENDPOINTS = {
             GENERATE_MULTIPLE: `${API_BASE_URL}/api/memory-management/test/generate-multiple`,
         }
     },
+    TEST_RESULTS: {
+        SAVE: `${API_BASE_URL}/api/test-results`,
+        GET_BY_USER: `${API_BASE_URL}/api/test-results/user`,
+        GET_BY_ID: `${API_BASE_URL}/api/test-results`,
+        GET_STATS: `${API_BASE_URL}/api/test-results/stats`,
+        GET_ALL: `${API_BASE_URL}/api/test-results`,
+    },
     TEST_GENERATION: {
         GENERATE: `${TEST_SERVICE_URL}/api/test-generation/generate`,
         GENERATE_BY_TYPE: `${TEST_SERVICE_URL}/api/test-generation/generate-by-type`,
@@ -63,11 +70,6 @@ export const API_ENDPOINTS = {
         GET_ALL: `${API_BASE_URL}/api/simulations`,
         GET_BY_ID: `${API_BASE_URL}/api/simulations`,
         DELETE: `${API_BASE_URL}/api/simulations`,
-    },
-    TEST_RESULTS: {
-        SAVE: `${API_BASE_URL}/api/test-results`,
-        GET_ALL: `${API_BASE_URL}/api/test-results`,
-        GET_BY_ID: `${API_BASE_URL}/api/test-results`,
     }
 } as const;
 

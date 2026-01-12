@@ -1,5 +1,6 @@
 import type { TestSession } from '../../types/Test.ts';
 import { getAuthToken } from '../../utils/auth.ts';
+import { API_ENDPOINTS } from '../../config/constants.ts';
 
 class TestResultsService {
     private static instance: TestResultsService;
@@ -23,7 +24,7 @@ class TestResultsService {
                 ? (session.endTime.getTime() - session.startTime.getTime()) / (1000 * 60)
                 : 0;
 
-            const response = await fetch('/api/test-results', {
+            const response = await fetch(API_ENDPOINTS.TEST_RESULTS.SAVE, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -76,7 +77,7 @@ class TestResultsService {
             if (options?.sortBy) params.append('sortBy', options.sortBy);
             if (options?.order) params.append('order', options.order);
 
-            const response = await fetch(`/api/test-results?${params.toString()}`, {
+            const response = await fetch(`${API_ENDPOINTS.TEST_RESULTS.GET_ALL}?${params.toString()}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -102,7 +103,7 @@ class TestResultsService {
                 return null;
             }
 
-            const response = await fetch(`/api/test-results/${id}`, {
+            const response = await fetch(`${API_ENDPOINTS.TEST_RESULTS.GET_BY_ID}/${id}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -128,7 +129,7 @@ class TestResultsService {
                 return false;
             }
 
-            const response = await fetch(`/api/test-results/${id}`, {
+            const response = await fetch(`${API_ENDPOINTS.TEST_RESULTS.GET_BY_ID}/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -154,7 +155,7 @@ class TestResultsService {
                 return null;
             }
 
-            const response = await fetch('/api/test-results/stats/summary', {
+            const response = await fetch(`${API_ENDPOINTS.TEST_RESULTS.GET_ALL}/stats/summary`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
