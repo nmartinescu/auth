@@ -54,7 +54,6 @@ export function Navbar() {
         >
             <Heading
                 as={RouterLink}
-                to="/"
                 size={{ base: "md", md: "lg" }}
                 fontWeight="semibold"
                 color={titleColor}
