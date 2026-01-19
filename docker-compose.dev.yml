@@ -9,8 +9,8 @@ services:
       - "5672:5672"
       - "15672:15672"
     environment:
-      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER:-admin}
-      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASS:-admin}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-admin}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-admin}
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "ping"]
       interval: 10s
@@ -28,8 +28,8 @@ services:
     ports:
       - "27017:27017"
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USER:-admin}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASS:-admin}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASS:-admin}
     healthcheck:
       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
       interval: 10s
@@ -40,7 +40,7 @@ services:
     volumes:
       - mongodb-data:/data/db
 
-  # Main Service (Single Instance)
+  # Main Service
   main-service:
     build:
       context: ./backend/main-service
@@ -49,12 +49,12 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=${NODE_ENV:-development}
-      - PORT=3000
-      - MONGODB_URI=${MONGODB_URI:-mongodb://admin:admin@mongodb:27017/os-simulator?authSource=admin}
-      - RABBITMQ_URL=${RABBITMQ_URL:-amqp://admin:admin@rabbitmq:5672}
-      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
-      - RESEND_API_KEY=${RESEND_API_KEY:-}
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3000
+      MONGODB_URI: ${MONGODB_URI:-mongodb://admin:admin@mongodb:27017/os-simulator?authSource=admin}
+      RABBITMQ_URL: ${RABBITMQ_URL:-amqp://admin:admin@rabbitmq:5672}
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -68,7 +68,7 @@ services:
     restart: unless-stopped
     command: npm run dev
 
-  # Test Service (Single Instance)
+  # Test Service
   test-service:
     build:
       context: ./backend/test-service
@@ -77,9 +77,12 @@ services:
     ports:
       - "3004:3004"
     environment:
-      - NODE_ENV=${NODE_ENV:-development}
-      - PORT=3004
-      - TEST_SERVICE_PORT=3004
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3004
+      TEST_SERVICE_PORT: 3004
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
     networks:
       - app-network
     volumes:
@@ -88,16 +91,16 @@ services:
     restart: unless-stopped
     command: npm run dev
 
-  # CPU Service (Multiple Instances)
+  # CPU Service
   cpu-service:
     build:
       context: ./backend/cpu-service
       dockerfile: Dockerfile.dev
     environment:
-      - NODE_ENV=${NODE_ENV:-development}
-      - PORT=3001
-      - RABBITMQ_URL=${RABBITMQ_URL:-amqp://admin:admin@rabbitmq:5672}
-      - SERVICE_NAME=cpu-service
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3001
+      RABBITMQ_URL: ${RABBITMQ_URL:-amqp://admin:admin@rabbitmq:5672}
+      SERVICE_NAME: cpu-service
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -108,20 +111,17 @@ services:
       - /app/node_modules
     restart: unless-stopped
     command: npm run dev
-    deploy:
-      mode: replicated
-      replicas: ${CPU_SERVICE_REPLICAS:-2}
 
-  # Disk Service (Multiple Instances)
+  # Disk Service
   disk-service:
     build:
       context: ./backend/disk-service
       dockerfile: Dockerfile.dev
     environment:
-      - NODE_ENV=${NODE_ENV:-development}
-      - PORT=3002
-      - RABBITMQ_URL=${RABBITMQ_URL:-amqp://admin:admin@rabbitmq:5672}
-      - SERVICE_NAME=disk-service
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3002
+      RABBITMQ_URL: ${RABBITMQ_URL:-amqp://admin:admin@rabbitmq:5672}
+      SERVICE_NAME: disk-service
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -132,20 +132,17 @@ services:
       - /app/node_modules
     restart: unless-stopped
     command: npm run dev
-    deploy:
-      mode: replicated
-      replicas: ${DISK_SERVICE_REPLICAS:-2}
 
-  # Memory Service (Multiple Instances)
+  # Memory Service
   memory-service:
     build:
       context: ./backend/memory-service
       dockerfile: Dockerfile.dev
     environment:
-      - NODE_ENV=${NODE_ENV:-development}
-      - PORT=3003
-      - RABBITMQ_URL=${RABBITMQ_URL:-amqp://admin:admin@rabbitmq:5672}
-      - SERVICE_NAME=memory-service
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3003
+      RABBITMQ_URL: ${RABBITMQ_URL:-amqp://admin:admin@rabbitmq:5672}
+      SERVICE_NAME: memory-service
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -156,9 +153,6 @@ services:
       - /app/node_modules
     restart: unless-stopped
     command: npm run dev
-    deploy:
-      mode: replicated
-      replicas: ${MEMORY_SERVICE_REPLICAS:-2}
 
 networks:
   app-network:
