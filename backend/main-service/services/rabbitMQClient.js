@@ -13,51 +13,54 @@ class RabbitMQClient {
     }
 
     async connect() {
-        try {
-            console.log('Connecting to RabbitMQ at:', this.url);
-            this.connection = await amqp.connect(this.url);
-            this.channel = await this.connection.createChannel();
-            
-            console.log('Successfully connected to RabbitMQ');
+        while (!this.channel) {
+            try {
+                console.log('Connecting to RabbitMQ at:', this.url);
+                this.connection = await amqp.connect(this.url);
+                this.channel = await this.connection.createChannel();
 
-            // Create reply queue for responses
-            const replyQueue = await this.channel.assertQueue('', { exclusive: true });
-            this.replyQueueName = replyQueue.queue;
+                console.log('Successfully connected to RabbitMQ');
 
-            // Setup consumer for reply queue
-            this.channel.consume(this.replyQueueName, (msg) => {
-                if (msg !== null) {
-                    const correlationId = msg.properties.correlationId;
-                    const resolve = this.responseQueues.get(correlationId);
-                    
-                    if (resolve) {
-                        const response = JSON.parse(msg.content.toString());
-                        resolve(response);
-                        this.responseQueues.delete(correlationId);
+                const replyQueue = await this.channel.assertQueue('', { exclusive: true });
+                this.replyQueueName = replyQueue.queue;
+
+                this.channel.consume(this.replyQueueName, (msg) => {
+                    if (msg) {
+                        const correlationId = msg.properties.correlationId;
+                        const resolve = this.responseQueues.get(correlationId);
+
+                        if (resolve) {
+                            const response = JSON.parse(msg.content.toString());
+                            resolve(response);
+                            this.responseQueues.delete(correlationId);
+                        }
+
+                        this.channel.ack(msg);
                     }
-                    
-                    this.channel.ack(msg);
-                }
-            }, { noAck: false });
+                });
 
-            // Handle connection events
-            this.connection.on('error', (err) => {
-                console.error('RabbitMQ connection error:', err);
-                setTimeout(() => this.connect(), 5000);
-            });
+                this.connection.on('error', (err) => {
+                    console.error('RabbitMQ connection error:', err);
+                    this.channel = null;
+                    setTimeout(() => this.connect(), 5000);
+                });
 
-            this.connection.on('close', () => {
-                console.warn('RabbitMQ connection closed. Reconnecting...');
-                setTimeout(() => this.connect(), 5000);
-            });
+                this.connection.on('close', () => {
+                    console.warn('RabbitMQ connection closed. Reconnecting...');
+                    this.channel = null;
+                    setTimeout(() => this.connect(), 5000);
+                });
 
-            return this.channel;
-        } catch (error) {
-            console.error('Failed to connect to RabbitMQ:', error);
-            setTimeout(() => this.connect(), 5000);
-            throw error;
+            } catch (error) {
+                console.error('Failed to connect to RabbitMQ:', error);
+                this.channel = null;
+                await new Promise(r => setTimeout(r, 5000));
+            }
         }
+
+        return this.channel;
     }
+
 
     async getChannel() {
         if (!this.channel) {
@@ -83,7 +86,7 @@ class RabbitMQClient {
             // Store the resolver
             this.responseQueues.set(correlationId, (response) => {
                 clearTimeout(timeoutId);
-                
+
                 // Check if response indicates an error
                 if (response.success === false) {
                     const error = new Error(response.error || response.message || 'Request failed');
