@@ -21,6 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { simulationService, type Simulation } from "@/lib/services/simulation-service"
 import { testResultsService } from "@/lib/services/test-results-service"
+import { tokenService } from "@/lib/services/token-service"
 import type { User as UserType } from "@/types/user"
 import { useRouter } from "next/navigation"
 
@@ -155,9 +156,7 @@ export default function DashboardPage() {
   }
 
   const handleLogout = () => {
-    localStorage.removeItem("authToken")
-    localStorage.removeItem("user")
-    localStorage.removeItem("tokenData")
+    tokenService.clearTokens()
     router.push("/login")
   }
 

@@ -6,6 +6,7 @@ import { useState, useEffect } from "react"
 import { Cpu, HardDrive, MemoryStick, FileText, LayoutDashboard, LogIn, LogOut, Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { tokenService } from "@/lib/services/token-service"
 
 const navItems = [
   { href: "/process", label: "Process", icon: Cpu },
@@ -28,8 +29,7 @@ export function Navbar() {
   }, [])
 
   const handleLogout = () => {
-    localStorage.removeItem("authToken")
-    localStorage.removeItem("user")
+    tokenService.clearTokens()
     setIsLoggedIn(false)
     window.location.href = "/login"
   }

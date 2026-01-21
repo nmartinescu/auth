@@ -10,6 +10,16 @@ router.post('/', authenticateToken, async (req, res) => {
     console.log("Request body:", req.body);
     console.log("User from token:", req.user);
     
+    // Explicit check to ensure user is authenticated
+    if (!req.user) {
+        console.log("No user found in request - authentication failed");
+        return res.status(401).json({
+            success: false,
+            message: 'User must be authenticated to save simulations',
+            code: 'NOT_AUTHENTICATED'
+        });
+    }
+    
     try {
         const { name, type, data } = req.body;
         
@@ -33,7 +43,7 @@ router.post('/', authenticateToken, async (req, res) => {
         
         // Create new simulation
         const simulation = new Simulation({
-            userId: req.user.id, // From the authenticated token
+            userId: req.user._id || req.user.id, // From the authenticated token
             name,
             type,
             data
@@ -63,10 +73,20 @@ router.post('/', authenticateToken, async (req, res) => {
 
 // Route to get all simulations for the current user - requires authentication
 router.get('/', authenticateToken, async (req, res) => {
+    // Explicit check to ensure user is authenticated
+    if (!req.user) {
+        console.log("No user found in request - authentication failed");
+        return res.status(401).json({
+            success: false,
+            message: 'User must be authenticated to fetch simulations',
+            code: 'NOT_AUTHENTICATED'
+        });
+    }
+    
     try {
         // Find all simulations for this user
         const simulations = await Simulation.find({ 
-            userId: req.user.id 
+            userId: req.user._id || req.user.id 
         }).sort({ updatedAt: -1 }); // Sort by most recently updated
         
         res.status(200).json({
@@ -91,10 +111,20 @@ router.get('/', authenticateToken, async (req, res) => {
 
 // Route to get a specific simulation by ID - requires authentication
 router.get('/:id', authenticateToken, async (req, res) => {
+    // Explicit check to ensure user is authenticated
+    if (!req.user) {
+        console.log("No user found in request - authentication failed");
+        return res.status(401).json({
+            success: false,
+            message: 'User must be authenticated to fetch simulations',
+            code: 'NOT_AUTHENTICATED'
+        });
+    }
+    
     try {
         const simulation = await Simulation.findOne({
             _id: req.params.id,
-            userId: req.user.id // Ensure it belongs to the current user
+            userId: req.user._id || req.user.id // Ensure it belongs to the current user
         });
         
         if (!simulation) {
@@ -127,10 +157,20 @@ router.get('/:id', authenticateToken, async (req, res) => {
 
 // Route to delete a simulation - requires authentication
 router.delete('/:id', authenticateToken, async (req, res) => {
+    // Explicit check to ensure user is authenticated
+    if (!req.user) {
+        console.log("No user found in request - authentication failed");
+        return res.status(401).json({
+            success: false,
+            message: 'User must be authenticated to delete simulations',
+            code: 'NOT_AUTHENTICATED'
+        });
+    }
+    
     try {
         const result = await Simulation.deleteOne({
             _id: req.params.id,
-            userId: req.user.id // Ensure it belongs to the current user
+            userId: req.user._id || req.user.id // Ensure it belongs to the current user
         });
         
         if (result.deletedCount === 0) {
