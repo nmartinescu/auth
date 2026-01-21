@@ -16,7 +16,6 @@ class RabbitMQConnection {
                 console.log('Connecting to RabbitMQ at:', this.url);
                 this.connection = await amqp.connect(this.url);
                 this.channel = await this.connection.createChannel();
-
                 console.log('Successfully connected to RabbitMQ');
 
                 this.connection.on('error', (err) => {
@@ -30,7 +29,7 @@ class RabbitMQConnection {
                     this.channel = null;
                     setTimeout(() => this.connect(), 5000);
                 });
-
+                
             } catch (error) {
                 console.error('Failed to connect to RabbitMQ:', error);
                 this.channel = null;
