@@ -123,15 +123,15 @@ npm install
 ## Backend
 
 ```bash
-cd ../backend
+cd ../
 docker-compose -f docker-compose.dev.yml up -d --build
 ```
 
 ---
 
-## Pornire frontend
+## Pornire frontend 
 
 ```bash
-cd ../frontend
+cd auth/frontend
 npm run dev
 ```
