@@ -132,6 +132,6 @@ docker-compose -f docker-compose.dev.yml up -d --build
 ## Pornire frontend 
 
 ```bash
-cd auth/frontend
+cd ./frontend
 npm run dev
 ```
