@@ -135,3 +135,5 @@ docker-compose -f docker-compose.dev.yml up -d --build
 cd ./frontend
 npm run dev
 ```
+
+Accesare: http://localhost:5173
